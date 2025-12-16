@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: Bundle API
+  version: "1.0.0"
+  description: API for bundles and refresh token
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+
+  schemas:
+    BundleDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+paths:
+
+  /refresh:
+    post:
+      summary: Refresh data
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: Refresh job created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+        "401":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
