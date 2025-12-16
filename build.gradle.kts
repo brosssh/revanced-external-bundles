@@ -1,30 +1,45 @@
+import java.util.Properties
+
+val envFile = rootProject.file(".env")
+
+val env = Properties().apply {
+    envFile.inputStream().use { load(it) }
+}
+
 plugins {
     kotlin("jvm") version libs.versions.kotlin.get()
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
+    id("io.ktor.plugin") version libs.versions.ktor.get()
     application
 }
 
 group = "me.brosssh"
-version = "1.0-SNAPSHOT"
+
+tasks.jar {
+    manifest {
+        attributes(
+            "Implementation-Version" to project.version.toString()
+        )
+    }
+}
 
 repositories {
-    mavenLocal()
     mavenCentral()
     google()
     maven {
         // A repository must be specified for some reason. "registry" is a dummy.
         url = uri("https://maven.pkg.github.com/brosssh/registry")
         credentials {
-            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+            username = project.findProperty("gpr.user") as String? ?: env.getProperty("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: env.getProperty("GITHUB_TOKEN")
         }
     }
     maven {
         // A repository must be specified for some reason. "registry" is a dummy.
         url = uri("https://maven.pkg.github.com/revanced/registry")
         credentials {
-            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+            username = project.findProperty("gpr.user") as String? ?: env.getProperty("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: env.getProperty("GITHUB_TOKEN")
         }
     }
 }
@@ -48,9 +63,13 @@ dependencies {
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
 
-    implementation("ch.qos.logback:logback-classic:1.4.11")
-    implementation("app.brosssh:revanced-patcher:1.3.1")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
+    implementation("app.brosssh:revanced-patcher:1.3.0-dev.1")
+    implementation("com.android.tools.build:apksig:8.1.1")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
+    implementation("io.github.smiley4:ktor-swagger-ui:5.4.0")
+    implementation("io.github.smiley4:ktor-openapi:5.4.0")
 
     implementation(libs.hikari.cp)
     implementation(libs.postgresql)
@@ -69,5 +88,5 @@ kotlin {
 }
 
 application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
+    mainClass.set("me.brosssh.bundles.ApplicationKt")
 }

@@ -1,25 +1,55 @@
 package me.brosssh.bundles.di
 
-import me.brosssh.bundles.clients.GithubClient
-import me.brosssh.bundles.db.queries.BundleRepository
-import me.brosssh.bundles.db.queries.RefreshJobRepository
-import me.brosssh.bundles.db.queries.SourceRepository
-import me.brosssh.bundles.services.GithubService
+import me.brosssh.bundles.Config
+import me.brosssh.bundles.domain.services.*
+import me.brosssh.bundles.domain.services.refresh.*
+import me.brosssh.bundles.integrations.github.GithubClient
+import me.brosssh.bundles.repositories.*
 import org.koin.dsl.module
-import me.brosssh.bundles.services.RefreshService
 
 val appModule = module {
+
     single { BundleRepository() }
     single { SourceRepository() }
+    single { SourceMetadataRepository() }
+    single { PatchRepository() }
     single { RefreshJobRepository() }
-    single { GithubService(get()) }
+    single { PackageRepository() }
+    single { PatchPackageRepository() }
+
+    single { CacheService() }
+
     single {
-        RefreshService(
-            githubService = get(),
-            refreshJobRepository = get(),
-            sourceRepository = get()
+        GithubClient(
+            client = get(),
+            githubToken = Config.githubRepoToken
         )
     }
 
-    single { GithubClient(get()) }
+    single {
+        RefreshBundlesService(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
+    single {
+        RefreshPatchesService(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
+    single {
+        BundleService(get())
+    }
 }

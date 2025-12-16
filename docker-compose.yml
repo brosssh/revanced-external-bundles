@@ -1,11 +1,17 @@
 version: "3.9"
 
 services:
+  app:
+    image: ghcr.io/brosssh/revanced-external-bundles:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8080:8080"
+
   postgres:
     image: postgres:16
-    container_name: local-postgres
-    ports:
-      - "5432:5432"
+    restart: unless-stopped
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres

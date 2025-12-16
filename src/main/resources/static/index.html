@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bundle Search</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+    </head>
+    <body>
+    <div class="container">
+        <h1>Bundle Search</h1>
+        <p class="subtitle">Search for ReVanced patch bundles</p>
+        <div class="search-row">
+            <input
+                    type="text"
+                    id="search"
+                    placeholder="Search bundles by source URL or name..."
+                    autocomplete="off"
+            >
+            <input
+                    type="text"
+                    id="package-filter"
+                    placeholder="Filter by package (e.g., com.google.android.youtube)"
+                    autocomplete="off"
+            >
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn" data-filter="all">All</button>
+            <button class="filter-btn active" data-filter="release">Release</button>
+            <button class="filter-btn" data-filter="prerelease">Prerelease</button>
+        </div>
+        <div id="status">Type a source URL to search</div>
+        <ul id="results"></ul>
+    </div>
+
+    <script src="app.js"></script>
+    </body>
+    </html>

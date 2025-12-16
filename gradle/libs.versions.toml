@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.2.21"
-ktor = "3.3.3"
-exposed = "0.45.0"
+ktor = "3.2.3"
+exposed = "1.0.0-rc-4"
 hikari = "5.1.0"
 postgresql = "42.7.3"
 koin = "3.5.3"
