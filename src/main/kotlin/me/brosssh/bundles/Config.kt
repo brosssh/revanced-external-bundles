@@ -26,8 +26,8 @@ object Config {
     val authenticationSecret: String = getEnv("AUTHENTICATION_SECRET")
     
     // GitHub
-    val githubToken: String = getEnv("GITHUB_TOKEN")
-    
+    val githubRepoToken: String = getEnv("GITHUB_REPO_TOKEN")
+
     // Server
     val port: Int = getEnv("PORT", "8080").toInt()
 }
