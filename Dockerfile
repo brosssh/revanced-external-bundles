@@ -1,7 +1,7 @@
 FROM gradle:8-jdk21 AS build
 WORKDIR /app
 COPY . .
-RUN gradle buildFatJar --no-daemon
+RUN gradle startShadowScript --no-daemon
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
