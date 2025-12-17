@@ -9,12 +9,12 @@ import me.brosssh.bundles.plugins.*
 import me.brosssh.bundles.routes.refreshRoute
 
 fun Application.module() {
-    val appToken = environment.config.property("app.token").getString()
-
     configureSerialization()
     configureDatabase()
     configureKoin()
-    configureAuthentication(appToken)
+    configureAuthentication(
+        environment.config.property("app.authentication_secret").getString()
+    )
 
     routing {
         openAPI(path = "openapi", swaggerFile = "openapi.yaml")

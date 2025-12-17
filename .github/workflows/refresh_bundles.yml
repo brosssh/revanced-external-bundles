@@ -1,0 +1,28 @@
+name: Refresh Bundles
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+  push:
+    branches:
+      - main
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call refresh endpoint
+        env:
+          SECRET: ${{ secrets.REFRESH_SECRET }}
+        run: |
+          TIMESTAMP=$(date +%s)
+          PAYLOAD="refresh:$TIMESTAMP"
+          HMAC=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
+
+          curl -X POST "https://myserver.com/refresh" \
+                -H "Authorization: Bearer $TIMESTAMP:$HMAC" \
+                -H "X-Github-Token: $GITHUB_TOKEN" \
+                -H "Content-Type: application/json" \
+                -w "\nHTTP Status: %{http_code}\n"

@@ -8,10 +8,15 @@ ktor {
 }
 
 app {
-    token = "YOUR_TOKEN_HERE"
+    env = "DEBUG"
+    authentication_secret = "YOUR_TOKEN_HERE"
     db {
         jdbcUrl = "jdbc:postgresql://localhost:5432/postgres"
         user = "YOUR_DB_USER"
         password = "YOUR_DB_PASSWORD"
     }
+}
+
+github {
+  token = "YOUR_GITHUB_TOKEN_HERE"
 }

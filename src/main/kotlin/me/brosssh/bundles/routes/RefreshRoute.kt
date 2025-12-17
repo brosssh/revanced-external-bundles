@@ -11,10 +11,14 @@ import org.koin.ktor.ext.get
 fun Route.refreshRoute() {
 
     route("/refresh") {
-        authenticate("apiTokenAuth") {
+        authenticate("hmacAuth") {
             post {
+                val githubToken =
+                    call.request.headers["X-Github-Token"]
+                        ?: environment.config.property("github.token").getString()
+
                 val refreshService = call.get<RefreshService>()
-                val jobId = refreshService.refreshAsync()
+                val jobId = refreshService.refreshAsync(githubToken)
                 call.respond(HttpStatusCode.Created, mapOf("job_id" to jobId))
             }
         }

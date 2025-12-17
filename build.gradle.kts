@@ -49,7 +49,7 @@ dependencies {
     implementation(libs.exposed.jdbc)
 
     implementation("ch.qos.logback:logback-classic:1.4.11")
-    implementation("app.brosssh:revanced-patcher:1.3.1")
+    implementation("app.brosssh:revanced-patcher:1.3.0-dev.1")
     implementation("com.android.tools.build:apksig:8.1.1")
 
 

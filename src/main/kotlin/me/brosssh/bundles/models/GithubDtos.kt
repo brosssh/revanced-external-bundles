@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GithubReleaseDto(
     val tag_name: String,
+    val body: String,
     val prerelease: Boolean,
     val created_at: String,
     val assets: List<GithubAssetDto>
@@ -15,8 +16,3 @@ data class GithubAssetDto(
     val name: String,
     val browser_download_url: String
 )
-
-enum class ReleaseType {
-    STABLE,
-    PRERELEASE
-}

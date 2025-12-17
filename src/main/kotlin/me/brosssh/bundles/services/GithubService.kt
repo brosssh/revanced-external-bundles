@@ -7,17 +7,11 @@ class GithubService(
     private val githubClient: GithubClient
 ) {
 
-    suspend fun downloadLatestRvp(owner: String, repo: String, targetDir: File): File {
-        val release = githubClient.getLatestRelease(owner, repo)
+    suspend fun downloadFile(url: String, target: File) =
+        githubClient.downloadFile(url, target)
 
-        val asset = release.assets
-            .firstOrNull { it.name.endsWith(".rvp", ignoreCase = true) }
-            ?: error("No .rvp file found in latest release")
-
-        return File(targetDir, asset.name).also {
-            githubClient.downloadFile(asset.browser_download_url, it)
-        }
-    }
+    suspend fun getRelease(owner: String, repo: String, preRelease: Boolean) =
+        githubClient.getRelease(owner, repo, preRelease)
 
     fun parseRepoUrl(url: String): Pair<String, String> {
         val parts = url.removeSuffix("/")

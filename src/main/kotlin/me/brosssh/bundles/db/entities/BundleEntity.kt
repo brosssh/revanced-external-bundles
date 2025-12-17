@@ -8,12 +8,11 @@ import org.jetbrains.exposed.v1.dao.IntEntityClass
 class BundleEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<BundleEntity>(BundleTable)
 
-    var name by BundleTable.name
     var version by BundleTable.version
+    var createdAt by BundleTable.createdAt
     var description by BundleTable.description
-    var bundleSource by BundleTable.bundleSource
-    var author by BundleTable.author
-    var contact by BundleTable.contact
-    var website by BundleTable.website
-    var license by BundleTable.license
+    var downloadUrl by BundleTable.downloadUrl
+    var signatureDownloadUrl by BundleTable.signatureDownloadUrl
+    var isPrerelease by BundleTable.isPrerelease
+    var sourceEntity by BundleTable.sourceFk
 }
