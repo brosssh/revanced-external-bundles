@@ -1,4 +1,4 @@
-FROM gradle:8-jdk17 AS build
+FROM gradle:8-jdk21 AS build
 WORKDIR /app
 COPY . .
 RUN gradle buildFatJar --no-daemon
