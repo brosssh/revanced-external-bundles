@@ -3,16 +3,15 @@ package me.brosssh.bundles.plugins
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.*
+import me.brosssh.bundles.Config.isDebug
 import me.brosssh.bundles.util.hmacSha256Hex
 import kotlin.math.abs
 
 fun Application.configureAuthentication(authenticationSecret: String, validWindowSeconds: Long = 300) {
-    val env = environment
-
     install(Authentication) {
         bearer("hmacAuth") {
             authenticate { tokenCredential ->
-                if (env.config.property("app.env").getString() == "DEBUG")
+                if (isDebug)
                     return@authenticate UserIdPrincipal("authorizedUser")
 
                 val parts = tokenCredential.token.split(":")

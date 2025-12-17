@@ -1,7 +1,8 @@
 package me.brosssh.bundles
 
 import io.ktor.server.application.Application
-import io.ktor.server.netty.EngineMain
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.openapi.openAPI
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.routing.routing
@@ -12,9 +13,7 @@ fun Application.module() {
     configureSerialization()
     configureDatabase()
     configureKoin()
-    configureAuthentication(
-        environment.config.property("app.authentication_secret").getString()
-    )
+    configureAuthentication(Config.authenticationSecret)
 
     routing {
         openAPI(path = "openapi", swaggerFile = "openapi.yaml")
@@ -25,5 +24,10 @@ fun Application.module() {
 }
 
 fun main(args: Array<String>) {
-    EngineMain.main(args)
+    embeddedServer(
+        Netty,
+        port = Config.port,
+        host = "0.0.0.0",
+        module = Application::module
+    ).start(wait = true)
 }

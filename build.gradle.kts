@@ -52,7 +52,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("app.brosssh:revanced-patcher:1.3.0-dev.1")
     implementation("com.android.tools.build:apksig:8.1.1")
-
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
     implementation(libs.hikari.cp)
     implementation(libs.postgresql)

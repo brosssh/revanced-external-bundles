@@ -46,4 +46,4 @@ bin/
 
 /docs/
 .idea
-application.conf
+.env
