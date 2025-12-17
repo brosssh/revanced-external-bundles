@@ -78,5 +78,5 @@ kotlin {
 }
 
 application {
-    mainClass.set("me.brosssh.bundles.MainKt")
+    mainClass.set("me.brosssh.bundles.ApplicationKt")
 }
