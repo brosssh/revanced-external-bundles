@@ -5,10 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BundleDto(
+    @SerialName("created_at")
     val createdAt: String,
     val description: String,
     val version: String,
-    @SerialName("downloadUrl")
+    @SerialName("download_url")
     val downloadUrl: String,
     @SerialName("signature_download_url")
     val signatureDownloadUrl: String
