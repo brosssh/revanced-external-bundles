@@ -23,7 +23,7 @@ jobs:
           HMAC=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
 
           curl -X POST "https://revanced-external-bundles.onrender.com/refresh" \
-                -H "Authorization: Bearer $TIMESTAMP:$HMAC" \
+                -H "Authorization: Bearer $TIMESTAMP-$HMAC" \
                 -H "X-GitHub-Token: $GITHUB_TOKEN" \
                 -H 'accept: application/json' \
                 -d '' \

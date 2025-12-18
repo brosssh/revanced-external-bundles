@@ -14,7 +14,7 @@ fun Application.configureAuthentication(authenticationSecret: String, validWindo
                 if (isDebug)
                     return@authenticate UserIdPrincipal("authorizedUser")
 
-                val parts = tokenCredential.token.split(":")
+                val parts = tokenCredential.token.split("-")
                 if (parts.size != 2) return@authenticate null
 
                 val (timestampStr, signature) = parts
