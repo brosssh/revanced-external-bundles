@@ -26,5 +26,5 @@ jobs:
                 -H "Authorization: Bearer $TIMESTAMP:$HMAC" \
                 -H "X-GitHub-Token: $GITHUB_TOKEN" \
                 -H 'accept: application/json' \
-                -d ''
+                -d '' \
                 -w "\nHTTP Status: %{http_code}\n"
