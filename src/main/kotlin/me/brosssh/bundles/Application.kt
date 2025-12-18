@@ -7,7 +7,7 @@ import io.ktor.server.plugins.openapi.openAPI
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.routing.routing
 import me.brosssh.bundles.plugins.*
-import me.brosssh.bundles.routes.refreshRoute
+import me.brosssh.bundles.routes.*
 
 fun Application.module() {
     configureSerialization()
@@ -20,6 +20,7 @@ fun Application.module() {
         swaggerUI(path = "swagger", swaggerFile = "openapi.yaml")
 
         refreshRoute()
+        bundleRoutes()
     }
 }
 

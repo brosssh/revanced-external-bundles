@@ -6,7 +6,6 @@ import java.io.File
 class GithubService(
     private val githubClient: GithubClient
 ) {
-
     suspend fun downloadFile(url: String, target: File) =
         githubClient.downloadFile(url, target)
 
