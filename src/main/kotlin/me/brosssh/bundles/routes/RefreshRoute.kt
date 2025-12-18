@@ -17,6 +17,9 @@ fun Route.refreshRoute() {
                 val githubToken =
                     call.request.headers["X-Github-Token"]
                         ?: Config.githubRepoToken
+                        ?: return@post call.respond(
+                        HttpStatusCode.BadRequest, mapOf("error" to "X-Github-Token is required")
+                    )
 
                 val refreshService = call.get<RefreshService>()
                 val jobId = refreshService.refreshAsync(githubToken)

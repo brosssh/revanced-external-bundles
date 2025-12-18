@@ -13,6 +13,12 @@ object Config {
             ?: default 
             ?: throw IllegalStateException("$key is required")
     }
+
+    private fun getDebugEnv(key: String, default: String? = null): String? {
+        return System.getenv(key)
+            ?: dotenv[key]
+            ?: default
+    }
     
     val env: String = getEnv("ENV", "production")
     val isDebug: Boolean = env.equals("debug", ignoreCase = true)
@@ -26,7 +32,7 @@ object Config {
     val authenticationSecret: String = getEnv("AUTHENTICATION_SECRET")
     
     // GitHub
-    val githubRepoToken: String = getEnv("GITHUB_REPO_TOKEN")
+    val githubRepoToken: String? = getDebugEnv("GITHUB_REPO_TOKEN")
 
     // Server
     val port: Int = getEnv("PORT", "8080").toInt()
