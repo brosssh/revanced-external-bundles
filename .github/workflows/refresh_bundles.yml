@@ -24,5 +24,4 @@ jobs:
           curl -X POST "https://revanced-external-bundles.onrender.com/refresh" \
                 -H "Authorization: Bearer $TIMESTAMP:$HMAC" \
                 -H "X-Github-Token: $GITHUB_TOKEN" \
-                -H "Content-Type: application/json" \
                 -w "\nHTTP Status: %{http_code}\n"
