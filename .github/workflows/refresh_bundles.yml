@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Call refresh endpoint
         env:
-          SECRET: ${{ secrets.REFRESH_SECRET }}
+          SECRET: ${{ secrets.AUTHENTICATION_SECRET }}
         run: |
           TIMESTAMP=$(date +%s)
           PAYLOAD="refresh:$TIMESTAMP"
