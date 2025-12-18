@@ -28,7 +28,7 @@ data class RefreshContext(
 )
 
 class RefreshService (
-    private val githubServiceFactory: (String) -> GithubService,
+    private val githubService: GithubService,
     private val refreshJobRepository: RefreshJobRepository,
     private val sourceRepository: SourceRepository,
     private val bundleRepository: BundleRepository,
@@ -37,14 +37,14 @@ class RefreshService (
 ) {
     private val logger = LoggerFactory.getLogger(RefreshService::class.java)
 
-    fun refreshAsync(githubToken: String): String {
+    fun refreshAsync(): String {
         val jobId = UUID.randomUUID().toString()
         val jobEntityId = refreshJobRepository.create(jobId).id.value
 
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 suspendTransaction {
-                    processRefresh(jobId, githubServiceFactory(githubToken))
+                    processRefresh(jobId)
 
                     val job = RefreshJobEntity[jobEntityId]
                     job.setCompleted()
@@ -61,7 +61,7 @@ class RefreshService (
         return jobId
     }
 
-    private suspend fun processRefresh(jobId: String, githubService: GithubService) {
+    private suspend fun processRefresh(jobId: String) {
         val processDir = File(System.getProperty("java.io.tmpdir"), "bundles").apply { mkdirs() }
 
         sourceRepository.getAll().forEach { source ->

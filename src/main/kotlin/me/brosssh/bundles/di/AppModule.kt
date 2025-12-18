@@ -1,16 +1,12 @@
 package me.brosssh.bundles.di
 
+import me.brosssh.bundles.Config
 import me.brosssh.bundles.clients.GithubClient
-import me.brosssh.bundles.db.repositories.BundleRepository
-import me.brosssh.bundles.db.repositories.PackageRepository
-import me.brosssh.bundles.db.repositories.PatchRepository
-import me.brosssh.bundles.db.repositories.RefreshJobRepository
-import me.brosssh.bundles.db.repositories.SourceRepository
+import me.brosssh.bundles.db.repositories.*
 import me.brosssh.bundles.services.BundleService
 import me.brosssh.bundles.services.GithubService
-import org.koin.dsl.module
 import me.brosssh.bundles.services.RefreshService
-import org.koin.core.parameter.parametersOf
+import org.koin.dsl.module
 
 val appModule = module {
 
@@ -20,13 +16,18 @@ val appModule = module {
     single { RefreshJobRepository() }
     single { PackageRepository() }
 
-    factory { (token: String) -> GithubClient(get(), token) }
+    single {
+        GithubClient(
+            client = get(),
+            githubToken = Config.githubRepoToken
+        )
+    }
 
-    factory { (token: String) -> GithubService(get { parametersOf(token) }) }
+    single { GithubService(get()) }
 
     single {
         RefreshService(
-            githubServiceFactory = { token -> get<GithubService> { parametersOf(token) } },
+            githubService = get(),
             refreshJobRepository = get(),
             sourceRepository = get(),
             bundleRepository = get(),
