@@ -16,6 +16,7 @@ jobs:
       - name: Call refresh endpoint
         env:
           SECRET: ${{ secrets.AUTHENTICATION_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TIMESTAMP=$(date +%s)
           PAYLOAD="refresh:$TIMESTAMP"
@@ -23,4 +24,7 @@ jobs:
 
           curl -X POST "https://revanced-external-bundles.onrender.com/refresh" \
                 -H "Authorization: Bearer $TIMESTAMP:$HMAC" \
+                -H "X-GitHub-Token: $GITHUB_TOKEN" \
+                -H 'accept: application/json' \
+                -d ''
                 -w "\nHTTP Status: %{http_code}\n"
