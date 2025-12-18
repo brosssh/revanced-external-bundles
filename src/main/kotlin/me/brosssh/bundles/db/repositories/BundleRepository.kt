@@ -21,7 +21,7 @@ class BundleRepository {
                 .limit(1)
                 .map {
                     BundleDto(
-                        createdAt = it[BundleTable.createdAt],
+                        createdAt = it[BundleTable.createdAt].substringBefore("Z"),
                         description = it[BundleTable.description] ?: "",
                         version = it[BundleTable.version],
                         downloadUrl = it[BundleTable.downloadUrl],
