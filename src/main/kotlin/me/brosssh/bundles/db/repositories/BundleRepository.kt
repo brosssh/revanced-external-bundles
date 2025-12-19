@@ -17,11 +17,11 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class BundleRepository {
-    fun findById(sourceUrl: Int) =
+    fun findById(bundleId: Int) =
         transaction {
             (BundleTable innerJoin SourceTable)
                 .selectAll()
-                .where { SourceTable.id eq sourceUrl }
+                .where { BundleTable.id eq bundleId }
                 .limit(1)
                 .map {
                     BundleDto(
