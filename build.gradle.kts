@@ -14,7 +14,12 @@ plugins {
 }
 
 group = "me.brosssh"
-version = "1.0-SNAPSHOT"
+
+version = project.property("version") as String
+
+tasks.withType<JavaExec> {
+    environment("APP_VERSION", project.version.toString())
+}
 
 repositories {
     mavenCentral()
@@ -56,10 +61,13 @@ dependencies {
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
 
-    implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
     implementation("app.brosssh:revanced-patcher:1.3.0-dev.1")
     implementation("com.android.tools.build:apksig:8.1.1")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
+    implementation("io.github.smiley4:ktor-swagger-ui:5.4.0")
+    implementation("io.github.smiley4:ktor-openapi:5.4.0")
 
     implementation(libs.hikari.cp)
     implementation(libs.postgresql)

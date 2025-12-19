@@ -1,23 +1,30 @@
 package me.brosssh.bundles
 
-import io.ktor.server.application.Application
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.openapi.openAPI
-import io.ktor.server.plugins.swagger.swaggerUI
-import io.ktor.server.routing.routing
+import io.github.smiley4.ktoropenapi.openApi
+import io.github.smiley4.ktorswaggerui.swaggerUI
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.routing.*
 import me.brosssh.bundles.plugins.*
-import me.brosssh.bundles.routes.*
+import me.brosssh.bundles.routes.bundleRoutes
+import me.brosssh.bundles.routes.refreshRoute
 
 fun Application.module() {
     configureSerialization()
     configureDatabase()
     configureKoin()
+    configureOpenApi()
+    configureStatic()
     configureAuthentication(Config.authenticationSecret)
 
     routing {
-        openAPI(path = "openapi", swaggerFile = "openapi.yaml")
-        swaggerUI(path = "swagger", swaggerFile = "openapi.yaml")
+        route("api.json") {
+            openApi()
+        }
+        route("swagger") {
+            swaggerUI("/api.json")
+        }
 
         refreshRoute()
         bundleRoutes()

@@ -22,16 +22,16 @@ class BundleEntity(id: EntityID<Int>) : IntEntity(id) {
         releaseDto: GithubReleaseDto,
         isPrereleaseFlag: Boolean
     ) {
-        version = releaseDto.tag_name
+        version = releaseDto.tagName
         description = releaseDto.body
-        createdAt = releaseDto.created_at
+        createdAt = releaseDto.createdAt
         downloadUrl =
             releaseDto.assets.firstOrNull { it.name.endsWith(".rvp") }
-                ?.browser_download_url
+                ?.browserDownloadUrl
                 ?: error("No rvp file found")
         signatureDownloadUrl =
             releaseDto.assets.firstOrNull { it.name.endsWith(".rvp.asc") }
-                ?.browser_download_url
+                ?.browserDownloadUrl
         isPrerelease = isPrereleaseFlag
     }
 }
