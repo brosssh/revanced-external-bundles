@@ -1,7 +1,6 @@
-package me.brosssh.bundles.db.repositories
+package me.brosssh.bundles.repositories
 
 import me.brosssh.bundles.db.entities.PackageEntity
-import me.brosssh.bundles.db.entities.SourceEntity
 import me.brosssh.bundles.db.tables.PackageTable
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq

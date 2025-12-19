@@ -1,6 +1,6 @@
-package me.brosssh.bundles.services
+package me.brosssh.bundles.domain.services
 
-import me.brosssh.bundles.db.repositories.BundleRepository
+import me.brosssh.bundles.repositories.BundleRepository
 
 
 class BundleService (

@@ -1,4 +1,4 @@
-package me.brosssh.bundles.db.repositories
+package me.brosssh.bundles.repositories
 
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.entities.PatchEntity

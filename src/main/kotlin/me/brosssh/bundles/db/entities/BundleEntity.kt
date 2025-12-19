@@ -1,7 +1,6 @@
 package me.brosssh.bundles.db.entities
 
 import me.brosssh.bundles.db.tables.BundleTable
-import me.brosssh.bundles.models.GithubReleaseDto
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity
 import org.jetbrains.exposed.v1.dao.IntEntityClass
@@ -17,21 +16,4 @@ class BundleEntity(id: EntityID<Int>) : IntEntity(id) {
     var isPrerelease by BundleTable.isPrerelease
     var fileSha by BundleTable.fileSha
     var sourceEntity by BundleTable.sourceFk
-
-    fun fromGithubRelease(
-        releaseDto: GithubReleaseDto,
-        isPrereleaseFlag: Boolean
-    ) {
-        version = releaseDto.tagName
-        description = releaseDto.body
-        createdAt = releaseDto.createdAt
-        downloadUrl =
-            releaseDto.assets.firstOrNull { it.name.endsWith(".rvp") }
-                ?.browserDownloadUrl
-                ?: error("No rvp file found")
-        signatureDownloadUrl =
-            releaseDto.assets.firstOrNull { it.name.endsWith(".rvp.asc") }
-                ?.browserDownloadUrl
-        isPrerelease = isPrereleaseFlag
-    }
 }

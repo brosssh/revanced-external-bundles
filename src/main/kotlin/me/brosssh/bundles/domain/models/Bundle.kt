@@ -1,10 +1,10 @@
-package me.brosssh.bundles.models
+package me.brosssh.bundles.domain.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BundleDto(
+data class Bundle(
     @SerialName("created_at")
     val createdAt: String,
     val description: String,

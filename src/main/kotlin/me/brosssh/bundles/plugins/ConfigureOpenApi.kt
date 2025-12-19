@@ -1,6 +1,8 @@
 package me.brosssh.bundles.plugins
 
 import io.github.smiley4.ktoropenapi.OpenApi
+import io.github.smiley4.ktoropenapi.config.AuthScheme
+import io.github.smiley4.ktoropenapi.config.AuthType
 import io.github.smiley4.ktoropenapi.config.OutputFormat
 import io.ktor.server.application.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -12,6 +14,12 @@ fun Application.configureOpenApi() {
         info {
             title = "ReVanced external bundles API"
             version = Config.version
+        }
+        security {
+            securityScheme("hmacAuth") {
+                type = AuthType.HTTP
+                scheme = AuthScheme.BEARER
+            }
         }
         /**
          * https://github.com/SMILEY4/ktor-openapi-tools/issues/227

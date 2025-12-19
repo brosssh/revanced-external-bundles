@@ -7,8 +7,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import me.brosssh.bundles.plugins.*
-import me.brosssh.bundles.routes.bundleRoutes
-import me.brosssh.bundles.routes.refreshRoute
+import me.brosssh.bundles.api.routes.bundleRoutes
+import me.brosssh.bundles.api.routes.refreshRoute
 
 fun Application.module() {
     configureSerialization()

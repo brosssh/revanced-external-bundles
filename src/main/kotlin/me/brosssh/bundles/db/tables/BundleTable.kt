@@ -1,6 +1,5 @@
 package me.brosssh.bundles.db.tables
 
-import me.brosssh.bundles.db.tables.PackageTable.name
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 
 object BundleTable : IntIdTable("bundle") {
@@ -10,7 +9,7 @@ object BundleTable : IntIdTable("bundle") {
     val downloadUrl = varchar("download_url", 255)
     val signatureDownloadUrl = varchar("signature_download_url", 255).nullable()
     val isPrerelease = bool("is_prerelease")
-    val fileSha = varchar("file_sha", 64)
+    val fileSha = varchar("file_sha", 64).nullable()
     val sourceFk = reference("source_fk", SourceTable.id)
 
     init {

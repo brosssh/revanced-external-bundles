@@ -1,20 +1,20 @@
-package me.brosssh.bundles.db.repositories
+package me.brosssh.bundles.repositories
 
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.entities.SourceEntity
 import me.brosssh.bundles.db.tables.BundleTable
 import me.brosssh.bundles.db.tables.PatchTable
 import me.brosssh.bundles.db.tables.SourceTable
-import me.brosssh.bundles.models.BundleDto
-import me.brosssh.bundles.models.GithubReleaseDto
-import me.brosssh.bundles.models.frontend.SearchResponseDto
-import me.brosssh.bundles.models.frontend.SearchResponsePatchDto
-import org.jetbrains.exposed.v1.core.and
+import me.brosssh.bundles.domain.models.Bundle
+import me.brosssh.bundles.integrations.github.GithubReleaseDto
+import me.brosssh.bundles.api.dto.SearchResponseDto
+import me.brosssh.bundles.api.dto.SearchResponsePatchDto
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.upsertReturning
 
 class BundleRepository {
     fun findById(bundleId: Int) =
@@ -24,7 +24,7 @@ class BundleRepository {
                 .where { BundleTable.id eq bundleId }
                 .limit(1)
                 .map {
-                    BundleDto(
+                    Bundle(
                         createdAt = it[BundleTable.createdAt].substringBefore("Z"),
                         description = it[BundleTable.description] ?: "",
                         version = it[BundleTable.version],
@@ -40,17 +40,20 @@ class BundleRepository {
         source: SourceEntity,
         isPrereleaseFlag: Boolean
     ): BundleEntity = transaction {
-
-        val existing = BundleEntity.find {
-            (BundleTable.sourceFk eq source.id) and (BundleTable.isPrerelease eq isPrereleaseFlag)
-        }.singleOrNull()
-
-        existing?.apply {
-            fromGithubRelease(releaseDto, isPrereleaseFlag)
-        } ?: BundleEntity.new {
-            sourceEntity = source.id
-            fromGithubRelease(releaseDto, isPrereleaseFlag)
-        }
+        BundleTable.upsertReturning(
+            BundleTable.sourceFk, BundleTable.isPrerelease
+        ) { bundle ->
+            bundle[sourceFk] = source.id
+            bundle[version] = releaseDto.tagName
+            bundle[description] = releaseDto.body
+            bundle[createdAt] = releaseDto.createdAt
+            bundle[downloadUrl] = releaseDto.assets.firstOrNull { it.name.endsWith(".rvp") }
+                    ?.browserDownloadUrl
+                    ?: error("No rvp file found")
+            bundle[signatureDownloadUrl] = releaseDto.assets.firstOrNull { it.name.endsWith(".rvp.asc") }
+                    ?.browserDownloadUrl
+            bundle[isPrerelease] = isPrereleaseFlag
+        }.single().let { BundleEntity.wrapRow(it) }
     }
 
     fun search(query: String) = transaction {

@@ -1,4 +1,4 @@
-package me.brosssh.bundles.models.frontend
+package me.brosssh.bundles.api.dto
 
 import kotlinx.serialization.Serializable
 
