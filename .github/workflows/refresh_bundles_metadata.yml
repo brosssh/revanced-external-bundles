@@ -1,4 +1,4 @@
-name: Refresh Bundles
+name: Refresh Bundles Metadata
 
 on:
   workflow_dispatch:
