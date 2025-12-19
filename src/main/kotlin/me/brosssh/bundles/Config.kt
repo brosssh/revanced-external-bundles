@@ -16,7 +16,7 @@ object Config {
     
     val env: String = getEnv("ENV", "production")
     val isDebug: Boolean = env.equals("debug", ignoreCase = true)
-    val version: String = getEnv("APP_VERSION")
+    val version: String = object {}.javaClass.`package`.implementationVersion ?: "dev"
 
     // Database
     val databaseUrl: String = getEnv("DATABASE_URL")

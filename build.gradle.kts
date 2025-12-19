@@ -15,10 +15,12 @@ plugins {
 
 group = "me.brosssh"
 
-version = project.property("version") as String
-
-tasks.withType<JavaExec> {
-    environment("APP_VERSION", project.version.toString())
+tasks.jar {
+    manifest {
+        attributes(
+            "Implementation-Version" to project.version.toString()
+        )
+    }
 }
 
 repositories {
