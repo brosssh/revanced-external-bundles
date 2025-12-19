@@ -17,7 +17,7 @@ fun Route.bundleRoutes() {
             description = "Get bundle by ID"
 
             request {
-                queryParameter<String>("id") {
+                queryParameter<Int>("id") {
                     description = "Internal ID of the bundle"
                     required = true
                 }

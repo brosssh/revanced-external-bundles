@@ -87,7 +87,7 @@ function renderBundle(bundle) {
                 </a>
             ` : ''}
             <span>•</span>
-            <button class="copy-btn" data-url="https://revanced-external-bundles.onrender.com/bunldes/id/${bundle.bundleId}">
+            <button class="copy-btn" data-url="https://revanced-external-bundles.onrender.com/bundles/id?id=${bundle.bundleId}">
                 Copy URL
             </button>
         </div>
