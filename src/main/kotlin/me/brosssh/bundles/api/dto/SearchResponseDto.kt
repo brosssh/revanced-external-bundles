@@ -4,10 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SearchResponseDto(
-    //val owner: String,
-    //val repo: String,
+    val ownerName: String,
+    val ownerAvatarUrl: String,
+    val repoName: String,
+    val repoDescription: String?,
     val sourceUrl: String,
-    //val stars: Int,
+    val repoStars: Int,
 
     val bundleId: Int,
     val createdAt: String,
@@ -15,6 +17,7 @@ data class SearchResponseDto(
     val version: String,
     val downloadUrl: String,
     val signatureDownloadUrl: String,
+    val isPrerelease: Boolean,
 
     val patches: List<SearchResponsePatchDto>
 )

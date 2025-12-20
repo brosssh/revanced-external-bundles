@@ -9,6 +9,7 @@ import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.integrations.github.GithubReleaseDto
 import me.brosssh.bundles.api.dto.SearchResponseDto
 import me.brosssh.bundles.api.dto.SearchResponsePatchDto
+import me.brosssh.bundles.db.tables.SourceMetadataTable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
@@ -57,7 +58,7 @@ class BundleRepository {
     }
 
     fun search(query: String) = transaction {
-        (BundleTable innerJoin SourceTable)
+        (BundleTable innerJoin SourceTable leftJoin SourceMetadataTable)
             .selectAll()
             .where { SourceTable.url.lowerCase() like "%${query.lowercase()}%" }
             .limit(20)
@@ -67,7 +68,6 @@ class BundleRepository {
                     .selectAll()
                     .where { PatchTable.bundleFk eq bundleId }
                     .map { patchRow ->
-                        // Map PatchRow to your PatchDto
                         SearchResponsePatchDto(
                             name = patchRow[PatchTable.name],
                             description = patchRow[PatchTable.description]
@@ -75,13 +75,21 @@ class BundleRepository {
                     }
 
                 SearchResponseDto(
+                    ownerName = bundleRow[SourceMetadataTable.ownerName],
+                    ownerAvatarUrl = bundleRow[SourceMetadataTable.ownerAvatarUrl],
+                    repoName = bundleRow[SourceMetadataTable.repoName],
+                    repoDescription = bundleRow[SourceMetadataTable.repoDescription],
+                    repoStars = bundleRow[SourceMetadataTable.repoStars],
                     sourceUrl = bundleRow[SourceTable.url],
+
                     bundleId = bundleId,
                     createdAt = bundleRow[BundleTable.createdAt].substringBefore("Z"),
                     description = bundleRow[BundleTable.description] ?: "",
                     version = bundleRow[BundleTable.version],
                     downloadUrl = bundleRow[BundleTable.downloadUrl],
                     signatureDownloadUrl = bundleRow[BundleTable.signatureDownloadUrl] ?: "",
+                    isPrerelease = bundleRow[BundleTable.isPrerelease],
+
                     patches = patches
                 )
             }

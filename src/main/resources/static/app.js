@@ -1,12 +1,27 @@
 const input = document.getElementById("search");
 const results = document.getElementById("results");
 const status = document.getElementById("status");
+const filterButtons = document.querySelectorAll(".filter-btn");
 
 let timeout = null;
+let currentFilter = "release";
+let allBundles = [];
 
 input.addEventListener("input", () => {
     clearTimeout(timeout);
     timeout = setTimeout(search, 400);
+});
+
+filterButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        // Update active button
+        filterButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // Update filter and re-render
+        currentFilter = btn.dataset.filter;
+        renderFilteredBundles();
+    });
 });
 
 async function search() {
@@ -16,6 +31,7 @@ async function search() {
 
     if (!query) {
         status.textContent = "Type a source URL to search";
+        allBundles = [];
         return;
     }
 
@@ -43,16 +59,43 @@ async function search() {
 
         if (!Array.isArray(bundles) || bundles.length === 0) {
             status.textContent = "No bundles found";
+            allBundles = [];
             return;
         }
 
-        bundles.forEach(renderBundle);
+        allBundles = bundles;
+        renderFilteredBundles();
 
     } catch (e) {
         console.error(e);
         status.textContent = "Network error";
         status.classList.remove("loading");
     }
+}
+
+function renderFilteredBundles() {
+    results.innerHTML = "";
+
+    // If no search has been performed yet
+    if (allBundles.length === 0) {
+        status.textContent = "Type a source URL to search";
+        return;
+    }
+
+    const filteredBundles = allBundles.filter(bundle => {
+        if (currentFilter === "all") return true;
+        if (currentFilter === "release") return !bundle.isPrerelease;
+        if (currentFilter === "prerelease") return bundle.isPrerelease;
+        return true;
+    });
+
+    if (filteredBundles.length === 0) {
+        status.textContent = `No ${currentFilter === "all" ? "" : currentFilter} bundles found`;
+        return;
+    }
+
+    status.textContent = "";
+    filteredBundles.forEach(renderBundle);
 }
 
 function renderBundle(bundle) {
@@ -64,19 +107,32 @@ function renderBundle(bundle) {
 
     li.innerHTML = `
         <div class="bundle-header">
-            <div class="bundle-title">${escapeHtml(bundle.version)}</div>
-            <span class="bundle-badge ${bundle.isPrerelease ? 'badge-prerelease' : 'badge-release'}">
-                ${bundle.isPrerelease ? 'Prerelease' : 'Release'}
-            </span>
+            <img src="${escapeHtml(bundle.ownerAvatarUrl)}"
+                 alt="${escapeHtml(bundle.ownerName)}"
+                 class="owner-avatar"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23eee%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3E${escapeHtml(bundle.ownerName[0] || '?').toUpperCase()}%3C/text%3E%3C/svg%3E'">
+            <div class="bundle-header-content">
+                <div class="repo-info">
+                    <a href="${escapeHtml(bundle.sourceUrl)}" target="_blank" rel="noopener" class="repo-name">
+                        ${escapeHtml(bundle.ownerName)}/${escapeHtml(bundle.repoName)}
+                    </a>
+                    <span>•</span>
+                    <span class="stars">${bundle.repoStars.toLocaleString()}</span>
+                </div>
+                ${bundle.repoDescription ? `<div class="bundle-description">${renderMarkdown(bundle.repoDescription)}</div>` : ''}
+                <div class="bundle-version">
+                    <span class="version-text">${escapeHtml(bundle.version)}</span>
+                    <span class="bundle-badge ${bundle.isPrerelease ? 'badge-prerelease' : 'badge-release'}">
+                        ${bundle.isPrerelease ? 'Prerelease' : 'Release'}
+                    </span>
+                    <span class="created-date">${formatDate(bundle.createdAt)}</span>
+                </div>
+            </div>
         </div>
 
-        ${bundle.description ? `<div class="bundle-description">${escapeHtml(bundle.description)}</div>` : ''}
+        ${bundle.description ? `<div class="bundle-description">${renderMarkdown(bundle.description)}</div>` : ''}
 
         <div class="bundle-meta">
-            <a href="${escapeHtml(bundle.sourceUrl)}" target="_blank" rel="noopener">
-                ${escapeHtml(bundle.sourceUrl)}
-            </a>
-            <span>•</span>
             <a href="${escapeHtml(bundle.downloadUrl)}" target="_blank" rel="noopener">
                 Download .RVP
             </a>
@@ -87,7 +143,7 @@ function renderBundle(bundle) {
                 </a>
             ` : ''}
             <span>•</span>
-            <button class="copy-btn" data-url="https://revanced-external-bundles.onrender.com/bundles/id?id=${bundle.bundleId}">
+            <button class="copy-btn" data-url="https://revanced-external-bundles.onrender.com/${bundle.bundleId}">
                 Copy URL
             </button>
         </div>
@@ -175,4 +231,41 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function renderMarkdown(text) {
+    if (!text) return '';
+    // Configure marked to be safe and sanitize HTML
+    marked.setOptions({
+        breaks: true,
+        gfm: true
+    });
+    return marked.parse(text);
+}
+
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 60) {
+            return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+        } else if (diffHours < 24) {
+            return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+        } else if (diffDays < 7) {
+            return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+        } else {
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    } catch (e) {
+        return dateString;
+    }
 }
