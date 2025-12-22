@@ -7,13 +7,12 @@ object Config {
         ignoreIfMissing = true 
     }
     
-    private fun getEnv(key: String, default: String? = null): String {
-        return System.getenv(key) 
+    private fun getEnv(key: String, default: String? = null) =
+        System.getenv(key)
             ?: dotenv[key] 
             ?: default 
             ?: throw IllegalStateException("$key is required")
-    }
-    
+
     val env: String = getEnv("ENV", "production")
     val isDebug: Boolean = env.equals("debug", ignoreCase = true)
     val version: String = object {}.javaClass.`package`.implementationVersion ?: "dev"

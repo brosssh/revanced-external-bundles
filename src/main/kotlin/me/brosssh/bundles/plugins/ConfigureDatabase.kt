@@ -16,6 +16,13 @@ fun Application.configureDatabase() {
     )
 
     transaction(db) {
-        SchemaUtils.create(BundleTable, PackageTable, PatchTable, RefreshJobTable, SourceTable, SourceMetadataTable)
+        SchemaUtils.create(BundleTable,
+            PackageTable,
+            PatchTable,
+            RefreshJobTable,
+            SourceTable,
+            SourceMetadataTable,
+            PatchPackageTable
+        )
     }
 }

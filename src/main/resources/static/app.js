@@ -1,15 +1,26 @@
 const input = document.getElementById("search");
+const packageFilter = document.getElementById("package-filter");
 const results = document.getElementById("results");
 const status = document.getElementById("status");
 const filterButtons = document.querySelectorAll(".filter-btn");
 
 let timeout = null;
+let packageTimeout = null;
 let currentFilter = "release";
+let currentPackageFilter = "";
 let allBundles = [];
 
 input.addEventListener("input", () => {
     clearTimeout(timeout);
     timeout = setTimeout(search, 400);
+});
+
+packageFilter.addEventListener("input", () => {
+    clearTimeout(packageTimeout);
+    packageTimeout = setTimeout(() => {
+        currentPackageFilter = packageFilter.value.trim().toLowerCase();
+        renderFilteredBundles();
+    }, 300);
 });
 
 filterButtons.forEach(btn => {
@@ -82,15 +93,46 @@ function renderFilteredBundles() {
         return;
     }
 
-    const filteredBundles = allBundles.filter(bundle => {
-        if (currentFilter === "all") return true;
-        if (currentFilter === "release") return !bundle.isPrerelease;
-        if (currentFilter === "prerelease") return bundle.isPrerelease;
-        return true;
-    });
+    const filteredBundles = allBundles
+        .map(bundle => {
+            // Filter by release type
+            if (currentFilter === "release" && bundle.isPrerelease) return null;
+            if (currentFilter === "prerelease" && !bundle.isPrerelease) return null;
+
+            // Filter patches by package if package filter is active
+            if (currentPackageFilter) {
+                const matchingPatches = bundle.patches.filter(patch => {
+                    // Check if patch has compatible packages
+                    if (!patch.compatiblePackages || patch.compatiblePackages.length === 0) {
+                        return false;
+                    }
+
+                    // Check if any package matches the filter
+                    return patch.compatiblePackages.some(pkg => {
+                        const nameMatches = pkg.name.toLowerCase().includes(currentPackageFilter);
+                        const versionMatches = pkg.versions?.some(v =>
+                            v && v.toLowerCase().includes(currentPackageFilter)
+                        );
+                        return nameMatches || versionMatches;
+                    });
+                });
+
+                // Skip bundle if no patches match
+                if (matchingPatches.length === 0) return null;
+
+                // Return bundle with filtered patches
+                return { ...bundle, patches: matchingPatches };
+            }
+
+            return bundle;
+        })
+        .filter(bundle => bundle !== null);
 
     if (filteredBundles.length === 0) {
-        status.textContent = `No ${currentFilter === "all" ? "" : currentFilter} bundles found`;
+        const filterDesc = currentPackageFilter
+            ? `matching "${currentPackageFilter}"`
+            : currentFilter === "all" ? "" : currentFilter;
+        status.textContent = `No ${filterDesc} bundles found`;
         return;
     }
 
@@ -121,7 +163,7 @@ function renderBundle(bundle) {
                 </div>
                 ${bundle.repoDescription ? `<div class="bundle-description">${renderMarkdown(bundle.repoDescription)}</div>` : ''}
                 <div class="bundle-version">
-                    <span class="version-text">${escapeHtml(bundle.version)}</span>
+                    <span class="version-text">v${escapeHtml(bundle.version)}</span>
                     <span class="bundle-badge ${bundle.isPrerelease ? 'badge-prerelease' : 'badge-release'}">
                         ${bundle.isPrerelease ? 'Prerelease' : 'Release'}
                     </span>
@@ -143,7 +185,7 @@ function renderBundle(bundle) {
                 </a>
             ` : ''}
             <span>•</span>
-            <button class="copy-btn" data-url="https://revanced-external-bundles.onrender.com/${bundle.bundleId}">
+            <button class="copy-btn" data-url="https://revanced-external-bundles.brosssh.com/${bundle.bundleId}">
                 Copy URL
             </button>
         </div>
@@ -155,12 +197,27 @@ function renderBundle(bundle) {
                     <span class="patches-count">${bundle.patches.length} total</span>
                 </div>
                 <div class="patches-list ${hasMore ? 'collapsed' : ''}" data-patches-container>
-                    ${patchesPreview.map(patch => `
+                    ${patchesPreview.map(patch => {
+                        console.log('Patch:', patch.name, 'Compatible packages:', patch.compatiblePackages);
+                        return `
                         <div class="patch-item">
                             <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
                             ${patch.description ? `<div class="patch-description">${escapeHtml(patch.description)}</div>` : ''}
+                            ${patch.compatiblePackages && patch.compatiblePackages.length > 0 ? `
+                                <div class="patch-packages">
+                                    ${patch.compatiblePackages.map(pkg => {
+                                        const versionsText = pkg.versions && pkg.versions.length > 0
+                                            ? pkg.versions.filter(v => v).join(', ') || 'all versions'
+                                            : 'all versions';
+                                        return `<span class="package-tag">
+                                            <span class="package-name">${escapeHtml(pkg.name)}</span>
+                                            <span class="package-versions">${escapeHtml(versionsText)}</span>
+                                        </span>`;
+                                    }).join('')}
+                                </div>
+                            ` : ''}
                         </div>
-                    `).join('')}
+                    `}).join('')}
                 </div>
                 ${hasMore ? `
                     <button class="toggle-patches" data-toggle-patches>
@@ -206,6 +263,19 @@ function renderBundle(bundle) {
                     <div class="patch-item">
                         <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
                         ${patch.description ? `<div class="patch-description">${escapeHtml(patch.description)}</div>` : ''}
+                        ${patch.compatiblePackages && patch.compatiblePackages.length > 0 ? `
+                            <div class="patch-packages">
+                                ${patch.compatiblePackages.map(pkg => {
+                                    const versionsText = pkg.versions && pkg.versions.length > 0
+                                        ? pkg.versions.filter(v => v).join(', ') || 'all versions'
+                                        : 'all versions';
+                                    return `<span class="package-tag">
+                                        <span class="package-name">${escapeHtml(pkg.name)}</span>
+                                        <span class="package-versions">${escapeHtml(versionsText)}</span>
+                                    </span>`;
+                                }).join('')}
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('');
                 patchesContainer.classList.remove("collapsed");
@@ -217,6 +287,19 @@ function renderBundle(bundle) {
                     <div class="patch-item">
                         <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
                         ${patch.description ? `<div class="patch-description">${escapeHtml(patch.description)}</div>` : ''}
+                        ${patch.compatiblePackages && patch.compatiblePackages.length > 0 ? `
+                            <div class="patch-packages">
+                                ${patch.compatiblePackages.map(pkg => {
+                                    const versionsText = pkg.versions && pkg.versions.length > 0
+                                        ? pkg.versions.filter(v => v).join(', ') || 'all versions'
+                                        : 'all versions';
+                                    return `<span class="package-tag">
+                                        <span class="package-name">${escapeHtml(pkg.name)}</span>
+                                        <span class="package-versions">${escapeHtml(versionsText)}</span>
+                                    </span>`;
+                                }).join('')}
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('');
                 patchesContainer.classList.add("collapsed");

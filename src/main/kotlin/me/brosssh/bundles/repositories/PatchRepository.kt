@@ -11,14 +11,12 @@ class PatchRepository {
     fun create(
         bundleEntity: BundleEntity,
         name: String?,
-        description: String?,
-        compatiblePackageIds: List<Int>
+        description: String?
     ) = transaction {
         PatchEntity.new {
             this.bundle = bundleEntity
             this.name = name
             this.description = description
-            this.compatiblePackageFk = compatiblePackageIds
         }
     }
 

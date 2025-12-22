@@ -25,5 +25,12 @@ data class SearchResponseDto(
 @Serializable
 data class SearchResponsePatchDto(
     val name: String?,
-    val description: String?
+    val description: String?,
+    val compatiblePackages: List<SearchResponsePatchPackageDto>
+)
+
+@Serializable
+data class SearchResponsePatchPackageDto(
+    val name: String,
+    val versions: List<String?>,
 )

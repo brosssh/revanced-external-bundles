@@ -2,13 +2,17 @@ package me.brosssh.bundles.repositories
 
 import me.brosssh.bundles.api.dto.SearchResponseDto
 import me.brosssh.bundles.api.dto.SearchResponsePatchDto
+import me.brosssh.bundles.api.dto.SearchResponsePatchPackageDto
 import me.brosssh.bundles.db.entities.SourceEntity
 import me.brosssh.bundles.db.tables.BundleTable
+import me.brosssh.bundles.db.tables.PackageTable
+import me.brosssh.bundles.db.tables.PatchPackageTable
 import me.brosssh.bundles.db.tables.PatchTable
 import me.brosssh.bundles.db.tables.SourceMetadataTable
 import me.brosssh.bundles.db.tables.SourceTable
 import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.integrations.github.GithubReleaseDto
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
@@ -57,38 +61,53 @@ class BundleRepository {
     }
 
     fun search(query: String) = transaction {
-        (BundleTable innerJoin SourceTable leftJoin SourceMetadataTable)
+        (BundleTable
+                innerJoin SourceTable
+                leftJoin SourceMetadataTable
+                innerJoin PatchTable
+                leftJoin PatchPackageTable
+                leftJoin PackageTable)
             .selectAll()
-            .where { SourceTable.url.lowerCase() like "%${query.lowercase()}%" }
-            .limit(20)
-            .map { bundleRow ->
-                val bundleId = bundleRow[BundleTable.id].value
-                val patches = PatchTable
-                    .selectAll()
-                    .where { PatchTable.bundleFk eq bundleId }
-                    .map { patchRow ->
+            .where {
+                SourceTable.url.lowerCase() like "%${query.lowercase()}%"
+            }
+            .orderBy(SourceMetadataTable.repoStars, SortOrder.DESC_NULLS_LAST)
+            .groupBy { it[BundleTable.id].value }
+            .map { (bundleId, rows) ->
+                val firstRow = rows.first()
+
+                val patches = rows
+                    .groupBy { it[PatchTable.id].value }
+                    .map { (_, patchRows) ->
                         SearchResponsePatchDto(
-                            name = patchRow[PatchTable.name],
-                            description = patchRow[PatchTable.description]
+                            name = patchRows.first()[PatchTable.name],
+                            description = patchRows.first()[PatchTable.description],
+                            compatiblePackages = patchRows
+                                .filter { it[PackageTable.id] != null }
+                                .groupBy { it[PackageTable.name] }
+                                .map { (name, pkgRows) ->
+                                    SearchResponsePatchPackageDto(
+                                        name,
+                                        pkgRows.map { it[PackageTable.version] }
+                                    )
+                                }
                         )
                     }
 
                 SearchResponseDto(
-                    ownerName = bundleRow[SourceMetadataTable.ownerName],
-                    ownerAvatarUrl = bundleRow[SourceMetadataTable.ownerAvatarUrl],
-                    repoName = bundleRow[SourceMetadataTable.repoName],
-                    repoDescription = bundleRow[SourceMetadataTable.repoDescription],
-                    repoStars = bundleRow[SourceMetadataTable.repoStars],
-                    sourceUrl = bundleRow[SourceTable.url],
-
+                    ownerName = firstRow[SourceMetadataTable.ownerName],
+                    ownerAvatarUrl = firstRow[SourceMetadataTable.ownerAvatarUrl],
+                    repoName = firstRow[SourceMetadataTable.repoName],
+                    repoDescription = firstRow[SourceMetadataTable.repoDescription],
+                    repoStars = firstRow[SourceMetadataTable.repoStars],
+                    sourceUrl = firstRow[SourceTable.url],
                     bundleId = bundleId,
-                    createdAt = bundleRow[BundleTable.createdAt].substringBefore("Z"),
-                    description = bundleRow[BundleTable.description] ?: "",
-                    version = bundleRow[BundleTable.version],
-                    downloadUrl = bundleRow[BundleTable.downloadUrl],
-                    signatureDownloadUrl = bundleRow[BundleTable.signatureDownloadUrl] ?: "",
-                    isPrerelease = bundleRow[BundleTable.isPrerelease],
-
+                    createdAt = firstRow[BundleTable.createdAt].substringBefore("Z"),
+                    description = firstRow[BundleTable.description].orEmpty(),
+                    version = firstRow[BundleTable.version],
+                    downloadUrl = firstRow[BundleTable.downloadUrl],
+                    signatureDownloadUrl = firstRow[BundleTable.signatureDownloadUrl].orEmpty(),
+                    isPrerelease = firstRow[BundleTable.isPrerelease],
                     patches = patches
                 )
             }

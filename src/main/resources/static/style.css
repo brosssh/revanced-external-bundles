@@ -28,17 +28,23 @@ h1 {
     font-size: 0.95rem;
 }
 
-#search {
+.search-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+#search, #package-filter {
     width: 100%;
     padding: 12px 16px;
     font-size: 16px;
     border: 2px solid #ddd;
     border-radius: 8px;
-    margin-bottom: 20px;
     background: white;
 }
 
-#search:focus {
+#search:focus, #package-filter:focus {
     outline: none;
     border-color: #4CAF50;
 }
@@ -314,6 +320,36 @@ h1 {
 .patch-description {
     color: #666;
     font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.patch-packages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.package-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    color: #666;
+}
+
+.package-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.package-versions {
+    color: #999;
+    font-size: 10px;
 }
 
 .toggle-patches {

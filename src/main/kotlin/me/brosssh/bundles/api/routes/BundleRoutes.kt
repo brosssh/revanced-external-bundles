@@ -8,6 +8,7 @@ import io.ktor.server.routing.route
 import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.api.dto.SearchResponseDto
 import me.brosssh.bundles.domain.services.BundleService
+import me.brosssh.bundles.domain.services.CacheService
 import org.koin.ktor.ext.get
 
 fun Route.bundleRoutes() {
@@ -77,6 +78,7 @@ fun Route.bundleRoutes() {
                 }
             }
         }) {
+            val cacheService = call.get<CacheService>()
             val bundleService = call.get<BundleService>()
 
             val query = call.request.queryParameters["q"]
@@ -85,7 +87,9 @@ fun Route.bundleRoutes() {
                     mapOf("error" to "Query parameter 'q' is required")
                 )
 
-            val results = bundleService.search(query)
+            val results = cacheService.getCachedSearch(query) {
+                bundleService.search(query)
+            }
             call.respond(HttpStatusCode.OK, results)
         }
     }

@@ -4,9 +4,9 @@ import app.revanced.patcher.patch.PatchBundle
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.entities.SourceEntity
 import me.brosssh.bundles.db.tables.BundleTable
+import me.brosssh.bundles.domain.services.CacheService
 import me.brosssh.bundles.integrations.github.GithubClient
 import me.brosssh.bundles.repositories.*
-import me.brosssh.bundles.util.intId
 import me.brosssh.bundles.util.sha256
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -16,12 +16,14 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class RefreshPatchesService(
+    cacheService: CacheService,
     refreshJobRepository: RefreshJobRepository,
     private val githubClient: GithubClient,
     private val sourceRepository: SourceRepository,
     private val patchRepository: PatchRepository,
-    private val packageRepository: PackageRepository
-) : BaseRefreshJobService(refreshJobRepository) {
+    private val packageRepository: PackageRepository,
+    private val patchPackageRepository: PatchPackageRepository
+) : BaseRefreshJobService(cacheService, refreshJobRepository) {
 
     override val logger: Logger = LoggerFactory.getLogger(RefreshPatchesService::class.java)
     override val jobType: String = "PATCHES"
@@ -84,24 +86,28 @@ class RefreshPatchesService(
             patchRepository.deleteByBundle(bundleEntity)
 
             PatchBundle(bundleFile.absolutePath).patches?.forEach { patch ->
-                val compatiblePackageIds = buildList {
-                    patch.compatiblePackages?.forEach { (packageName, versions) ->
-                        if (versions == null) {
-                            add(packageRepository.findOrCreate(packageName, null).intId)
-                        } else {
-                            versions.forEach { version ->
-                                add(packageRepository.findOrCreate(packageName, version).intId)
-                            }
-                        }
-                    }
-                }
-
-                patchRepository.create(
+                val patchEntity = patchRepository.create(
                     bundleEntity = bundleEntity,
                     name = patch.name,
-                    description = patch.description,
-                    compatiblePackageIds = compatiblePackageIds
+                    description = patch.description
                 )
+
+                patch.compatiblePackages?.forEach { (packageName, versions) ->
+                    val resolvedPackages = versions
+                        ?.map { version ->
+                            packageRepository.findOrCreate(packageName, version)
+                        }
+                        ?: listOf(
+                            packageRepository.findOrCreate(packageName, null)
+                        )
+
+                    resolvedPackages.forEach { pkg ->
+                        patchPackageRepository.link(
+                            patch = patchEntity,
+                            pkg = pkg
+                        )
+                    }
+                }
             }
 
             logger.info("Success")
