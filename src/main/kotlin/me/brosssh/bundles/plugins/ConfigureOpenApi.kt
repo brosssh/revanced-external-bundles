@@ -14,12 +14,19 @@ fun Application.configureOpenApi() {
         info {
             title = "ReVanced external bundles API"
             version = Config.version
+            contact {
+                name = "brosssh"
+                email = "brosssh@proton.me"
+            }
         }
         security {
             securityScheme("hmacAuth") {
                 type = AuthType.HTTP
                 scheme = AuthScheme.BEARER
             }
+        }
+        pathFilter = { _, url ->
+            !url.contains("{...}")
         }
         /**
          * https://github.com/SMILEY4/ktor-openapi-tools/issues/227

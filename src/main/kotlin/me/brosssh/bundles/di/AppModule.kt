@@ -2,8 +2,8 @@ package me.brosssh.bundles.di
 
 import me.brosssh.bundles.Config
 import me.brosssh.bundles.domain.services.BundleService
-import me.brosssh.bundles.domain.services.refresh.RefreshBundlesMetadataService
 import me.brosssh.bundles.domain.services.refresh.RefreshBundlesService
+import me.brosssh.bundles.domain.services.refresh.RefreshPatchesService
 import me.brosssh.bundles.integrations.github.GithubClient
 import me.brosssh.bundles.repositories.*
 import org.koin.dsl.module
@@ -26,21 +26,21 @@ val appModule = module {
 
     single {
         RefreshBundlesService(
-            githubClient = get(),
-            refreshJobRepository = get(),
-            sourceRepository = get(),
-            bundleRepository = get(),
-            patchRepository = get(),
-            packageRepository = get()
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
         )
     }
 
     single {
-        RefreshBundlesMetadataService(
-            githubClient = get(),
-            sourceRepository = get(),
-            sourceMetadataRepository = get(),
-            refreshJobRepository = get()
+        RefreshPatchesService(
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
         )
     }
 

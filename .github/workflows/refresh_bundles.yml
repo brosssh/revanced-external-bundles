@@ -3,7 +3,6 @@ name: Refresh Bundles
 on:
   workflow_dispatch:
   schedule:
-    # Run every 30 minutes
     - cron: '*/30 * * * *'
   push:
     branches:

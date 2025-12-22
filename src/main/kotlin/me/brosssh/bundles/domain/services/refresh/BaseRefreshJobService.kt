@@ -17,12 +17,13 @@ abstract class BaseRefreshJobService (
 
     fun refresh(): String {
         val jobId = UUID.randomUUID().toString()
-        val jobEntityId = refreshJobRepository.create(jobId).id.value
+        val jobEntityId = refreshJobRepository.create(jobId, jobType).id.value
 
         CoroutineScope(Dispatchers.Default).launch {
             try {
+                processRefresh(jobId)
+
                 suspendTransaction {
-                    processRefresh(jobId)
                     RefreshJobEntity[jobEntityId]
                         .setCompleted()
                 }

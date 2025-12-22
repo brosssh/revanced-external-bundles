@@ -1,21 +1,20 @@
 package me.brosssh.bundles.repositories
 
-import me.brosssh.bundles.db.entities.BundleEntity
+import me.brosssh.bundles.api.dto.SearchResponseDto
+import me.brosssh.bundles.api.dto.SearchResponsePatchDto
 import me.brosssh.bundles.db.entities.SourceEntity
 import me.brosssh.bundles.db.tables.BundleTable
 import me.brosssh.bundles.db.tables.PatchTable
+import me.brosssh.bundles.db.tables.SourceMetadataTable
 import me.brosssh.bundles.db.tables.SourceTable
 import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.integrations.github.GithubReleaseDto
-import me.brosssh.bundles.api.dto.SearchResponseDto
-import me.brosssh.bundles.api.dto.SearchResponsePatchDto
-import me.brosssh.bundles.db.tables.SourceMetadataTable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.upsertReturning
+import org.jetbrains.exposed.v1.jdbc.upsert
 
 class BundleRepository {
     fun findById(bundleId: Int) =
@@ -40,8 +39,8 @@ class BundleRepository {
         releaseDto: GithubReleaseDto,
         source: SourceEntity,
         isPrereleaseFlag: Boolean
-    ): BundleEntity = transaction {
-        BundleTable.upsertReturning(
+    ) = transaction {
+        BundleTable.upsert(
             BundleTable.sourceFk, BundleTable.isPrerelease
         ) { bundle ->
             bundle[sourceFk] = source.id
@@ -54,7 +53,7 @@ class BundleRepository {
             bundle[signatureDownloadUrl] = releaseDto.assets.firstOrNull { it.name.endsWith(".rvp.asc") }
                     ?.browserDownloadUrl
             bundle[isPrerelease] = isPrereleaseFlag
-        }.single().let { BundleEntity.wrapRow(it) }
+        }
     }
 
     fun search(query: String) = transaction {

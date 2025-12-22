@@ -7,9 +7,10 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class RefreshJobRepository {
 
-    fun create(jobId: String) = transaction {
+    fun create(jobId: String, jobType: String) = transaction {
         RefreshJobEntity.new {
             this.jobId = jobId
+            this.jobType = jobType
             this.status = RefreshJobTable.JobStatus.PENDING
             this.error = null
             val now = System.currentTimeMillis()
