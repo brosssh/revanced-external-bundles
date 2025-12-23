@@ -3,15 +3,33 @@ plugins {
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
     id("io.ktor.plugin") version libs.versions.ktor.get()
     application
+    `maven-publish`
+    signing
 }
 
 group = "me.brosssh"
 
-tasks.jar {
-    manifest {
-        attributes(
-            "Implementation-Version" to project.version.toString()
-        )
+tasks {
+    processResources {
+        expand("projectVersion" to project.version)
+        exclude("static/**/*.js")
+    }
+
+    // Used by gradle-semantic-release-plugin.
+    // Tracking: https://github.com/KengoTODA/gradle-semantic-release-plugin/issues/435.
+    publish {
+        dependsOn(shadowJar)
+    }
+
+    shadowJar {
+        // Needed for Jetty to work.
+        mergeServiceFiles()
+    }
+}
+
+ktor {
+    fatJar {
+        archiveFileName.set("${project.name}-${project.version}.jar")
     }
 }
 
@@ -81,4 +99,23 @@ kotlin {
 
 application {
     mainClass.set("me.brosssh.bundles.ApplicationKt")
+}
+
+// The maven-publish plugin is necessary to make signing work.
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        create<MavenPublication>("revanced-external-bundles-publication") {
+            from(components["java"])
+        }
+    }
+}
+
+signing {
+    useGpgCmd()
+
+    sign(publishing.publications["revanced-external-bundles-publication"])
 }
