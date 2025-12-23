@@ -1,1 +1,1 @@
-rootProject.name = "bundles"
+rootProject.name = "revanced-external-bundles"
