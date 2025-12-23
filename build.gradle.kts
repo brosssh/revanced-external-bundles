@@ -1,11 +1,3 @@
-import java.util.Properties
-
-val envFile = rootProject.file(".env")
-
-val env = Properties().apply {
-    envFile.inputStream().use { load(it) }
-}
-
 plugins {
     kotlin("jvm") version libs.versions.kotlin.get()
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
@@ -30,16 +22,16 @@ repositories {
         // A repository must be specified for some reason. "registry" is a dummy.
         url = uri("https://maven.pkg.github.com/brosssh/registry")
         credentials {
-            username = project.findProperty("gpr.user") as String? ?: env.getProperty("GITHUB_ACTOR")
-            password = project.findProperty("gpr.key") as String? ?: env.getProperty("GITHUB_TOKEN")
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
         }
     }
     maven {
         // A repository must be specified for some reason. "registry" is a dummy.
         url = uri("https://maven.pkg.github.com/revanced/registry")
         credentials {
-            username = project.findProperty("gpr.user") as String? ?: env.getProperty("GITHUB_ACTOR")
-            password = project.findProperty("gpr.key") as String? ?: env.getProperty("GITHUB_TOKEN")
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
         }
     }
 }
