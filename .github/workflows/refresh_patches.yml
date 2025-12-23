@@ -16,7 +16,7 @@ jobs:
           TIMESTAMP=$(date +%s)
           PAYLOAD="refresh:$TIMESTAMP"
           HMAC=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
-          curl -X POST "https://revanced-external-bundles.brosssh.com:8080/refresh/patches" \
+          curl -X POST "https://revanced-external-bundles.brosssh.com/refresh/patches" \
                 -H "Authorization: Bearer $TIMESTAMP-$HMAC" \
                 -H 'accept: application/json' \
                 -d '' \
