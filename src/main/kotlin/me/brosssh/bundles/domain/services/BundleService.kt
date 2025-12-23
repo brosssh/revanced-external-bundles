@@ -7,6 +7,6 @@ class BundleService (
     private val bundleRepository: BundleRepository
 ) {
     fun getById(id: Int) = bundleRepository.findById(id)
-    fun search(query: String) = bundleRepository.search(query)
+    fun getSnapshot() = bundleRepository.getSnapshot()
 
 }

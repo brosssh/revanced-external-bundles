@@ -10,11 +10,6 @@ plugins {
 group = "me.brosssh"
 
 tasks {
-    processResources {
-        expand("projectVersion" to project.version)
-        exclude("static/**/*.js")
-    }
-
     // Used by gradle-semantic-release-plugin.
     // Tracking: https://github.com/KengoTODA/gradle-semantic-release-plugin/issues/435.
     publish {

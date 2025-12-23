@@ -87,10 +87,7 @@ fun Route.bundleRoutes() {
                     mapOf("error" to "Query parameter 'q' is required")
                 )
 
-            val results = cacheService.getCachedSearch(query) {
-                bundleService.search(query)
-            }
-            call.respond(HttpStatusCode.OK, results)
+            call.respond(HttpStatusCode.OK, setOf<SearchResponseDto>())
         }
     }
 }

@@ -4,77 +4,57 @@ const results = document.getElementById("results");
 const status = document.getElementById("status");
 const filterButtons = document.querySelectorAll(".filter-btn");
 
-let timeout = null;
-let packageTimeout = null;
 let currentFilter = "release";
+let currentSearchQuery = "";
 let currentPackageFilter = "";
 let allBundles = [];
 
+// Load bundles on page load
+loadBundles();
+
 input.addEventListener("input", () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(search, 400);
+    currentSearchQuery = input.value.trim().toLowerCase();
+    renderFilteredBundles();
 });
 
 packageFilter.addEventListener("input", () => {
-    clearTimeout(packageTimeout);
-    packageTimeout = setTimeout(() => {
-        currentPackageFilter = packageFilter.value.trim().toLowerCase();
-        renderFilteredBundles();
-    }, 300);
+    currentPackageFilter = packageFilter.value.trim().toLowerCase();
+    renderFilteredBundles();
 });
 
 filterButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-        // Update active button
         filterButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
-
-        // Update filter and re-render
         currentFilter = btn.dataset.filter;
         renderFilteredBundles();
     });
 });
 
-async function search() {
-    const query = input.value.trim();
-
-    results.innerHTML = "";
-
-    if (!query) {
-        status.textContent = "Type a source URL to search";
-        allBundles = [];
-        return;
-    }
-
-    status.textContent = "Searching";
+async function loadBundles() {
+    status.textContent = "Loading bundles...";
     status.classList.add("loading");
 
     try {
-        const res = await fetch(`/bundles/search?q=${encodeURIComponent(query)}`);
-
-        if (res.status === 404) {
-            status.textContent = "No bundles found";
-            status.classList.remove("loading");
-            return;
-        }
+        const res = await fetch('/snapshot');
 
         if (!res.ok) {
-            status.textContent = "Server error";
+            status.textContent = "Failed to load bundles";
             status.classList.remove("loading");
             return;
         }
 
         const bundles = await res.json();
-        status.textContent = "";
-        status.classList.remove("loading");
 
         if (!Array.isArray(bundles) || bundles.length === 0) {
-            status.textContent = "No bundles found";
+            status.textContent = "No bundles available";
+            status.classList.remove("loading");
             allBundles = [];
             return;
         }
 
         allBundles = bundles;
+        status.classList.remove("loading");
         renderFilteredBundles();
 
     } catch (e) {
@@ -87,27 +67,36 @@ async function search() {
 function renderFilteredBundles() {
     results.innerHTML = "";
 
-    // If no search has been performed yet
     if (allBundles.length === 0) {
-        status.textContent = "Type a source URL to search";
+        status.textContent = "No bundles available";
         return;
     }
 
     const filteredBundles = allBundles
         .map(bundle => {
-            // Filter by release type
             if (currentFilter === "release" && bundle.isPrerelease) return null;
             if (currentFilter === "prerelease" && !bundle.isPrerelease) return null;
 
-            // Filter patches by package if package filter is active
+            if (currentSearchQuery) {
+                const searchableText = [
+                    bundle.sourceUrl,
+                    bundle.ownerName,
+                    bundle.repoName,
+                    bundle.repoDescription,
+                    bundle.version
+                ].filter(Boolean).join(' ').toLowerCase();
+
+                if (!searchableText.includes(currentSearchQuery)) {
+                    return null;
+                }
+            }
+
             if (currentPackageFilter) {
                 const matchingPatches = bundle.patches.filter(patch => {
-                    // Check if patch has compatible packages
                     if (!patch.compatiblePackages || patch.compatiblePackages.length === 0) {
                         return false;
                     }
 
-                    // Check if any package matches the filter
                     return patch.compatiblePackages.some(pkg => {
                         const nameMatches = pkg.name.toLowerCase().includes(currentPackageFilter);
                         const versionMatches = pkg.versions?.some(v =>
@@ -117,10 +106,7 @@ function renderFilteredBundles() {
                     });
                 });
 
-                // Skip bundle if no patches match
                 if (matchingPatches.length === 0) return null;
-
-                // Return bundle with filtered patches
                 return { ...bundle, patches: matchingPatches };
             }
 
@@ -129,10 +115,12 @@ function renderFilteredBundles() {
         .filter(bundle => bundle !== null);
 
     if (filteredBundles.length === 0) {
-        const filterDesc = currentPackageFilter
-            ? `matching "${currentPackageFilter}"`
-            : currentFilter === "all" ? "" : currentFilter;
-        status.textContent = `No ${filterDesc} bundles found`;
+        const filterParts = [];
+        if (currentSearchQuery) filterParts.push(`matching "${currentSearchQuery}"`);
+        if (currentPackageFilter) filterParts.push(`for package "${currentPackageFilter}"`);
+        if (currentFilter !== "all") filterParts.push(currentFilter);
+
+        status.textContent = `No bundles found ${filterParts.join(' ')}`;
         return;
     }
 
@@ -163,7 +151,7 @@ function renderBundle(bundle) {
                 </div>
                 ${bundle.repoDescription ? `<div class="bundle-description">${renderMarkdown(bundle.repoDescription)}</div>` : ''}
                 <div class="bundle-version">
-                    <span class="version-text">v${escapeHtml(bundle.version)}</span>
+                    <span class="version-text">${escapeHtml(bundle.version)}</span>
                     <span class="bundle-badge ${bundle.isPrerelease ? 'badge-prerelease' : 'badge-release'}">
                         ${bundle.isPrerelease ? 'Prerelease' : 'Release'}
                     </span>
@@ -185,7 +173,7 @@ function renderBundle(bundle) {
                 </a>
             ` : ''}
             <span>•</span>
-            <button class="copy-btn" data-url="https://revanced-external-bundles.brosssh.com/${bundle.bundleId}">
+            <button class="copy-btn" data-url="https://revanced-external-bundles.brosssh.com/bundles/id?id=${bundle.bundleId}">
                 Copy URL
             </button>
         </div>
@@ -197,9 +185,7 @@ function renderBundle(bundle) {
                     <span class="patches-count">${bundle.patches.length} total</span>
                 </div>
                 <div class="patches-list ${hasMore ? 'collapsed' : ''}" data-patches-container>
-                    ${patchesPreview.map(patch => {
-                        console.log('Patch:', patch.name, 'Compatible packages:', patch.compatiblePackages);
-                        return `
+                    ${patchesPreview.map(patch => `
                         <div class="patch-item">
                             <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
                             ${patch.description ? `<div class="patch-description">${escapeHtml(patch.description)}</div>` : ''}
@@ -217,7 +203,7 @@ function renderBundle(bundle) {
                                 </div>
                             ` : ''}
                         </div>
-                    `}).join('')}
+                    `).join('')}
                 </div>
                 ${hasMore ? `
                     <button class="toggle-patches" data-toggle-patches>
@@ -230,7 +216,6 @@ function renderBundle(bundle) {
 
     results.appendChild(li);
 
-    // Setup copy button
     const copyBtn = li.querySelector(".copy-btn");
     copyBtn.addEventListener("click", async () => {
         const url = copyBtn.dataset.url;
@@ -249,7 +234,6 @@ function renderBundle(bundle) {
         }
     });
 
-    // Setup toggle patches button
     const toggleBtn = li.querySelector("[data-toggle-patches]");
     const patchesContainer = li.querySelector("[data-patches-container]");
 
@@ -258,7 +242,6 @@ function renderBundle(bundle) {
 
         toggleBtn.addEventListener("click", () => {
             if (!expanded) {
-                // Expand: show all patches
                 patchesContainer.innerHTML = bundle.patches.map(patch => `
                     <div class="patch-item">
                         <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
@@ -282,7 +265,6 @@ function renderBundle(bundle) {
                 toggleBtn.textContent = "Show less";
                 expanded = true;
             } else {
-                // Collapse: show only first 5
                 patchesContainer.innerHTML = patchesPreview.map(patch => `
                     <div class="patch-item">
                         <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
@@ -318,7 +300,6 @@ function escapeHtml(text) {
 
 function renderMarkdown(text) {
     if (!text) return '';
-    // Configure marked to be safe and sanitize HTML
     marked.setOptions({
         breaks: true,
         gfm: true

@@ -2,19 +2,24 @@ package me.brosssh.bundles.domain.services
 
 import me.brosssh.bundles.api.dto.SearchResponseDto
 import java.time.Instant
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 class CacheService {
-    private var cachedSearchResults = ConcurrentHashMap<String, List<SearchResponseDto>>()
+    private val cachedSnapshot = AtomicReference<List<SearchResponseDto>>(emptyList())
     private var lastUpdate = Instant.now()
 
     fun invalidateCache() {
-        cachedSearchResults.clear()
+        cachedSnapshot.set(null)
         lastUpdate = Instant.now()
     }
 
-    fun getCachedSearch(query: String, fetch: () -> List<SearchResponseDto>): List<SearchResponseDto> =
-        cachedSearchResults.getOrPut(query.lowercase()) {
-            fetch()
-        }
+    fun getCachedSnapshot(fetch: () -> List<SearchResponseDto>): List<SearchResponseDto> {
+        val current = cachedSnapshot.get()
+        if (current.isNotEmpty()) return current
+
+        val snapshot = fetch()
+        cachedSnapshot.set(snapshot)
+        lastUpdate = Instant.now()
+        return snapshot
+    }
 }

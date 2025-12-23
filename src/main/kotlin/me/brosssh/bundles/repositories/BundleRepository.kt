@@ -60,7 +60,7 @@ class BundleRepository {
         }
     }
 
-    fun search(query: String) = transaction {
+    fun getSnapshot() = transaction {
         (BundleTable
                 innerJoin SourceTable
                 leftJoin SourceMetadataTable
@@ -68,9 +68,6 @@ class BundleRepository {
                 leftJoin PatchPackageTable
                 leftJoin PackageTable)
             .selectAll()
-            .where {
-                SourceTable.url.lowerCase() like "%${query.lowercase()}%"
-            }
             .orderBy(SourceMetadataTable.repoStars, SortOrder.DESC_NULLS_LAST)
             .groupBy { it[BundleTable.id].value }
             .map { (bundleId, rows) ->
