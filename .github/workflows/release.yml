@@ -63,20 +63,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm exec semantic-release
 
-      - name: Set Portainer stack webhook URL based on branch
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            PORTAINER_WEBHOOK_URL=${{ secrets.PORTAINER_WEBHOOK_MAIN_URL }}
-          else
-            PORTAINER_WEBHOOK_URL=${{ secrets.PORTAINER_WEBHOOK_DEV_URL }}
-          fi
-          echo "PORTAINER_WEBHOOK_URL=$PORTAINER_WEBHOOK_URL" >> $GITHUB_ENV
-
-      - name: Trigger Portainer stack update
-        uses: newarifrh/portainer-service-webhook@v1
-        with:
-          webhook_url: ${{ env.PORTAINER_WEBHOOK_URL }}
-
       - name: Purge outdated images
         uses: snok/container-retention-policy@v3.0.0
         with:
