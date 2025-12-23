@@ -17,6 +17,11 @@ tasks {
     }
 
     shadowJar {
+        manifest {
+            attributes(
+                "Implementation-Version" to project.version.toString()
+            )
+        }
         // Needed for Jetty to work.
         mergeServiceFiles()
     }

@@ -5,7 +5,7 @@ import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 
 class CacheService {
-    private val cachedSnapshot = AtomicReference<List<SearchResponseDto>>(emptyList())
+    private val cachedSnapshot = AtomicReference<List<SearchResponseDto>>(null)
     private var lastUpdate = Instant.now()
 
     fun invalidateCache() {
@@ -15,7 +15,7 @@ class CacheService {
 
     fun getCachedSnapshot(fetch: () -> List<SearchResponseDto>): List<SearchResponseDto> {
         val current = cachedSnapshot.get()
-        if (current.isNotEmpty()) return current
+        if (current != null) return current
 
         val snapshot = fetch()
         cachedSnapshot.set(snapshot)

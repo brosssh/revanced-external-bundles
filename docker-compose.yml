@@ -1,23 +1,2 @@
-version: "3.9"
-
-services:
-  app:
-    image: ghcr.io/brosssh/revanced-external-bundles:latest
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - "8080:8080"
-
-  postgres:
-    image: postgres:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata:
+include:
+  - path: docker-compose.${DEPLOY_ENV:-dev}.yml

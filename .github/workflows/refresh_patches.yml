@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '*/60 * * * *'
-  push:
-    branches:
-      - main
 
 jobs:
   refresh:

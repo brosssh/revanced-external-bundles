@@ -1,0 +1,21 @@
+# For deploy
+services:
+  app:
+    image: ghcr.io/brosssh/revanced-external-bundles:latest
+    container_name: bundles-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    network_mode: host
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      --label-enable
+      --interval 300
