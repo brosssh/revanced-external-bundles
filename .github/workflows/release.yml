@@ -23,6 +23,9 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      - name: Ensure gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Cache Gradle
         uses: burrunan/gradle-cache-action@v1
 
