@@ -56,7 +56,8 @@
         "dockerArgs": {
            "GITHUB_ACTOR": null,
            "GITHUB_TOKEN": null,
-        }
+        },
+        "dockerBuildCacheFrom": "ghcr.io/brosssh/revanced-external-bundles:latest"
       }
     ],
     [
