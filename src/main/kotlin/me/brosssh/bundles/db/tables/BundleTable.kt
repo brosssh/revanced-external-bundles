@@ -9,7 +9,9 @@ object BundleTable : IntIdTable("bundle") {
     val downloadUrl = varchar("download_url", 255)
     val signatureDownloadUrl = varchar("signature_download_url", 255).nullable()
     val isPrerelease = bool("is_prerelease")
-    val fileSha = varchar("file_sha", 64).nullable()
+    val fileHash = varchar("file_hash", 255).nullable()
+    val needPatchesUpdate = bool("need_patches_update")
+    val isBundleV3 = bool("is_bundle_v3")
     val sourceFk = reference("source_fk", SourceTable.id)
 
     init {

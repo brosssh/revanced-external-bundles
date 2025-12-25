@@ -18,7 +18,8 @@ data class GithubReleaseDto(
 data class GithubAssetDto(
     val name: String,
     @SerialName("browser_download_url")
-    val browserDownloadUrl: String
+    val browserDownloadUrl: String,
+    val digest: String? // GitHub doesn't always compute this, idk why
 )
 
 @Serializable

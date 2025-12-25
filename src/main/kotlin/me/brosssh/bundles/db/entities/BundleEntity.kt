@@ -14,6 +14,7 @@ class BundleEntity(id: EntityID<Int>) : IntEntity(id) {
     var downloadUrl by BundleTable.downloadUrl
     var signatureDownloadUrl by BundleTable.signatureDownloadUrl
     var isPrerelease by BundleTable.isPrerelease
-    var fileSha by BundleTable.fileSha
-    var sourceEntity by BundleTable.sourceFk
+    var fileHash by BundleTable.fileHash
+    var needPatchesUpdate by BundleTable.needPatchesUpdate
+    var sourceEntity by SourceEntity referencedOn BundleTable.sourceFk
 }

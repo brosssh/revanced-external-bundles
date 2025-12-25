@@ -135,7 +135,15 @@ function renderBundle(bundle) {
     const patchesPreview = bundle.patches.slice(0, 5);
     const hasMore = bundle.patches.length > 5;
 
+    const v3WarningHtml = bundle.isBundleV3
+        ? `<div class="v3-warning">
+                ⚠️ This bundle is V3. It will not be usable in URV and the patches list will always be empty.
+           </div>`
+        : '';
+
     li.innerHTML = `
+        ${v3WarningHtml}
+
         <div class="bundle-header">
             <img src="${escapeHtml(bundle.ownerAvatarUrl)}"
                  alt="${escapeHtml(bundle.ownerName)}"
@@ -160,11 +168,11 @@ function renderBundle(bundle) {
             </div>
         </div>
 
-        ${bundle.description ? `<div class="bundle-description">${renderMarkdown(bundle.description)}</div>` : ''}
+        ${bundle.description ? `<div class="changelog-content">${renderMarkdown(bundle.description)}</div>` : ''}
 
         <div class="bundle-meta">
             <a href="${escapeHtml(bundle.downloadUrl)}" target="_blank" rel="noopener">
-                Download .RVP
+                Download bundle
             </a>
             ${bundle.signatureDownloadUrl ? `
                 <span>•</span>
@@ -173,43 +181,38 @@ function renderBundle(bundle) {
                 </a>
             ` : ''}
             <span>•</span>
-            <button class="copy-btn" data-url="https://revanced-external-bundles.brosssh.com/bundles/id?id=${bundle.bundleId}">
-                Copy URL
+            <button class="copy-btn" ${bundle.isBundleV3 ? 'disabled' : ''} data-url="https://revanced-external-bundles.brosssh.com/bundles/id?id=${bundle.bundleId}">
+                Copy remote bundle URL
             </button>
         </div>
 
         ${bundle.patches.length > 0 ? `
-            <div class="patches-section">
-                <div class="patches-header">
-                    <span class="patches-title">Patches</span>
-                    <span class="patches-count">${bundle.patches.length} total</span>
-                </div>
-                <div class="patches-list ${hasMore ? 'collapsed' : ''}" data-patches-container>
-                    ${patchesPreview.map(patch => `
-                        <div class="patch-item">
-                            <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
-                            ${patch.description ? `<div class="patch-description">${escapeHtml(patch.description)}</div>` : ''}
-                            ${patch.compatiblePackages && patch.compatiblePackages.length > 0 ? `
-                                <div class="patch-packages">
-                                    ${patch.compatiblePackages.map(pkg => {
-                                        const versionsText = pkg.versions && pkg.versions.length > 0
-                                            ? pkg.versions.filter(v => v).join(', ') || 'all versions'
-                                            : 'all versions';
-                                        return `<span class="package-tag">
-                                            <span class="package-name">${escapeHtml(pkg.name)}</span>
-                                            <span class="package-versions">${escapeHtml(versionsText)}</span>
-                                        </span>`;
-                                    }).join('')}
-                                </div>
-                            ` : ''}
+                    <div class="patches-section">
+                        <div class="patches-header">
+                            <span class="patches-title">Patches</span>
+                            <span class="patches-count">${bundle.patches.length} total</span>
                         </div>
-                    `).join('')}
+                        <div class="patches-list" data-patches-container>
+                            ${bundle.patches.map(patch => `
+                                <div class="patch-item">
+                                    <div class="patch-name">${escapeHtml(patch.name || 'Unnamed patch')}</div>
+                                    ${patch.description ? `<div class="patch-description">${escapeHtml(patch.description)}</div>` : ''}
+                                    ${patch.compatiblePackages && patch.compatiblePackages.length > 0 ? `
+                                        <div class="patch-packages">
+                                            ${patch.compatiblePackages.map(pkg => {
+                                                const versionsText = pkg.versions && pkg.versions.length > 0
+                                                    ? pkg.versions.filter(v => v).join(', ') || 'all versions'
+                                                    : 'all versions';
+                                                return `<span class="package-tag">
+                                                    <span class="package-name">${escapeHtml(pkg.name)}</span>
+                                                    <span class="package-versions">${escapeHtml(versionsText)}</span>
+                                                </span>`;
+                                            }).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
                 </div>
-                ${hasMore ? `
-                    <button class="toggle-patches" data-toggle-patches>
-                        Show all ${bundle.patches.length} patches
-                    </button>
-                ` : ''}
             </div>
         ` : ''}
     `;

@@ -3,19 +3,15 @@ package me.brosssh.bundles.repositories
 import me.brosssh.bundles.api.dto.SearchResponseDto
 import me.brosssh.bundles.api.dto.SearchResponsePatchDto
 import me.brosssh.bundles.api.dto.SearchResponsePatchPackageDto
-import me.brosssh.bundles.db.entities.SourceEntity
-import me.brosssh.bundles.db.tables.BundleTable
-import me.brosssh.bundles.db.tables.PackageTable
-import me.brosssh.bundles.db.tables.PatchPackageTable
-import me.brosssh.bundles.db.tables.PatchTable
-import me.brosssh.bundles.db.tables.SourceMetadataTable
-import me.brosssh.bundles.db.tables.SourceTable
+import me.brosssh.bundles.db.entities.BundleEntity
+import me.brosssh.bundles.db.tables.*
 import me.brosssh.bundles.domain.models.Bundle
-import me.brosssh.bundles.integrations.github.GithubReleaseDto
+import me.brosssh.bundles.domain.models.BundleMetadata
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.like
-import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.neq
+import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.upsert
@@ -39,32 +35,44 @@ class BundleRepository {
                 .singleOrNull()
         }
 
-    fun upsert(
-        releaseDto: GithubReleaseDto,
-        source: SourceEntity,
-        isPrereleaseFlag: Boolean
-    ) = transaction {
-        BundleTable.upsert(
-            BundleTable.sourceFk, BundleTable.isPrerelease
-        ) { bundle ->
-            bundle[sourceFk] = source.id
-            bundle[version] = releaseDto.tagName
-            bundle[description] = releaseDto.body
-            bundle[createdAt] = releaseDto.createdAt
-            bundle[downloadUrl] = releaseDto.assets.firstOrNull { it.name.endsWith(".rvp") }
-                    ?.browserDownloadUrl
-                    ?: error("No rvp file found")
-            bundle[signatureDownloadUrl] = releaseDto.assets.firstOrNull { it.name.endsWith(".rvp.asc") }
-                    ?.browserDownloadUrl
-            bundle[isPrerelease] = isPrereleaseFlag
+    fun upsert(bundleMetadata: BundleMetadata) = transaction {
+        val commonFields: (UpdateBuilder<*>) -> Unit = {
+            it[BundleTable.version] = bundleMetadata.version
+            it[BundleTable.description] = bundleMetadata.description
+            it[BundleTable.createdAt] = bundleMetadata.createdAt
+            it[BundleTable.downloadUrl] = bundleMetadata.downloadUrl
+            it[BundleTable.signatureDownloadUrl] = bundleMetadata.signatureDownloadUrl
+            it[BundleTable.fileHash] = bundleMetadata.fileHash
+            it[BundleTable.isBundleV3] = bundleMetadata.isBundleV3
         }
+
+        BundleTable.upsert(
+            BundleTable.sourceFk,
+            BundleTable.isPrerelease,
+            onUpdate = {
+                it[BundleTable.needPatchesUpdate] = BundleTable.needPatchesUpdate or
+                    BundleTable.fileHash.neq(bundleMetadata.fileHash)
+
+                commonFields(it)
+            }
+        ) { bundle ->
+            bundle[sourceFk] = bundleMetadata.sourceFk
+            bundle[isPrerelease] = bundleMetadata.isPrerelease
+            bundle[needPatchesUpdate] = !bundleMetadata.isBundleV3
+
+            commonFields(bundle)
+        }
+    }
+
+    fun getBundlesNeedPatchesUpdate() = transaction {
+        BundleEntity.find { BundleTable.needPatchesUpdate eq true }.toList()
     }
 
     fun getSnapshot() = transaction {
         (BundleTable
                 innerJoin SourceTable
                 leftJoin SourceMetadataTable
-                innerJoin PatchTable
+                leftJoin PatchTable
                 leftJoin PatchPackageTable
                 leftJoin PackageTable)
             .selectAll()
@@ -74,6 +82,7 @@ class BundleRepository {
                 val firstRow = rows.first()
 
                 val patches = rows
+                    .filter { it[PatchTable.id] != null }
                     .groupBy { it[PatchTable.id].value }
                     .map { (_, patchRows) ->
                         SearchResponsePatchDto(
@@ -105,6 +114,7 @@ class BundleRepository {
                     downloadUrl = firstRow[BundleTable.downloadUrl],
                     signatureDownloadUrl = firstRow[BundleTable.signatureDownloadUrl].orEmpty(),
                     isPrerelease = firstRow[BundleTable.isPrerelease],
+                    isBundleV3 = firstRow[BundleTable.isBundleV3],
                     patches = patches
                 )
             }

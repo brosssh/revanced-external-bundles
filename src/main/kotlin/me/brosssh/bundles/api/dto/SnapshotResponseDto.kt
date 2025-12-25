@@ -18,6 +18,7 @@ data class SearchResponseDto(
     val downloadUrl: String,
     val signatureDownloadUrl: String,
     val isPrerelease: Boolean,
+    val isBundleV3: Boolean,
 
     val patches: List<SearchResponsePatchDto>
 )

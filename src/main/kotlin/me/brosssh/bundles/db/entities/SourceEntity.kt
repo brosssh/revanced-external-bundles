@@ -1,5 +1,6 @@
 package me.brosssh.bundles.db.entities
 
+import me.brosssh.bundles.db.tables.SourceMetadataTable
 import me.brosssh.bundles.db.tables.SourceTable
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity

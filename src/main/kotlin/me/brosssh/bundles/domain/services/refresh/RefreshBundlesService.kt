@@ -1,12 +1,10 @@
 package me.brosssh.bundles.domain.services.refresh
 
+import me.brosssh.bundles.domain.models.BundleImportError
 import me.brosssh.bundles.domain.services.CacheService
 import me.brosssh.bundles.integrations.github.GithubClient
 import me.brosssh.bundles.integrations.github.toDomainModel
-import me.brosssh.bundles.repositories.BundleRepository
-import me.brosssh.bundles.repositories.RefreshJobRepository
-import me.brosssh.bundles.repositories.SourceMetadataRepository
-import me.brosssh.bundles.repositories.SourceRepository
+import me.brosssh.bundles.repositories.*
 import me.brosssh.bundles.util.intId
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.slf4j.Logger
@@ -25,7 +23,9 @@ class RefreshBundlesService(
     override val jobType: String = "BUNDLES"
 
     override suspend fun processRefresh(jobId: String) {
+        logger.info("Processing bundles refresh")
         sourceRepository.getAll().forEach { source ->
+            logger.info("Processing source ${source.url}")
             suspendTransaction {
                 with(githubClient) {
                     val (owner, repo) = parseRepoUrl(source.url)
@@ -45,12 +45,21 @@ class RefreshBundlesService(
                                 return@forEach
                             }
 
-                            bundleRepository.upsert(releaseDto, source, releaseType)
+                            try {
+                                bundleRepository.upsert(
+                                    releaseDto.toDomainModel(source.intId)
+                                )
+                            } catch (_: BundleImportError) {
+                                logger.warn("No rvp found for owner=${owner}, repo=${repo}, prerelease=${releaseType}")
+                                return@forEach
+                            }
                         }
                     }
                 }
             }
+            logger.info("Source process completed")
         }
+        logger.info("Process completed")
     }
 
     companion object {
