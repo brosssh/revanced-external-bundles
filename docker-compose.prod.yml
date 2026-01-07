@@ -52,6 +52,7 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
+      HASURA_GRAPHQL_SERVER_PATH: /hasura
     networks:
       - app-network
 
