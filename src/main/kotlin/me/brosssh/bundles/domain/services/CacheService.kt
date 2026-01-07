@@ -1,11 +1,11 @@
 package me.brosssh.bundles.domain.services
 
-import me.brosssh.bundles.api.dto.SearchResponseDto
+import me.brosssh.bundles.api.dto.SnapshotResponseDto
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 
 class CacheService {
-    private val cachedSnapshot = AtomicReference<List<SearchResponseDto>>(null)
+    private val cachedSnapshot = AtomicReference<List<SnapshotResponseDto>>(null)
     private var lastUpdate = Instant.now()
 
     fun invalidateCache() {
@@ -13,7 +13,7 @@ class CacheService {
         lastUpdate = Instant.now()
     }
 
-    fun getCachedSnapshot(fetch: () -> List<SearchResponseDto>): List<SearchResponseDto> {
+    fun getCachedSnapshot(fetch: () -> List<SnapshotResponseDto>): List<SnapshotResponseDto> {
         val current = cachedSnapshot.get()
         if (current != null) return current
 

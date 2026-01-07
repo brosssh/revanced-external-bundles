@@ -1,11 +1,11 @@
 package me.brosssh.bundles.repositories
 
-import me.brosssh.bundles.api.dto.SearchResponseDto
-import me.brosssh.bundles.api.dto.SearchResponsePatchDto
-import me.brosssh.bundles.api.dto.SearchResponsePatchPackageDto
+import me.brosssh.bundles.api.dto.BundleResponseDto
+import me.brosssh.bundles.api.dto.SnapshotPackageResponseDto
+import me.brosssh.bundles.api.dto.SnapshotPatchResponseDto
+import me.brosssh.bundles.api.dto.SnapshotResponseDto
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.tables.*
-import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleMetadata
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
@@ -24,7 +24,7 @@ class BundleRepository {
                 .where { BundleTable.id eq bundleId }
                 .limit(1)
                 .map {
-                    Bundle(
+                    BundleResponseDto(
                         createdAt = it[BundleTable.createdAt].substringBefore("Z"),
                         description = it[BundleTable.description] ?: "",
                         version = it[BundleTable.version],
@@ -85,14 +85,14 @@ class BundleRepository {
                     .filter { it[PatchTable.id] != null }
                     .groupBy { it[PatchTable.id].value }
                     .map { (_, patchRows) ->
-                        SearchResponsePatchDto(
+                        SnapshotPatchResponseDto(
                             name = patchRows.first()[PatchTable.name],
                             description = patchRows.first()[PatchTable.description],
                             compatiblePackages = patchRows
                                 .filter { it[PackageTable.id] != null }
                                 .groupBy { it[PackageTable.name] }
                                 .map { (name, pkgRows) ->
-                                    SearchResponsePatchPackageDto(
+                                    SnapshotPackageResponseDto(
                                         name,
                                         pkgRows.map { it[PackageTable.version] }
                                     )
@@ -100,7 +100,7 @@ class BundleRepository {
                         )
                     }
 
-                SearchResponseDto(
+                SnapshotResponseDto(
                     ownerName = firstRow[SourceMetadataTable.ownerName],
                     ownerAvatarUrl = firstRow[SourceMetadataTable.ownerAvatarUrl],
                     repoName = firstRow[SourceMetadataTable.repoName],

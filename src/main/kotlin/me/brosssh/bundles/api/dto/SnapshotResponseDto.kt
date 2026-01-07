@@ -3,7 +3,7 @@ package me.brosssh.bundles.api.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SearchResponseDto(
+data class SnapshotResponseDto(
     val ownerName: String,
     val ownerAvatarUrl: String,
     val repoName: String,
@@ -20,18 +20,18 @@ data class SearchResponseDto(
     val isPrerelease: Boolean,
     val isBundleV3: Boolean,
 
-    val patches: List<SearchResponsePatchDto>
+    val patches: List<SnapshotPatchResponseDto>
 )
 
 @Serializable
-data class SearchResponsePatchDto(
+data class SnapshotPatchResponseDto(
     val name: String?,
     val description: String?,
-    val compatiblePackages: List<SearchResponsePatchPackageDto>
+    val compatiblePackages: List<SnapshotPackageResponseDto>
 )
 
 @Serializable
-data class SearchResponsePatchPackageDto(
+data class SnapshotPackageResponseDto(
     val name: String,
     val versions: List<String?>,
 )

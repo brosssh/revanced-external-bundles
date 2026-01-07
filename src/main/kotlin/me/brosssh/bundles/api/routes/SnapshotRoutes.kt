@@ -5,8 +5,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
-import me.brosssh.bundles.domain.models.Bundle
-import me.brosssh.bundles.api.dto.SearchResponseDto
+import me.brosssh.bundles.api.dto.SnapshotResponseDto
 import me.brosssh.bundles.domain.services.BundleService
 import me.brosssh.bundles.domain.services.CacheService
 import org.koin.ktor.ext.get
@@ -20,7 +19,7 @@ fun Route.snapshotRoutes() {
             response {
                 HttpStatusCode.OK
                 code(HttpStatusCode.OK) {
-                    body<List<SearchResponseDto>>()
+                    body<List<SnapshotResponseDto>>()
                 }
             }
         }) {

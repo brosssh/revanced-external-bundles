@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version libs.versions.kotlin.get()
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
@@ -118,4 +120,8 @@ signing {
     useGpgCmd()
 
     sign(publishing.publications["revanced-external-bundles-publication"])
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
 }

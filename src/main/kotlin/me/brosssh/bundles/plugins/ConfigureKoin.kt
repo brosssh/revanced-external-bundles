@@ -1,7 +1,6 @@
 package me.brosssh.bundles.plugins
 
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
+import io.ktor.server.application.*
 import me.brosssh.bundles.di.appModule
 import me.brosssh.bundles.di.httpClientModule
 import org.koin.ktor.plugin.Koin

@@ -6,9 +6,34 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    expose:
+      - "8080"
     network_mode: host
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+
+  hasura:
+    image: hasura/graphql-engine
+    container_name: bundles-hasura
+    expose:
+      - "8080"
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
+
+  reverse-proxy:
+    image: nginx:alpine
+    container_name: bundles-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx_conf:/etc/nginx/conf.d:ro
+    depends_on:
+      - app
+      - hasura
 
   watchtower:
     image: containrrr/watchtower

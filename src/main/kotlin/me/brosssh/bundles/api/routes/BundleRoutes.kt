@@ -5,10 +5,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
-import me.brosssh.bundles.domain.models.Bundle
-import me.brosssh.bundles.api.dto.SearchResponseDto
+import me.brosssh.bundles.api.dto.BundleResponseDto
 import me.brosssh.bundles.domain.services.BundleService
-import me.brosssh.bundles.domain.services.CacheService
 import org.koin.ktor.ext.get
 
 fun Route.bundleRoutes() {
@@ -35,7 +33,7 @@ fun Route.bundleRoutes() {
                     description = "Bundle not found"
                 }
                 code(HttpStatusCode.OK) {
-                    body<Bundle>()
+                    body<BundleResponseDto>()
                 }
             }
         }) {
@@ -54,40 +52,6 @@ fun Route.bundleRoutes() {
                 )
 
             call.respond(HttpStatusCode.OK, bundle)
-        }
-
-        get("search", {
-            description = "Search bundle by query"
-
-            request {
-                queryParameter<String>("q") {
-                    description = "Query string to search bundles"
-                    required = true
-                }
-            }
-
-            response {
-                HttpStatusCode.OK to {
-                    description = "Bundles matching the query"
-                }
-                HttpStatusCode.BadRequest to {
-                    description = "Missing query parameter"
-                }
-                code(HttpStatusCode.OK) {
-                    body<List<SearchResponseDto>>()
-                }
-            }
-        }) {
-            val cacheService = call.get<CacheService>()
-            val bundleService = call.get<BundleService>()
-
-            val query = call.request.queryParameters["q"]
-                ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Query parameter 'q' is required")
-                )
-
-            call.respond(HttpStatusCode.OK, setOf<SearchResponseDto>())
         }
     }
 }

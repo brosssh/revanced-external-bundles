@@ -1,23 +1,5 @@
 # For local testing
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        GITHUB_ACTOR: ${GITHUB_ACTOR}
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
-    image: bundles-app:dev
-    container_name: bundles-app
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-
   postgres:
     image: postgres:16
     container_name: bundles-postgres
@@ -31,10 +13,34 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  hasura:
+    image: hasura/graphql-engine
+    container_name: bundles-hasura
+    ports:
+      - "8082:8080"
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: admin
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  reverse-proxy:
+    image: nginx:alpine
+    container_name: bundles-nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx_conf:/etc/nginx/conf.d:ro
+    depends_on:
+      - hasura
 
 volumes:
   pgdata:
