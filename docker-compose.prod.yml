@@ -17,6 +17,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
+
 
   app:
     image: ghcr.io/brosssh/revanced-external-bundles:latest
@@ -31,6 +34,9 @@ services:
         condition: service_healthy
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - app-network
+
 
   hasura:
     image: hasura/graphql-engine:v2.31.0
@@ -46,6 +52,8 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
+    networks:
+      - app-network
 
   caddy:
     image: caddy:2
@@ -61,6 +69,8 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+    networks:
+      - app-network
 
   watchtower:
     image: containrrr/watchtower
@@ -76,3 +86,7 @@ volumes:
   pgdata:
   caddy_data:
   caddy_config:
+
+networks:
+  app-network:
+    driver: bridge
