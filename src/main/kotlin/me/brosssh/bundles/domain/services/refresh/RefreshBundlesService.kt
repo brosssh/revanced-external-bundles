@@ -26,37 +26,43 @@ class RefreshBundlesService(
         logger.info("Processing bundles refresh")
         sourceRepository.getAll().forEach { source ->
             logger.info("Processing source ${source.url}")
-            suspendTransaction {
-                with(githubClient) {
-                    val (owner, repo) = parseRepoUrl(source.url)
+            try {
+                suspendTransaction {
+                    with(githubClient) {
+                        val (owner, repo) = parseRepoUrl(source.url)
 
-                    // Update metatable
-                    getRepo(owner, repo).also { repoDto ->
-                        sourceMetadataRepository.upsert(
-                            repoDto.toDomainModel(source.intId)
-                        )
-                    }
+                        // Update metatable
+                        getRepo(owner, repo).also { repoDto ->
+                            sourceMetadataRepository.upsert(
+                                repoDto.toDomainModel(source.intId)
+                            )
+                        }
 
-                    // Update bundle table
-                    RELEASE_TYPES.forEach { releaseType ->
-                        getRelease(owner, repo, releaseType).also { releaseDto ->
-                            if (releaseDto == null) {
-                                logger.warn("No release found for owner=${owner}, repo=${repo}, prerelease=${releaseType}")
-                                return@forEach
-                            }
+                        // Update bundle table
+                        RELEASE_TYPES.forEach { releaseType ->
+                            getRelease(owner, repo, releaseType).also { releaseDto ->
+                                if (releaseDto == null) {
+                                    logger.warn("No release found for owner=${owner}, repo=${repo}, prerelease=${releaseType}")
+                                    return@forEach
+                                }
 
-                            try {
-                                bundleRepository.upsert(
-                                    releaseDto.toDomainModel(source.intId)
-                                )
-                            } catch (_: BundleImportError) {
-                                logger.warn("No rvp found for owner=${owner}, repo=${repo}, prerelease=${releaseType}")
-                                return@forEach
+                                try {
+                                    bundleRepository.upsert(
+                                        releaseDto.toDomainModel(source.intId)
+                                    )
+                                } catch (_: BundleImportError) {
+                                    logger.warn("No rvp found for owner=${owner}, repo=${repo}, prerelease=${releaseType}")
+                                    return@forEach
+                                }
                             }
                         }
                     }
                 }
             }
+            catch (e: Exception) {
+                logger.warn("Something went wrong while processing, error: ${e.cause}, ${e.message}, ${e.stackTrace}")
+            }
+
             logger.info("Source process completed")
         }
         logger.info("Process completed")

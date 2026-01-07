@@ -38,6 +38,8 @@ class RefreshPatchesService(
                     processRelease(bundle, processDir)
                 }
             }
+        } catch (e: Exception) {
+            logger.warn("Something went wrong while processing, error: ${e.cause}, ${e.message}, ${e.stackTrace}")
         } finally {
             processDir.deleteRecursively()
         }
