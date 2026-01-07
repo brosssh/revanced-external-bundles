@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.7...v1.0.8) (2026-01-07)
+
+
+### Bug Fixes
+
+* Add back serialization ([a4b113d](https://github.com/brosssh/revanced-external-bundles/commit/a4b113d61d372e5c5e9325f5f5cef3d032daeb61))
+
 ## [1.0.7](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.6...v1.0.7) (2026-01-07)
 
 
