@@ -30,4 +30,5 @@ object Config {
 
     // Server
     val port: Int = getEnv("PORT", "8080").toInt()
+
 }
