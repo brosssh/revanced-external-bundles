@@ -29,5 +29,5 @@ object Config {
     val githubRepoToken: String = getEnv("GITHUB_REPO_TOKEN")
 
     // Server
-    val port: Int = getEnv("PORT", "8081").toInt()
+    val port: Int = getEnv("PORT", "8080").toInt()
 }
