@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.6...v1.0.7) (2026-01-07)
+
+
+### Bug Fixes
+
+* Use correct port ([43afae5](https://github.com/brosssh/revanced-external-bundles/commit/43afae5e86c5dd226bfe570353f8da4bc8b62195))
+
 ## [1.0.6](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.5...v1.0.6) (2026-01-07)
 
 
