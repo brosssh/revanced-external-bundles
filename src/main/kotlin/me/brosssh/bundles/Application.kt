@@ -12,6 +12,7 @@ import me.brosssh.bundles.api.routes.refreshRoute
 import me.brosssh.bundles.api.routes.snapshotRoutes
 
 fun Application.module() {
+    configureSerialization()
     configureDatabase()
     configureKoin()
     configureOpenApi()
