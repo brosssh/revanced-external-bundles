@@ -1,5 +1,21 @@
 # For deploy
 services:
+  postgres:
+    image: postgres:16
+    container_name: bundles-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     image: ghcr.io/brosssh/revanced-external-bundles:latest
     container_name: bundles-app
@@ -8,34 +24,41 @@ services:
       - .env
     expose:
       - "8080"
-    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
   hasura:
-    image: hasura/graphql-engine
+    image: hasura/graphql-engine:v2.31.0
     container_name: bundles-hasura
+    restart: unless-stopped
     expose:
       - "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"   # disable console in prod
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
-      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: ${HASURA_GRAPHQL_UNAUTHORIZED_ROLE}
 
   caddy:
     image: caddy:2
+    container_name: bundles-caddy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+    depends_on:
+      - app
+      - hasura
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on:
-      - app
-      - hasura
 
   watchtower:
     image: containrrr/watchtower
@@ -48,5 +71,6 @@ services:
       --interval 300
 
 volumes:
+  pgdata:
   caddy_data:
   caddy_config:
