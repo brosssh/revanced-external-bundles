@@ -5,6 +5,13 @@
 
 * Fixes ([07fa5bd](https://github.com/brosssh/revanced-external-bundles/commit/07fa5bd4f13fe592bdfe48399e9dd8eb94977233))
 
+## [1.0.9](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.8...v1.0.9) (2026-01-07)
+
+
+### Bug Fixes
+
+* Fixes ([07fa5bd](https://github.com/brosssh/revanced-external-bundles/commit/07fa5bd4f13fe592bdfe48399e9dd8eb94977233))
+
 ## [1.0.8](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.7...v1.0.8) (2026-01-07)
 
 
