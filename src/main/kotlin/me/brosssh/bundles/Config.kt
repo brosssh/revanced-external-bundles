@@ -18,17 +18,20 @@ object Config {
     val version: String = object {}.javaClass.`package`.implementationVersion ?: "dev"
 
     // Database
-    val databaseUrl: String = getEnv("DATABASE_URL")
+    val databaseHost: String = getEnv("DATABASE_HOST")
+    val databaseName: String = getEnv("DATABASE_NAME")
     val databaseUser: String = getEnv("DATABASE_USER")
     val databasePassword: String = getEnv("DATABASE_PSSW")
+
+    val databaseJdbcUrl = "jdbc:postgresql://$databaseHost:5432/$databaseName"
+
     
     // Authentication
-    val authenticationSecret: String = getEnv("AUTHENTICATION_SECRET")
+    val authenticationSecret: String = getEnv("BACKEND_AUTHENTICATION_SECRET")
     
     // GitHub
-    val githubRepoToken: String = getEnv("GITHUB_REPO_TOKEN")
+    val githubPatToken: String = getEnv("BACKEND_GITHUB_PAT_TOKEN")
 
     // Server
-    val port: Int = getEnv("PORT", "8080").toInt()
-
+    val port: Int = getEnv("BACKEND_PORT").toInt()
 }

@@ -5,15 +5,15 @@ services:
     container_name: bundles-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PSSW}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,24 +21,29 @@ services:
   hasura:
     image: hasura/graphql-engine
     container_name: bundles-hasura
+    expose:
+      - "8080"
     ports:
-      - "8082:8080"
+      - "${HASURA_PORT}:8080"
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PSSW}@postgres:5432/${DATABASE_NAME}
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
-      HASURA_GRAPHQL_ADMIN_SECRET: admin
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
+      HASURA_GRAPHQL_SERVER_PATH: /hasura
     depends_on:
       postgres:
         condition: service_healthy
 
-  reverse-proxy:
-    image: nginx:alpine
-    container_name: bundles-nginx
+  caddy:
+    image: caddy:2
+    container_name: bundles-caddy
     ports:
       - "8080:8080"
     volumes:
-      - ./nginx_conf:/etc/nginx/conf.d:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    environment:
+      HOST: :8080
     depends_on:
       - hasura
 

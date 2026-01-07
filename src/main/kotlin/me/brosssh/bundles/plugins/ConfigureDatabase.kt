@@ -9,7 +9,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.configureDatabase() {
     val db = Database.connect(
-        Config.databaseUrl,
+        Config.databaseJdbcUrl,
         driver = "org.postgresql.Driver",
         user = Config.databaseUser,
         password = Config.databasePassword

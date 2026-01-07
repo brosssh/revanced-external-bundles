@@ -22,7 +22,7 @@ val appModule = module {
     single {
         GithubClient(
             client = get(),
-            githubToken = Config.githubRepoToken
+            githubToken = Config.githubPatToken
         )
     }
 

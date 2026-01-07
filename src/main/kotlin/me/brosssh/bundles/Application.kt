@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import me.brosssh.bundles.plugins.*
 import me.brosssh.bundles.api.routes.bundleRoutes
+import me.brosssh.bundles.api.routes.graphQLRoute
 import me.brosssh.bundles.api.routes.refreshRoute
 import me.brosssh.bundles.api.routes.snapshotRoutes
 
@@ -30,6 +31,7 @@ fun Application.module() {
         refreshRoute()
         snapshotRoutes()
         bundleRoutes()
+        graphQLRoute()
     }
 }
 

@@ -5,7 +5,7 @@ services:
     container_name: bundles-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: bundles-db
+      POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PSSW}
     volumes:
@@ -29,13 +29,13 @@ services:
       - .env
     expose:
       - "8080"
+    ports:
+      - "${BACKEND_PORT}:8080"
     depends_on:
       postgres:
         condition: service_healthy
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-    networks:
-      - app-network
 
 
   hasura:
@@ -44,17 +44,17 @@ services:
     restart: unless-stopped
     expose:
       - "8080"
+    ports:
+      - "${HASURA_PORT}:8080"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PSSW}@postgres:5432/bundles-db
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PSSW}@postgres:5432/${DATABASE_NAME}
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
       HASURA_GRAPHQL_SERVER_PATH: /hasura
-    networks:
-      - app-network
 
   caddy:
     image: caddy:2
@@ -63,15 +63,13 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    environment:
+      CADDY_HOST: ${HOST}
     depends_on:
       - app
       - hasura
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - app-network
 
   watchtower:
     image: containrrr/watchtower
@@ -85,9 +83,3 @@ services:
 
 volumes:
   pgdata:
-  caddy_data:
-  caddy_config:
-
-networks:
-  app-network:
-    driver: bridge
