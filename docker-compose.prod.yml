@@ -23,14 +23,16 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
 
-  reverse-proxy:
-    image: nginx:alpine
-    container_name: bundles-nginx
+  caddy:
+    image: caddy:2
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./nginx_conf:/etc/nginx/conf.d:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
       - app
       - hasura
@@ -44,3 +46,7 @@ services:
     command: >
       --label-enable
       --interval 300
+
+volumes:
+  caddy_data:
+  caddy_config:
