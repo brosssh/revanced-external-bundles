@@ -63,7 +63,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     environment:
-      CADDY_HOST: ${HOST}
+      HOST: ${HOST}
     depends_on:
       - app
       - hasura
