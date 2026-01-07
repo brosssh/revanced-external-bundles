@@ -68,7 +68,7 @@ jobs:
       - name: Purge outdated images
         uses: snok/container-retention-policy@v3.0.1
         with:
-          account: ${{ github.repository_owner }}
+          account: user
           token: ${{ secrets.GITHUB_TOKEN }}
           image-names: revanced-external-bundles
           keep-n-most-recent: 5
