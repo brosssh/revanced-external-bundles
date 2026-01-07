@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.5...v1.0.6) (2026-01-07)
+
+
+### Bug Fixes
+
+* Handle deleted repos ([96fa9cf](https://github.com/brosssh/revanced-external-bundles/commit/96fa9cf79069bd0ad15f4dc8c1cd1e73a7354cf2))
+
 ## [1.0.5](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.4...v1.0.5) (2025-12-25)
 
 
