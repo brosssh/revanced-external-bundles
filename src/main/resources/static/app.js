@@ -36,7 +36,7 @@ async function loadBundles() {
     status.classList.add("loading");
 
     try {
-        const res = await fetch('/snapshot');
+        const res = await fetch('/api/v1/snapshot');
 
         if (!res.ok) {
             status.textContent = "Failed to load bundles";
@@ -181,7 +181,7 @@ function renderBundle(bundle) {
                 </a>
             ` : ''}
             <span>•</span>
-            <button class="copy-btn" ${bundle.isBundleV3 ? 'disabled' : ''} data-url="https://revanced-external-bundles.brosssh.com/bundles/id?id=${bundle.bundleId}">
+            <button class="copy-btn" ${bundle.isBundleV3 ? 'disabled' : ''} data-url="https://revanced-external-bundles.brosssh.com/api/v1/bundle/${bundle.ownerName}/${bundle.repoName}?prerelease=${bundle.isPrerelease}">
                 Copy remote bundle URL
             </button>
         </div>

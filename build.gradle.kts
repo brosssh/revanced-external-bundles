@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version libs.versions.kotlin.get()
-    kotlin("plugin.serialization") version libs.versions.kotlin.get()
-    id("io.ktor.plugin") version libs.versions.ktor.get()
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ktor)
     application
     `maven-publish`
     signing
@@ -62,8 +60,6 @@ dependencies {
     implementation(libs.ktor.content.negotiation)
     implementation(libs.ktor.kotlinx.json)
     implementation(libs.ktor.call.logging)
-    implementation(libs.ktor.openapi)
-    implementation(libs.ktor.swagger)
     implementation(libs.ktor.auth)
 
     implementation(libs.ktor.client.core)
@@ -71,23 +67,22 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.kotlinx.json)
 
+    implementation(libs.ktor.swagger.ui)
+    implementation(libs.ktor.openapi)
+
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger)
+
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
 
-    implementation("ch.qos.logback:logback-classic:1.5.13")
-    implementation("app.brosssh:revanced-patcher:1.3.0-dev.1")
-    implementation("com.android.tools.build:apksig:8.1.1")
-    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
-
-    implementation("io.github.smiley4:ktor-swagger-ui:5.4.0")
-    implementation("io.github.smiley4:ktor-openapi:5.4.0")
-
     implementation(libs.hikari.cp)
     implementation(libs.postgresql)
 
-    implementation(libs.koin.ktor)
-    implementation(libs.koin.logger)
+    implementation(libs.dotenv)
+    implementation(libs.brosssh.patcher)
+    implementation(libs.logback)
 
     testImplementation(libs.kotlin.test)
 }
@@ -120,8 +115,4 @@ signing {
     useGpgCmd()
 
     sign(publishing.publications["revanced-external-bundles-publication"])
-}
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.compilerOptions {
-    freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
 }

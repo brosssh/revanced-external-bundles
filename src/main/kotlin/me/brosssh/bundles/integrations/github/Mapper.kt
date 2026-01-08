@@ -1,5 +1,6 @@
 package me.brosssh.bundles.integrations.github
 
+import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleImportError
 import me.brosssh.bundles.domain.models.BundleMetadata
 import me.brosssh.bundles.domain.models.SourceMetadata
@@ -22,13 +23,15 @@ fun GithubReleaseDto.toDomainModel(sourceId: Int): BundleMetadata {
         } ?: throw BundleImportError.ReleaseFileNotFoundError()
 
     return BundleMetadata(
-        sourceFk = sourceId,
-        version = tagName,
-        description = body,
-        createdAt = createdAt,
-        downloadUrl = downloadUrl,
+        bundle = Bundle(
+            sourceFk = sourceId,
+            version = tagName,
+            description = body,
+            createdAt = createdAt,
+            downloadUrl = downloadUrl,
+            signatureDownloadUrl = assets.firstOrNull { it.name.endsWith(".rvp.asc") }?.browserDownloadUrl,
+        ),
         fileHash = digestHash,
-        signatureDownloadUrl = assets.firstOrNull { it.name.endsWith(".rvp.asc") }?.browserDownloadUrl,
         isPrerelease = prerelease,
         isBundleV3 = isBundleV3
     )

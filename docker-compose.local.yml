@@ -42,8 +42,6 @@ services:
       - "8080:8080"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    environment:
-      HOST: :8080
     depends_on:
       - hasura
 
