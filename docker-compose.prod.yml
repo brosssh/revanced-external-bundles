@@ -63,9 +63,6 @@ services:
       --label-enable
       --interval 300
 
-volumes:
-  pgdata-${ENV}:
-
 networks:
   default:
     name: bundles-${ENV}-network
