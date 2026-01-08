@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_PORT: ${DATABASE_PORT}
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PSSW}
     volumes:
