@@ -2,7 +2,7 @@
 services:
   postgres:
     image: postgres:16
-    container_name: bundles-postgres
+    container_name: bundles-${ENV}-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
@@ -19,8 +19,8 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/brosssh/revanced-external-bundles:latest
-    container_name: bundles-app
+    image: ghcr.io/brosssh/revanced-external-bundles:${APP_TAG:-latest}
+    container_name: bundles-${ENV}-app
     restart: unless-stopped
     env_file:
       - .env
@@ -37,7 +37,7 @@ services:
 
   hasura:
     image: hasura/graphql-engine:v2.31.0
-    container_name: bundles-hasura
+    container_name: bundles-${ENV}-hasura
     restart: unless-stopped
     expose:
       - "8080"
@@ -55,7 +55,7 @@ services:
 
   caddy:
     image: caddy:2
-    container_name: bundles-caddy
+    container_name: bundles-${ENV}-caddy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -64,13 +64,15 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     environment:
       HOST: ${HOST}
+      BACKEND_PORT: ${BACKEND_PORT}
+      HASURA_PORT: ${HASURA_PORT}
     depends_on:
       - app
       - hasura
 
   watchtower:
     image: containrrr/watchtower
-    container_name: watchtower
+    container_name: watchtower-${ENV}
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
