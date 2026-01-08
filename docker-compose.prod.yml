@@ -64,7 +64,8 @@ services:
       --interval 300
 
 volumes:
-  pgdata-${ENV}:
+  pgdata-dev:
+  pgdata-prod:
 
 networks:
   default:
