@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PSSW}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata-${ENV}:/var/lib/postgresql/data
     ports:
       - "${DATABASE_PORT}:5432"
     healthcheck:
@@ -64,7 +64,7 @@ services:
       --interval 300
 
 volumes:
-  pgdata:
+  pgdata-${ENV}:
 
 networks:
   default:
