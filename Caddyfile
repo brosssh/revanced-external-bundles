@@ -1,4 +1,4 @@
-{$HOST} {
+:8080 {
     encode gzip
 
     route {

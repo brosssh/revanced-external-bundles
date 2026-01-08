@@ -2,7 +2,7 @@
 services:
   postgres:
     image: postgres:16
-    container_name: bundles-postgres
+    container_name: bundles-${ENV}-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
@@ -11,7 +11,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
       interval: 5s
@@ -19,8 +19,8 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/brosssh/revanced-external-bundles:latest
-    container_name: bundles-app
+    image: ghcr.io/brosssh/revanced-external-bundles:${APP_TAG:-latest}
+    container_name: bundles-${ENV}-app
     restart: unless-stopped
     env_file:
       - .env
@@ -37,7 +37,7 @@ services:
 
   hasura:
     image: hasura/graphql-engine:v2.31.0
-    container_name: bundles-hasura
+    container_name: bundles-${ENV}-hasura
     restart: unless-stopped
     expose:
       - "8080"
@@ -53,24 +53,9 @@ services:
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
       HASURA_GRAPHQL_SERVER_PATH: /hasura
 
-  caddy:
-    image: caddy:2
-    container_name: bundles-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    environment:
-      HOST: ${HOST}
-    depends_on:
-      - app
-      - hasura
-
   watchtower:
     image: containrrr/watchtower
-    container_name: watchtower
+    container_name: watchtower-${ENV}
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

@@ -9,7 +9,6 @@ import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
 val httpClientModule = module {
-
     single {
         HttpClient(OkHttp) {
 
