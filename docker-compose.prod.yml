@@ -53,23 +53,6 @@ services:
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
       HASURA_GRAPHQL_SERVER_PATH: /hasura
 
-  caddy:
-    image: caddy:2
-    container_name: bundles-${ENV}-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    environment:
-      HOST: ${HOST}
-      BACKEND_PORT: ${BACKEND_PORT}
-      HASURA_PORT: ${HASURA_PORT}
-    depends_on:
-      - app
-      - hasura
-
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower-${ENV}
