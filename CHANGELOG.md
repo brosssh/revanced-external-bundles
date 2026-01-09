@@ -1,3 +1,24 @@
+# [1.1.0-dev.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2026-01-09)
+
+
+### Bug Fixes
+
+* Fix recursive issue ([5e844ee](https://github.com/brosssh/revanced-external-bundles/commit/5e844ee83fbe5e8325a3ecd71fffa0c03d6cf0c9))
+
+# [1.1.0-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.11-dev.1...v1.1.0-dev.1) (2026-01-09)
+
+
+### Features
+
+* Add support for Morphe patches ([#7](https://github.com/brosssh/revanced-external-bundles/issues/7)) ([335ecdd](https://github.com/brosssh/revanced-external-bundles/commit/335ecdde5e0b67afe68f1b55b9e622eeaee6aaca))
+
+## [1.0.11-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.10...v1.0.11-dev.1) (2026-01-08)
+
+
+### Bug Fixes
+
+* Release ([7245718](https://github.com/brosssh/revanced-external-bundles/commit/72457184ca222e163105647baaa035554cf58490))
+
 ## [1.0.10](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.9...v1.0.10) (2026-01-08)
 
 

@@ -1,2 +1,2 @@
 include:
-  - path: docker-compose.${DEPLOY_ENV:-dev}.yml
+  - path: docker-compose.${DEPLOY_ENV:-local}.yml

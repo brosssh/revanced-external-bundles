@@ -1,49 +1,50 @@
 package me.brosssh.bundles.repositories
 
-import me.brosssh.bundles.api.dto.BundleResponseDto
 import me.brosssh.bundles.api.dto.SnapshotPackageResponseDto
 import me.brosssh.bundles.api.dto.SnapshotPatchResponseDto
 import me.brosssh.bundles.api.dto.SnapshotResponseDto
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.tables.*
+import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleMetadata
-import org.jetbrains.exposed.v1.core.SortOrder
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.neq
-import org.jetbrains.exposed.v1.core.or
+import me.brosssh.bundles.domain.models.BundleType
+import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.upsert
 
 class BundleRepository {
+    private fun rowToBundle(row: ResultRow) =
+            Bundle.create(
+                row[BundleTable.bundleType],
+                row[BundleTable.version],
+                row[BundleTable.description],
+                row[BundleTable.createdAt],
+                row[BundleTable.downloadUrl],
+                row[BundleTable.signatureDownloadUrl],
+                row[BundleTable.sourceFk].value
+            )
+
     fun findById(bundleId: Int) =
         transaction {
-            (BundleTable innerJoin SourceTable)
+            BundleTable
                 .selectAll()
                 .where { BundleTable.id eq bundleId }
                 .limit(1)
-                .map {
-                    BundleResponseDto(
-                        createdAt = it[BundleTable.createdAt].substringBefore("Z"),
-                        description = it[BundleTable.description] ?: "",
-                        version = it[BundleTable.version],
-                        downloadUrl = it[BundleTable.downloadUrl],
-                        signatureDownloadUrl = it[BundleTable.signatureDownloadUrl] ?: "",
-                    )
-                }
+                .map(::rowToBundle)
                 .singleOrNull()
         }
 
     fun upsert(bundleMetadata: BundleMetadata) = transaction {
         val commonFields: (UpdateBuilder<*>) -> Unit = {
-            it[BundleTable.version] = bundleMetadata.version
-            it[BundleTable.description] = bundleMetadata.description
-            it[BundleTable.createdAt] = bundleMetadata.createdAt
-            it[BundleTable.downloadUrl] = bundleMetadata.downloadUrl
-            it[BundleTable.signatureDownloadUrl] = bundleMetadata.signatureDownloadUrl
+            it[BundleTable.version] = bundleMetadata.bundle.version
+            it[BundleTable.description] = bundleMetadata.bundle.description
+            it[BundleTable.createdAt] = bundleMetadata.bundle.createdAt
+            it[BundleTable.downloadUrl] = bundleMetadata.bundle.downloadUrl
+            it[BundleTable.signatureDownloadUrl] = bundleMetadata.bundle.signatureDownloadUrl
             it[BundleTable.fileHash] = bundleMetadata.fileHash
-            it[BundleTable.isBundleV3] = bundleMetadata.isBundleV3
+            it[BundleTable.bundleType] = bundleMetadata.bundle.bundleType.value
         }
 
         BundleTable.upsert(
@@ -51,14 +52,14 @@ class BundleRepository {
             BundleTable.isPrerelease,
             onUpdate = {
                 it[BundleTable.needPatchesUpdate] = BundleTable.needPatchesUpdate or
-                    BundleTable.fileHash.neq(bundleMetadata.fileHash)
+                        BundleTable.fileHash.neq(bundleMetadata.fileHash)
 
                 commonFields(it)
             }
         ) { bundle ->
-            bundle[sourceFk] = bundleMetadata.sourceFk
+            bundle[sourceFk] = bundleMetadata.bundle.sourceFk
             bundle[isPrerelease] = bundleMetadata.isPrerelease
-            bundle[needPatchesUpdate] = !bundleMetadata.isBundleV3
+            bundle[needPatchesUpdate] = bundleMetadata.bundle.bundleType != BundleType.REVANCED_V3
 
             commonFields(bundle)
         }
@@ -114,11 +115,22 @@ class BundleRepository {
                     downloadUrl = firstRow[BundleTable.downloadUrl],
                     signatureDownloadUrl = firstRow[BundleTable.signatureDownloadUrl].orEmpty(),
                     isPrerelease = firstRow[BundleTable.isPrerelease],
-                    isBundleV3 = firstRow[BundleTable.isBundleV3],
+                    bundleType = BundleType.from(firstRow[BundleTable.bundleType]),
                     patches = patches
                 )
             }
     }
 
-
+    fun findByPk(owner: String, repo: String, prerelease: Boolean) = transaction {
+        (BundleTable innerJoin SourceTable innerJoin SourceMetadataTable)
+            .selectAll()
+            .where {
+                (SourceMetadataTable.ownerName eq owner) and
+                        (SourceMetadataTable.repoName eq repo) and
+                        (BundleTable.isPrerelease eq prerelease)
+            }
+            .limit(1)
+            .map(::rowToBundle)
+            .singleOrNull()
+    }
 }

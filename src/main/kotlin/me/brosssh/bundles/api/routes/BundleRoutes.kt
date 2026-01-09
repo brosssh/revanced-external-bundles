@@ -1,48 +1,42 @@
-package me.brosssh.bundles.api.routes
-
 import io.github.smiley4.ktoropenapi.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import me.brosssh.bundles.api.dto.BundleResponseDto
+import me.brosssh.bundles.domain.models.toResponseDto
+import me.brosssh.bundles.domain.services.BundleQuery
 import me.brosssh.bundles.domain.services.BundleService
 import org.koin.ktor.ext.get
 
 fun Route.bundleRoutes() {
-
-    route("/bundles") {
-        get("id", {
-            description = "Get bundle by ID"
+    route("/bundle") {
+        // Get by ID
+        get("/{id}", {
+            description = "Get bundle by internal ID"
 
             request {
-                queryParameter<Int>("id") {
+                pathParameter<Int>("id") {
                     description = "Internal ID of the bundle"
-                    required = true
                 }
             }
 
             response {
                 HttpStatusCode.OK to {
                     description = "Bundle found"
-                }
-                HttpStatusCode.BadRequest to {
-                    description = "Missing id query parameter"
+                    body<BundleResponseDto>()
                 }
                 HttpStatusCode.NotFound to {
                     description = "Bundle not found"
-                }
-                code(HttpStatusCode.OK) {
-                    body<BundleResponseDto>()
                 }
             }
         }) {
             val bundleService = call.get<BundleService>()
 
-            val id = call.request.queryParameters["id"]?.toIntOrNull()
+            val id = call.parameters["id"]?.toIntOrNull()
                 ?: return@get call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "id query parameter is required")
+                    mapOf("error" to "Invalid id")
                 )
 
             val bundle = bundleService.getById(id)
@@ -51,7 +45,51 @@ fun Route.bundleRoutes() {
                     mapOf("error" to "Bundle not found")
                 )
 
-            call.respond(HttpStatusCode.OK, bundle)
+            call.respond(HttpStatusCode.OK, bundle.toResponseDto())
+        }
+
+        // Get by owner/repo
+        get("/{owner}/{repo}", {
+            description = "Get bundle by repository owner and name"
+
+            request {
+                pathParameter<String>("owner") {
+                    description = "Repository owner"
+                }
+                pathParameter<String>("repo") {
+                    description = "Repository name"
+                }
+                queryParameter<Boolean>("prerelease") {
+                    description = "Whether to fetch prerelease version"
+                    required = false
+                }
+            }
+
+            response {
+                HttpStatusCode.OK to {
+                    description = "Bundle found"
+                    body<BundleResponseDto>()
+                }
+                HttpStatusCode.NotFound to {
+                    description = "Bundle not found"
+                }
+            }
+        }) {
+            val bundleService = call.get<BundleService>()
+
+            val owner = call.parameters["owner"]!!
+            val repo = call.parameters["repo"]!!
+            val isPrerelease = call.request.queryParameters["prerelease"]?.toBooleanStrictOrNull() ?: false
+
+            val bundle = bundleService.getBundleByQuery(
+                BundleQuery.ByRepository(owner, repo, isPrerelease)
+            )
+                ?: return@get call.respond(
+                    HttpStatusCode.NotFound,
+                    mapOf("error" to "Bundle not found")
+                )
+
+            call.respond(HttpStatusCode.OK, bundle.toResponseDto())
         }
     }
 }
