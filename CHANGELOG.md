@@ -1,3 +1,10 @@
+# [1.1.0-dev.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2026-01-09)
+
+
+### Bug Fixes
+
+* Fix recursive issue ([5e844ee](https://github.com/brosssh/revanced-external-bundles/commit/5e844ee83fbe5e8325a3ecd71fffa0c03d6cf0c9))
+
 # [1.1.0-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.11-dev.1...v1.1.0-dev.1) (2026-01-09)
 
 
