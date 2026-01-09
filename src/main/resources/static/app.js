@@ -135,7 +135,7 @@ function renderBundle(bundle) {
     const patchesPreview = bundle.patches.slice(0, 5);
     const hasMore = bundle.patches.length > 5;
 
-    const v3WarningHtml = bundle.isBundleV3
+    const v3WarningHtml = bundle.bundleType == "REVANCED_V3"
         ? `<div class="v3-warning">
                 ⚠️ This bundle is V3. It will not be usable in URV and the patches list will always be empty.
            </div>`
@@ -181,7 +181,7 @@ function renderBundle(bundle) {
                 </a>
             ` : ''}
             <span>•</span>
-            <button class="copy-btn" ${bundle.isBundleV3 ? 'disabled' : ''} data-url="https://revanced-external-bundles.brosssh.com/api/v1/bundle/${bundle.ownerName}/${bundle.repoName}?prerelease=${bundle.isPrerelease}">
+            <button class="copy-btn" ${bundle.bundleType == "REVANCED_V3" ? 'disabled' : ''} data-url="https://revanced-external-bundles.brosssh.com/api/v1/bundle/${bundle.ownerName}/${bundle.repoName}?prerelease=${bundle.isPrerelease}">
                 Copy remote bundle URL
             </button>
         </div>
