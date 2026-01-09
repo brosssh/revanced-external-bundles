@@ -1,3 +1,10 @@
+# [1.1.0-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.11-dev.1...v1.1.0-dev.1) (2026-01-09)
+
+
+### Features
+
+* Add support for Morphe patches ([#7](https://github.com/brosssh/revanced-external-bundles/issues/7)) ([335ecdd](https://github.com/brosssh/revanced-external-bundles/commit/335ecdde5e0b67afe68f1b55b9e622eeaee6aaca))
+
 ## [1.0.11-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.10...v1.0.11-dev.1) (2026-01-08)
 
 
