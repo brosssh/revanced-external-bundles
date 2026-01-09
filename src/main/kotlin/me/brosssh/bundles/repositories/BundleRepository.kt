@@ -5,8 +5,8 @@ import me.brosssh.bundles.api.dto.SnapshotPatchResponseDto
 import me.brosssh.bundles.api.dto.SnapshotResponseDto
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.tables.*
-import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleMetadata
+import me.brosssh.bundles.domain.models.BundleType
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -14,14 +14,17 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.upsert
 
 class BundleRepository {
-    private fun rowToBundle(row: ResultRow) = Bundle(
-        createdAt = row[BundleTable.createdAt],
-        description = row[BundleTable.description],
-        version = row[BundleTable.version],
-        downloadUrl = row[BundleTable.downloadUrl],
-        signatureDownloadUrl = row[BundleTable.signatureDownloadUrl],
-        sourceFk = row[BundleTable.sourceFk].value
-    )
+    private fun rowToBundle(row: ResultRow) =
+        with(BundleType.from(row[BundleTable.bundleType])) {
+            createBundle(
+                row[BundleTable.version],
+                row[BundleTable.description],
+                row[BundleTable.createdAt],
+                row[BundleTable.downloadUrl],
+                row[BundleTable.signatureDownloadUrl],
+                row[BundleTable.sourceFk].value
+            )
+        }
 
     fun findById(bundleId: Int) =
         transaction {
@@ -41,7 +44,7 @@ class BundleRepository {
             it[BundleTable.downloadUrl] = bundleMetadata.bundle.downloadUrl
             it[BundleTable.signatureDownloadUrl] = bundleMetadata.bundle.signatureDownloadUrl
             it[BundleTable.fileHash] = bundleMetadata.fileHash
-            it[BundleTable.isBundleV3] = bundleMetadata.isBundleV3
+            it[BundleTable.bundleType] = bundleMetadata.bundle.bundleType.value
         }
 
         BundleTable.upsert(
@@ -56,7 +59,7 @@ class BundleRepository {
         ) { bundle ->
             bundle[sourceFk] = bundleMetadata.bundle.sourceFk
             bundle[isPrerelease] = bundleMetadata.isPrerelease
-            bundle[needPatchesUpdate] = !bundleMetadata.isBundleV3
+            bundle[needPatchesUpdate] = bundleMetadata.bundle.bundleType != BundleType.REVANCED_V3
 
             commonFields(bundle)
         }
@@ -112,7 +115,7 @@ class BundleRepository {
                     downloadUrl = firstRow[BundleTable.downloadUrl],
                     signatureDownloadUrl = firstRow[BundleTable.signatureDownloadUrl].orEmpty(),
                     isPrerelease = firstRow[BundleTable.isPrerelease],
-                    isBundleV3 = firstRow[BundleTable.isBundleV3],
+                    bundleType = BundleType.from(firstRow[BundleTable.bundleType]),
                     patches = patches
                 )
             }

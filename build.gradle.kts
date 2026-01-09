@@ -36,6 +36,7 @@ ktor {
 repositories {
     mavenCentral()
     google()
+    maven("https://jitpack.io")
     maven {
         // A repository must be specified for some reason. "registry" is a dummy.
         url = uri("https://maven.pkg.github.com/brosssh/registry")
@@ -47,6 +48,14 @@ repositories {
     maven {
         // A repository must be specified for some reason. "registry" is a dummy.
         url = uri("https://maven.pkg.github.com/revanced/registry")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+    maven {
+        // A repository must be specified for some reason. "registry" is a dummy.
+        url = uri("https://maven.pkg.github.com/morpheapp/registry")
         credentials {
             username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
@@ -79,9 +88,12 @@ dependencies {
 
     implementation(libs.hikari.cp)
     implementation(libs.postgresql)
+    implementation("com.android.tools.build:apksig:8.1.1")
+
 
     implementation(libs.dotenv)
     implementation(libs.brosssh.patcher)
+    implementation(libs.morphe.patcher)
     implementation(libs.logback)
 
     testImplementation(libs.kotlin.test)

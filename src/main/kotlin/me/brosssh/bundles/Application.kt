@@ -11,6 +11,7 @@ import me.brosssh.bundles.plugins.*
 import me.brosssh.bundles.api.routes.graphQLRoute
 import me.brosssh.bundles.api.routes.refreshRoute
 import me.brosssh.bundles.api.routes.snapshotRoutes
+import me.brosssh.bundles.db.migration.migrationScript
 
 fun Route.apiV1(build: Route.() -> Unit) {
     route("/api/v1", build)
@@ -23,6 +24,8 @@ fun Application.module() {
     configureOpenApi()
     configureStatic()
     configureAuthentication(Config.authenticationSecret)
+
+    migrationScript()
 
     routing {
         route("api.json") {

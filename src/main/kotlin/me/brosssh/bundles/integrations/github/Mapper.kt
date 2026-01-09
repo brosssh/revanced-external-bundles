@@ -1,8 +1,8 @@
 package me.brosssh.bundles.integrations.github
 
-import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleImportError
 import me.brosssh.bundles.domain.models.BundleMetadata
+import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.SourceMetadata
 
 fun GithubRepoDto.toDomainModel(sourceId: Int) = SourceMetadata(
@@ -14,25 +14,36 @@ fun GithubRepoDto.toDomainModel(sourceId: Int) = SourceMetadata(
         repoStars = stars
     )
 
+private fun String.toBundleType(): BundleType = when {
+    endsWith(".rvp") -> BundleType.REVANCED_V4
+    endsWith(".mpp") -> BundleType.MORPHE_V1
+    endsWith(".jar") -> BundleType.REVANCED_V3
+    else -> throw BundleImportError.ReleaseFileNotFoundError()
+}
+
 fun GithubReleaseDto.toDomainModel(sourceId: Int): BundleMetadata {
-    val (isBundleV3, downloadUrl, digestHash) =
-        assets.firstOrNull { it.name.endsWith(".rvp") }?.let { asset ->
-            Triple(false, asset.browserDownloadUrl, asset.digest)
-        } ?: assets.firstOrNull { it.name.endsWith(".jar") }?.let { asset ->
-            Triple(true, asset.browserDownloadUrl, asset.digest)
-        } ?: throw BundleImportError.ReleaseFileNotFoundError()
+    val asset = assets
+        .firstOrNull {
+            it.name.endsWith(".rvp") ||
+                    it.name.endsWith(".mpp") ||
+                    it.name.endsWith(".jar")
+        }
+        ?: throw BundleImportError.ReleaseFileNotFoundError()
+
+    val bundleType = asset.name.toBundleType()
+    val downloadUrl = asset.browserDownloadUrl
+    val digestHash = asset.digest
 
     return BundleMetadata(
-        bundle = Bundle(
-            sourceFk = sourceId,
-            version = tagName,
-            description = body,
-            createdAt = createdAt,
-            downloadUrl = downloadUrl,
-            signatureDownloadUrl = assets.firstOrNull { it.name.endsWith(".rvp.asc") }?.browserDownloadUrl,
+        bundle = bundleType.createBundle(
+            tagName,
+            body,
+            createdAt,
+            downloadUrl,
+            assets.firstOrNull { it.name.endsWith(".asc") }?.browserDownloadUrl,
+            sourceId
         ),
         fileHash = digestHash,
-        isPrerelease = prerelease,
-        isBundleV3 = isBundleV3
+        isPrerelease = prerelease
     )
 }

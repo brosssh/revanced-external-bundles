@@ -11,7 +11,7 @@ object BundleTable : IntIdTable("bundle") {
     val isPrerelease = bool("is_prerelease")
     val fileHash = varchar("file_hash", 255).nullable()
     val needPatchesUpdate = bool("need_patches_update")
-    val isBundleV3 = bool("is_bundle_v3")
+    val bundleType = varchar("bundle_type", 255)
     val sourceFk = reference("source_fk", SourceTable.id)
 
     init {
