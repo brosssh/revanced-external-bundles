@@ -88,13 +88,12 @@ dependencies {
 
     implementation(libs.hikari.cp)
     implementation(libs.postgresql)
-    implementation("com.android.tools.build:apksig:8.1.1")
-
 
     implementation(libs.dotenv)
     implementation(libs.brosssh.patcher)
     implementation(libs.morphe.patcher)
     implementation(libs.logback)
+    implementation(libs.apksig)
 
     testImplementation(libs.kotlin.test)
 }
