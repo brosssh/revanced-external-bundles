@@ -27,12 +27,6 @@ tasks {
     }
 }
 
-ktor {
-    fatJar {
-        archiveFileName.set("${project.name}-${project.version}.jar")
-    }
-}
-
 repositories {
     mavenCentral()
     google()
