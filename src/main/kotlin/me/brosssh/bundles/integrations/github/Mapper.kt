@@ -1,5 +1,6 @@
 package me.brosssh.bundles.integrations.github
 
+import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleImportError
 import me.brosssh.bundles.domain.models.BundleMetadata
 import me.brosssh.bundles.domain.models.BundleType
@@ -35,7 +36,8 @@ fun GithubReleaseDto.toDomainModel(sourceId: Int): BundleMetadata {
     val digestHash = asset.digest
 
     return BundleMetadata(
-        bundle = bundleType.createBundle(
+        bundle = Bundle.create(
+            bundleType,
             tagName,
             body,
             createdAt,

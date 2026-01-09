@@ -16,8 +16,7 @@ sealed class Bundle(
     val createdAt: String,
     val downloadUrl: String,
     val signatureDownloadUrl: String?,
-    val sourceFk: Int,
-    val bundleType: BundleType
+    val sourceFk: Int
 ) : KoinComponent {
     protected val githubClient: GithubClient by inject()
     protected val processDir =
@@ -46,7 +45,54 @@ sealed class Bundle(
         }
     }
 
+    abstract val bundleType: BundleType
     protected abstract suspend fun loadPatchesFromBundle(bundleFile: File): Set<Patch>
+
+    companion object {
+        fun create(
+            type: BundleType,
+            version: String,
+            description: String?,
+            createdAt: String,
+            downloadUrl: String,
+            signatureDownloadUrl: String?,
+            sourceFk: Int
+        ): Bundle = when (type) {
+            BundleType.REVANCED_V3 -> ReVancedV3Bundle(
+                version, description, createdAt, downloadUrl,
+                signatureDownloadUrl, sourceFk
+            )
+
+            BundleType.REVANCED_V4 -> ReVancedV4Bundle(
+                version, description, createdAt, downloadUrl,
+                signatureDownloadUrl, sourceFk
+            )
+
+            BundleType.MORPHE_V1 -> MorpheV1Bundle(
+                version, description, createdAt, downloadUrl,
+                signatureDownloadUrl, sourceFk
+            )
+        }
+
+        fun create(
+            type: String,
+            version: String,
+            description: String?,
+            createdAt: String,
+            downloadUrl: String,
+            signatureDownloadUrl: String?,
+            sourceFk: Int
+        ): Bundle =
+            create(
+                type = type,
+                version = version,
+                description = description,
+                createdAt = createdAt,
+                downloadUrl = downloadUrl,
+                signatureDownloadUrl = signatureDownloadUrl,
+                sourceFk = sourceFk
+            )
+    }
 }
 
 class ReVancedV3Bundle(
@@ -55,17 +101,17 @@ class ReVancedV3Bundle(
     createdAt: String,
     downloadUrl: String,
     signatureDownloadUrl: String?,
-    sourceFk: Int,
-    bundleType: BundleType
+    sourceFk: Int
 ) : Bundle(
     version,
     description,
     createdAt,
     downloadUrl,
     signatureDownloadUrl,
-    sourceFk,
-    bundleType
+    sourceFk
 ) {
+    override val bundleType = BundleType.REVANCED_V3
+
     override suspend fun loadPatchesFromBundle(bundleFile: File) =
         emptySet<Patch>()
 }
@@ -76,17 +122,17 @@ class ReVancedV4Bundle(
     createdAt: String,
     downloadUrl: String,
     signatureDownloadUrl: String?,
-    sourceFk: Int,
-    bundleType: BundleType
+    sourceFk: Int
 ) : Bundle(
     version,
     description,
     createdAt,
     downloadUrl,
     signatureDownloadUrl,
-    sourceFk,
-    bundleType
+    sourceFk
 ) {
+    override val bundleType = BundleType.REVANCED_V4
+
     override suspend fun loadPatchesFromBundle(bundleFile: File) =
         loadReVancedBundle(setOf(bundleFile))
             .map { ReVancedPatchAdapter(it) }
@@ -99,17 +145,17 @@ class MorpheV1Bundle(
     createdAt: String,
     downloadUrl: String,
     signatureDownloadUrl: String?,
-    sourceFk: Int,
-    bundleType: BundleType
+    sourceFk: Int
 ) : Bundle(
     version,
     description,
     createdAt,
     downloadUrl,
     signatureDownloadUrl,
-    sourceFk,
-    bundleType
+    sourceFk
 ) {
+    override val bundleType = BundleType.MORPHE_V1
+
     override suspend fun loadPatchesFromBundle(bundleFile: File) =
         loadMorpheBundle(setOf(bundleFile))
             .map { MorphePatchAdapter(it) }
@@ -143,18 +189,5 @@ enum class BundleType(val value: String) {
         fun from(value: String) =
             entries.firstOrNull { it.value == value }
                 ?: throw IllegalArgumentException("Unknown bundle type: $value")
-    }
-
-    fun createBundle(
-        version: String,
-        description: String?,
-        createdAt: String,
-        downloadUrl: String,
-        signatureDownloadUrl: String?,
-        sourceFk: Int
-    ): Bundle = when(this) {
-        REVANCED_V3 -> ReVancedV3Bundle(version, description, createdAt, downloadUrl, signatureDownloadUrl, sourceFk, this)
-        REVANCED_V4 -> ReVancedV4Bundle(version, description, createdAt, downloadUrl, signatureDownloadUrl, sourceFk, this)
-        MORPHE_V1   -> MorpheV1Bundle(version, description, createdAt, downloadUrl, signatureDownloadUrl, sourceFk, this)
     }
 }

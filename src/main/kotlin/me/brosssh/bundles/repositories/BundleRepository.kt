@@ -5,6 +5,7 @@ import me.brosssh.bundles.api.dto.SnapshotPatchResponseDto
 import me.brosssh.bundles.api.dto.SnapshotResponseDto
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.tables.*
+import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleMetadata
 import me.brosssh.bundles.domain.models.BundleType
 import org.jetbrains.exposed.v1.core.*
@@ -15,8 +16,8 @@ import org.jetbrains.exposed.v1.jdbc.upsert
 
 class BundleRepository {
     private fun rowToBundle(row: ResultRow) =
-        with(BundleType.from(row[BundleTable.bundleType])) {
-            createBundle(
+            Bundle.create(
+                row[BundleTable.bundleType],
                 row[BundleTable.version],
                 row[BundleTable.description],
                 row[BundleTable.createdAt],
@@ -24,7 +25,6 @@ class BundleRepository {
                 row[BundleTable.signatureDownloadUrl],
                 row[BundleTable.sourceFk].value
             )
-        }
 
     fun findById(bundleId: Int) =
         transaction {

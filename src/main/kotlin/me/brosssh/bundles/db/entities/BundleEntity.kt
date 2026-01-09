@@ -22,22 +22,12 @@ class BundleEntity(id: EntityID<Int>) : IntEntity(id) {
     var sourceEntity by SourceEntity referencedOn BundleTable.sourceFk
 }
 
-
-private fun createBundleDomain(
-    constructor: (String, String?, String, String, String?, Int, BundleType) -> Bundle,
-    entity: BundleEntity
-): Bundle = constructor(
-    entity.version,
-    entity.description,
-    entity.createdAt,
-    entity.downloadUrl,
-    entity.signatureDownloadUrl,
-    entity.sourceFk.value,
-    BundleType.from(entity.bundleType)
-)
-
-fun BundleEntity.toBundleDomain() =  when (BundleType.from(bundleType)) {
-    BundleType.REVANCED_V3 -> createBundleDomain(::ReVancedV3Bundle, this)
-    BundleType.REVANCED_V4 -> createBundleDomain(::ReVancedV4Bundle, this)
-    BundleType.MORPHE_V1 -> createBundleDomain(::MorpheV1Bundle, this)
-}
+fun BundleEntity.toBundleDomain() = Bundle.create(
+        bundleType,
+        version,
+        description,
+        createdAt,
+        downloadUrl,
+        signatureDownloadUrl,
+        sourceFk.value,
+    )
