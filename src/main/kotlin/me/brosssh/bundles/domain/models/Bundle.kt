@@ -84,7 +84,7 @@ sealed class Bundle(
             sourceFk: Int
         ): Bundle =
             create(
-                type = type,
+                type = BundleType.from(type),
                 version = version,
                 description = description,
                 createdAt = createdAt,
