@@ -1,6 +1,7 @@
 package me.brosssh.bundles.api.dto
 
 import kotlinx.serialization.Serializable
+import me.brosssh.bundles.domain.models.BundleType
 
 @Serializable
 data class SnapshotResponseDto(
@@ -18,7 +19,7 @@ data class SnapshotResponseDto(
     val downloadUrl: String,
     val signatureDownloadUrl: String,
     val isPrerelease: Boolean,
-    val isBundleV3: Boolean,
+    val bundleType: BundleType,
 
     val patches: List<SnapshotPatchResponseDto>
 )
