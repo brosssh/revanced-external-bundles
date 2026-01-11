@@ -1,0 +1,21 @@
+- table:
+    schema: public
+    name: bundle
+- table:
+    schema: public
+    name: package
+- table:
+    schema: public
+    name: patch
+- table:
+    schema: public
+    name: patch_package
+- table:
+    schema: public
+    name: refresh_jobs
+- table:
+    schema: public
+    name: source
+- table:
+    schema: public
+    name: source_metadata
