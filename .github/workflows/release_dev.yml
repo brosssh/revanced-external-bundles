@@ -64,6 +64,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm exec semantic-release
 
+      - name: Auto track Hasura tables
+        uses: smplrspace/hasura-action@v3
+        with:
+          args: metadata track table --schema public --all-tables
+        env:
+          HASURA_ENDPOINT: ${{ vars.HASURA_ENDPOINT }}
+          HASURA_ADMIN_SECRET: ${{ secrets.HASURA_ADMIN_SECRET }}
+
       - name: Purge outdated images
         uses: snok/container-retention-policy@v3.0.1
         with:
