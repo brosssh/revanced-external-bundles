@@ -1,3 +1,10 @@
+# [1.1.0-dev.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.2...v1.1.0-dev.3) (2026-01-11)
+
+
+### Features
+
+* add more columns to source_metadata ([ba20296](https://github.com/brosssh/revanced-external-bundles/commit/ba202965bc59eaf41a6a0d243b091f49bd80dc3e))
+
 # [1.1.0-dev.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2026-01-09)
 
 
