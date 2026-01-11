@@ -9,7 +9,7 @@ on:
 jobs:
   release:
     name: Release dev
-    environment: dev
+    environment: Development
     runs-on: ubuntu-latest
     permissions:
       contents: write
