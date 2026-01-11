@@ -69,7 +69,7 @@ jobs:
           curl -X POST \
             -H "X-Hasura-Admin-Secret: ${{ secrets.HASURA_ADMIN_SECRET }}" \
             -d '{"type":"replace_metadata", "args":'"$(cat hasura/metadata.json)"'}' \
-            ${{ vars.HASURA_ENDPOINT }}/v1/metadata/replace_metadata
+            ${{ vars.HASURA_ENDPOINT }}/v1/metadata
 
       - name: Purge outdated images
         uses: snok/container-retention-policy@v3.0.1
