@@ -67,7 +67,7 @@ jobs:
       - name: Auto track Hasura tables
         uses: smplrspace/hasura-action@v3
         with:
-          args: metadata track table --schema public --all-tables
+          args: metadata apply --metadata-mode auto-track-tables
         env:
           HASURA_ENDPOINT: ${{ vars.HASURA_ENDPOINT }}
           HASURA_ADMIN_SECRET: ${{ secrets.HASURA_ADMIN_SECRET }}
