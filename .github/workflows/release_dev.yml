@@ -64,13 +64,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm exec semantic-release
 
-      - name: Auto track Hasura tables
-        uses: smplrspace/hasura-action@v3
-        with:
-          args: metadata apply
-        env:
-          HASURA_ENDPOINT: ${{ vars.HASURA_ENDPOINT }}
-          HASURA_ADMIN_SECRET: ${{ secrets.HASURA_ADMIN_SECRET }}
+      - name: Apply Hasura metadata from JSON
+        run: |
+          curl -X POST \
+            -H "X-Hasura-Admin-Secret: ${{ secrets.HASURA_ADMIN_SECRET }}" \
+            -d '{"type":"replace_metadata", "args":'"$(cat hasura/metadata.json)"'} \
+            ${{ vars.HASURA_ENDPOINT }}/v1/metadata/replace_metadata
 
       - name: Purge outdated images
         uses: snok/container-retention-policy@v3.0.1

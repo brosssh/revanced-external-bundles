@@ -1,0 +1,179 @@
+{
+  "resource_version": 3,
+  "metadata": {
+    "version": 3,
+    "sources": [
+      {
+        "name": "default",
+        "kind": "postgres",
+        "tables": [
+          {
+            "table": {
+              "name": "bundle",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "source",
+                "using": {
+                  "foreign_key_constraint_on": "source_fk"
+                }
+              }
+            ],
+            "array_relationships": [
+              {
+                "name": "patches",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "bundle_fk",
+                    "table": {
+                      "name": "patch",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "package",
+              "schema": "public"
+            },
+            "array_relationships": [
+              {
+                "name": "patch_packages",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "package_fk",
+                    "table": {
+                      "name": "patch_package",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "patch",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "bundle",
+                "using": {
+                  "foreign_key_constraint_on": "bundle_fk"
+                }
+              }
+            ],
+            "array_relationships": [
+              {
+                "name": "patch_packages",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "patch_fk",
+                    "table": {
+                      "name": "patch_package",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "patch_package",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "package",
+                "using": {
+                  "foreign_key_constraint_on": "package_fk"
+                }
+              },
+              {
+                "name": "patch",
+                "using": {
+                  "foreign_key_constraint_on": "patch_fk"
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "refresh_jobs",
+              "schema": "public"
+            }
+          },
+          {
+            "table": {
+              "name": "source",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "source_metadatum",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "source_fk",
+                    "table": {
+                      "name": "source_metadata",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "array_relationships": [
+              {
+                "name": "bundles",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "source_fk",
+                    "table": {
+                      "name": "bundle",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "source_metadata",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "source",
+                "using": {
+                  "foreign_key_constraint_on": "source_fk"
+                }
+              }
+            ]
+          }
+        ],
+        "configuration": {
+          "connection_info": {
+            "database_url": {
+              "from_env": "HASURA_GRAPHQL_DATABASE_URL"
+            },
+            "isolation_level": "read-committed",
+            "pool_settings": {
+              "connection_lifetime": 600,
+              "idle_timeout": 180,
+              "max_connections": 50,
+              "retries": 1
+            },
+            "use_prepared_statements": true
+          }
+        }
+      }
+    ]
+  }
+}
