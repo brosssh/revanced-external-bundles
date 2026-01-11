@@ -7,13 +7,15 @@ import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.SourceMetadata
 
 fun GithubRepoDto.toDomainModel(sourceId: Int) = SourceMetadata(
-        id = sourceId,
-        ownerName = owner.name,
-        ownerAvatarUrl = owner.avatarUrl,
-        repoName = repoName,
-        repoDescription = repoDescription,
-        repoStars = stars
-    )
+    id = sourceId,
+    ownerName = owner.name,
+    ownerAvatarUrl = owner.avatarUrl,
+    repoName = repoName,
+    repoDescription = repoDescription,
+    repoStars = stars,
+    isRepoArchived = archived,
+    repoPushedAt = pushedAt
+)
 
 private fun String.toBundleType(): BundleType = when {
     endsWith(".rvp") -> BundleType.REVANCED_V4

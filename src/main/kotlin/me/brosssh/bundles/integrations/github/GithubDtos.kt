@@ -31,7 +31,11 @@ data class GithubRepoDto(
     @SerialName("stargazers_count")
     val stars: Int,
     @SerialName("owner")
-    val owner: GithubRepoOwnerDto
+    val owner: GithubRepoOwnerDto,
+    @SerialName("archived")
+    val archived: Boolean,
+    @SerialName("pushed_at")
+    val pushedAt: String
 )
 
 @Serializable

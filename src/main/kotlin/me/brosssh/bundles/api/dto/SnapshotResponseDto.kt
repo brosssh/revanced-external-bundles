@@ -11,6 +11,8 @@ data class SnapshotResponseDto(
     val repoDescription: String?,
     val sourceUrl: String,
     val repoStars: Int,
+    val isRepoArchived: Boolean,
+    val repoPushedAt: String,
 
     val bundleId: Int,
     val createdAt: String,

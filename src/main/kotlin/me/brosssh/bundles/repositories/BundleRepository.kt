@@ -107,6 +107,8 @@ class BundleRepository {
                     repoName = firstRow[SourceMetadataTable.repoName],
                     repoDescription = firstRow[SourceMetadataTable.repoDescription],
                     repoStars = firstRow[SourceMetadataTable.repoStars],
+                    isRepoArchived = firstRow[SourceMetadataTable.isRepoArchived],
+                    repoPushedAt = firstRow[SourceMetadataTable.repoPushedAt].substringBefore("Z"),
                     sourceUrl = firstRow[SourceTable.url],
                     bundleId = bundleId,
                     createdAt = firstRow[BundleTable.createdAt].substringBefore("Z"),

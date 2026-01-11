@@ -6,5 +6,7 @@ data class SourceMetadata(
     val ownerAvatarUrl: String,
     val repoName: String,
     val repoDescription: String?,
-    val repoStars: Int
+    val repoStars: Int,
+    val isRepoArchived: Boolean,
+    val repoPushedAt: String
 )

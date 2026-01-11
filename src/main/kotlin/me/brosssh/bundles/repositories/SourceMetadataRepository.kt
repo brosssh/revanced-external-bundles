@@ -20,6 +20,8 @@ class SourceMetadataRepository {
             source[repoName] = sourceMetadata.repoName
             source[repoDescription] = sourceMetadata.repoDescription
             source[repoStars] = sourceMetadata.repoStars
+            source[isRepoArchived] = sourceMetadata.isRepoArchived
+            source[repoPushedAt] = sourceMetadata.repoPushedAt
         }.single().let { SourceMetadataEntity.wrapRow(it) }
     }
 }

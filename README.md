@@ -13,13 +13,13 @@ A centralized collection and API service for ReVanced external patches bundles, 
 ### 🔄 Automatic Bundle & Patch Updates
 Scheduled jobs continuously monitor and update all bundles and their patches, ensuring you always have access to the latest versions without manual intervention.
 
-### 🔌 REST API with Swagger Documentation
-Comprehensive RESTful endpoints with interactive Swagger/OpenAPI documentation for easy integration and testing. Browse and query bundles, patches, and their metadata through well-documented HTTP endpoints.
-
-### 🎯 GraphQL Query Interface
+### [🎯 GraphQL Query Interface](https://cloud.hasura.io/public-graphiql/?endpoint=https%3A%2F%2Frevanced-external-bundles.brosssh.com%2Fhasura%2Fv1%2Fgraphql)
 Powerful GraphQL endpoint allowing you to fetch exactly the data you need with flexible, nested queries. Check out the [GraphQL examples documentation](docs/graphql-examples.md).
 
-### 🌐 Interactive Web Interface
+### [🔌 REST API with Swagger Documentation](https://revanced-external-bundles.brosssh.com/swagger/index.html)
+Comprehensive RESTful endpoints with interactive Swagger/OpenAPI documentation for easy integration and testing. Browse and query bundles, patches, and their metadata through well-documented HTTP endpoints.
+
+### [🌐 Interactive Web Interface](https://revanced-external-bundles.brosssh.com/)
 User-friendly website to explore available bundles and their patches visually. Built on top of the REST API, providing an intuitive way to discover and understand patch compatibility and features.
 > [!WARNING]  
 > The Web Interface is **NOT** the primary goal of this project. Better Web Interfaces are welcome, I personally have no interest in designing a proper website.
@@ -27,7 +27,7 @@ User-friendly website to explore available bundles and their patches visually. B
 
 ## 🚀 How to get started
 
-A Java Development Kit (JDK) and Git must be installed.
+A Java Development Kit (JDK), Git and Docker must be installed.
 
 1. Run `git clone git@github.com:brosssh/revanced-external-bundles.git` to clone the repository
 2. Copy [.env.example](.env.example) to `.env` and fill in the required values
