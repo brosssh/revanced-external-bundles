@@ -9,7 +9,9 @@ on:
 jobs:
   release:
     name: Release prod
-    environment: Production
+    environment:
+      name: production
+      url: https://revanced-external-bundles.brosssh.com/
     runs-on: ubuntu-latest
     permissions:
       contents: write

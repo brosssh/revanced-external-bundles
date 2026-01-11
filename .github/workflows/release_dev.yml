@@ -10,7 +10,7 @@ jobs:
   release:
     name: Release dev
     environment:
-      name: Development
+      name: development
       url: https://revanced-external-bundles-dev.brosssh.com/
     runs-on: ubuntu-latest
     permissions:
