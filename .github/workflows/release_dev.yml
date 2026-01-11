@@ -68,7 +68,7 @@ jobs:
         run: |
           curl -X POST \
             -H "X-Hasura-Admin-Secret: ${{ secrets.HASURA_ADMIN_SECRET }}" \
-            -d '{"type":"replace_metadata", "args":'"$(cat hasura/metadata.json)"'} \
+            -d '{"type":"replace_metadata", "args":'"$(cat hasura/metadata.json)"'}' \
             ${{ vars.HASURA_ENDPOINT }}/v1/metadata/replace_metadata
 
       - name: Purge outdated images
