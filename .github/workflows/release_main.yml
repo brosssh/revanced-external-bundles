@@ -5,11 +5,11 @@ on:
   push:
     branches:
       - main
-      - dev
 
 jobs:
   release:
-    name: Release
+    name: Release prod
+    environment: prod
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -22,9 +22,6 @@ jobs:
           # https://github.com/cycjimmy/semantic-release-action#private-packages
           persist-credentials: false
           fetch-depth: 0
-
-      - name: Ensure gradlew executable
-        run: chmod +x ./gradlew
 
       - name: Cache Gradle
         uses: burrunan/gradle-cache-action@v1
