@@ -1,5 +1,5 @@
 {
-  "resource_version": 3,
+  "resource_version": 15,
   "metadata": {
     "version": 3,
     "sources": [
@@ -33,6 +33,29 @@
                   }
                 }
               }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "is_prerelease",
+                    "need_patches_update",
+                    "bundle_type",
+                    "created_at",
+                    "download_url",
+                    "file_hash",
+                    "signature_download_url",
+                    "version",
+                    "id",
+                    "source_fk",
+                    "description"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
             ]
           },
           {
@@ -52,6 +75,21 @@
                     }
                   }
                 }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "name",
+                    "version",
+                    "id"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
               }
             ]
           },
@@ -81,6 +119,22 @@
                   }
                 }
               }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "name",
+                    "bundle_fk",
+                    "id",
+                    "description"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
             ]
           },
           {
@@ -101,13 +155,46 @@
                   "foreign_key_constraint_on": "patch_fk"
                 }
               }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "package_fk",
+                    "patch_fk"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
             ]
           },
           {
             "table": {
               "name": "refresh_jobs",
               "schema": "public"
-            }
+            },
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "created_at",
+                    "updated_at",
+                    "job_id",
+                    "job_type",
+                    "status",
+                    "id",
+                    "error"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ]
           },
           {
             "table": {
@@ -141,6 +228,20 @@
                   }
                 }
               }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "url",
+                    "id"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
             ]
           },
           {
@@ -154,6 +255,27 @@
                 "using": {
                   "foreign_key_constraint_on": "source_fk"
                 }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "is_repo_archived",
+                    "owner_avatar_url",
+                    "owner_name",
+                    "repo_description",
+                    "repo_name",
+                    "repo_pushed_at",
+                    "id",
+                    "repo_stars",
+                    "source_fk"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
               }
             ]
           }
