@@ -1,7 +1,6 @@
 package me.brosssh.bundles.domain.services.refresh
 
 import me.brosssh.bundles.domain.models.BundleImportError
-import me.brosssh.bundles.domain.services.CacheService
 import me.brosssh.bundles.integrations.github.GithubClient
 import me.brosssh.bundles.integrations.github.toDomainModel
 import me.brosssh.bundles.repositories.*
@@ -11,13 +10,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class RefreshBundlesService(
-    cacheService: CacheService,
     refreshJobRepository: RefreshJobRepository,
     private val githubClient: GithubClient,
     private val sourceRepository: SourceRepository,
     private val sourceMetadataRepository: SourceMetadataRepository,
     private val bundleRepository: BundleRepository
-) : BaseRefreshJobService(cacheService, refreshJobRepository) {
+) : BaseRefreshJobService(refreshJobRepository) {
 
     override val logger: Logger = LoggerFactory.getLogger(RefreshBundlesService::class.java)
     override val jobType: String = "BUNDLES"

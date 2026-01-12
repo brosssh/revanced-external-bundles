@@ -15,7 +15,6 @@ class BundleService (
     private val bundleRepository: BundleRepository
 ) {
     fun getById(id: Int) = bundleRepository.findById(id)
-    fun getSnapshot() = bundleRepository.getSnapshot()
     fun getBundleByQuery(query: BundleQuery) =
         when (query) {
             is BundleQuery.ById -> bundleRepository.findById(query.id)

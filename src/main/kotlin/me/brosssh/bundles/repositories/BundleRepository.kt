@@ -1,8 +1,5 @@
 package me.brosssh.bundles.repositories
 
-import me.brosssh.bundles.api.dto.SnapshotPackageResponseDto
-import me.brosssh.bundles.api.dto.SnapshotPatchResponseDto
-import me.brosssh.bundles.api.dto.SnapshotResponseDto
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.tables.*
 import me.brosssh.bundles.domain.models.Bundle
@@ -67,60 +64,6 @@ class BundleRepository {
 
     fun getBundlesNeedPatchesUpdate() = transaction {
         BundleEntity.find { BundleTable.needPatchesUpdate eq true }.toList()
-    }
-
-    fun getSnapshot() = transaction {
-        (BundleTable
-                innerJoin SourceTable
-                leftJoin SourceMetadataTable
-                leftJoin PatchTable
-                leftJoin PatchPackageTable
-                leftJoin PackageTable)
-            .selectAll()
-            .orderBy(SourceMetadataTable.repoStars, SortOrder.DESC_NULLS_LAST)
-            .groupBy { it[BundleTable.id].value }
-            .map { (bundleId, rows) ->
-                val firstRow = rows.first()
-
-                val patches = rows
-                    .filter { it[PatchTable.id] != null }
-                    .groupBy { it[PatchTable.id].value }
-                    .map { (_, patchRows) ->
-                        SnapshotPatchResponseDto(
-                            name = patchRows.first()[PatchTable.name],
-                            description = patchRows.first()[PatchTable.description],
-                            compatiblePackages = patchRows
-                                .filter { it[PackageTable.id] != null }
-                                .groupBy { it[PackageTable.name] }
-                                .map { (name, pkgRows) ->
-                                    SnapshotPackageResponseDto(
-                                        name,
-                                        pkgRows.map { it[PackageTable.version] }
-                                    )
-                                }
-                        )
-                    }
-
-                SnapshotResponseDto(
-                    ownerName = firstRow[SourceMetadataTable.ownerName],
-                    ownerAvatarUrl = firstRow[SourceMetadataTable.ownerAvatarUrl],
-                    repoName = firstRow[SourceMetadataTable.repoName],
-                    repoDescription = firstRow[SourceMetadataTable.repoDescription],
-                    repoStars = firstRow[SourceMetadataTable.repoStars],
-                    isRepoArchived = firstRow[SourceMetadataTable.isRepoArchived],
-                    repoPushedAt = firstRow[SourceMetadataTable.repoPushedAt].substringBefore("Z"),
-                    sourceUrl = firstRow[SourceTable.url],
-                    bundleId = bundleId,
-                    createdAt = firstRow[BundleTable.createdAt].substringBefore("Z"),
-                    description = firstRow[BundleTable.description].orEmpty(),
-                    version = firstRow[BundleTable.version],
-                    downloadUrl = firstRow[BundleTable.downloadUrl],
-                    signatureDownloadUrl = firstRow[BundleTable.signatureDownloadUrl].orEmpty(),
-                    isPrerelease = firstRow[BundleTable.isPrerelease],
-                    bundleType = BundleType.from(firstRow[BundleTable.bundleType]),
-                    patches = patches
-                )
-            }
     }
 
     fun findByPk(owner: String, repo: String, prerelease: Boolean) = transaction {

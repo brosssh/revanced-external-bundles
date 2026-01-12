@@ -17,8 +17,6 @@ val appModule = module {
     single { PackageRepository() }
     single { PatchPackageRepository() }
 
-    single { CacheService() }
-
     single {
         GithubClient(
             client = get(),
@@ -32,14 +30,12 @@ val appModule = module {
             get(),
             get(),
             get(),
-            get(),
             get()
         )
     }
 
     single {
         RefreshPatchesService(
-            get(),
             get(),
             get(),
             get(),

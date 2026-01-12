@@ -10,7 +10,6 @@ import io.ktor.server.routing.*
 import me.brosssh.bundles.plugins.*
 import me.brosssh.bundles.api.routes.graphQLRoute
 import me.brosssh.bundles.api.routes.refreshRoute
-import me.brosssh.bundles.api.routes.snapshotRoutes
 import me.brosssh.bundles.db.migration.migrationScript
 
 fun Route.apiV1(build: Route.() -> Unit) {
@@ -37,7 +36,6 @@ fun Application.module() {
 
         apiV1 {
             refreshRoute()
-            snapshotRoutes()
             bundleRoutes()
         }
 

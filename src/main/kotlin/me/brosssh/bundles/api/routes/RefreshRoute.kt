@@ -16,6 +16,7 @@ fun Route.refreshRoute() {
         authenticate("hmacAuth") {
             post("bundles", {
                 description = "Trigger async bundles refresh job"
+                tags = listOf("Refresh")
 
                 securitySchemeNames("hmacAuth")
 
@@ -36,6 +37,7 @@ fun Route.refreshRoute() {
 
             post("patches", {
                 description = "Trigger async patches refresh job"
+                tags = listOf("Refresh")
 
                 securitySchemeNames("hmacAuth")
 

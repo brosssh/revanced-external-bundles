@@ -14,6 +14,7 @@ fun Route.bundleRoutes() {
         // Get by ID
         get("/{id}", {
             description = "Get bundle by internal ID"
+            tags = listOf("Bundle")
 
             request {
                 pathParameter<Int>("id") {
@@ -51,6 +52,7 @@ fun Route.bundleRoutes() {
         // Get by owner/repo
         get("/{owner}/{repo}", {
             description = "Get bundle by repository owner and name"
+            tags = listOf("Bundle")
 
             request {
                 pathParameter<String>("owner") {

@@ -1,17 +1,16 @@
 package me.brosssh.bundles.repositories
 
-import me.brosssh.bundles.db.entities.SourceMetadataEntity
 import me.brosssh.bundles.db.tables.SourceMetadataTable
 import me.brosssh.bundles.domain.models.SourceMetadata
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.upsertReturning
+import org.jetbrains.exposed.v1.jdbc.upsert
 
 
 class SourceMetadataRepository {
     fun upsert(
         sourceMetadata: SourceMetadata
     ) = transaction {
-        SourceMetadataTable.upsertReturning(
+        SourceMetadataTable.upsert(
             SourceMetadataTable.sourceFk
         ) { source ->
             source[sourceFk] = sourceMetadata.id
@@ -22,6 +21,6 @@ class SourceMetadataRepository {
             source[repoStars] = sourceMetadata.repoStars
             source[isRepoArchived] = sourceMetadata.isRepoArchived
             source[repoPushedAt] = sourceMetadata.repoPushedAt
-        }.single().let { SourceMetadataEntity.wrapRow(it) }
+        }
     }
 }
