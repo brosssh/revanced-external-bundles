@@ -1,3 +1,10 @@
+# [1.1.0-dev.4](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.3...v1.1.0-dev.4) (2026-01-12)
+
+
+### Bug Fixes
+
+* Removed snapshot endpoint, minor improvements ([d10c009](https://github.com/brosssh/revanced-external-bundles/commit/d10c0093af1ea7ee368dd7d6e8a7cd25ae426114))
+
 # [1.1.0-dev.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.2...v1.1.0-dev.3) (2026-01-11)
 
 
