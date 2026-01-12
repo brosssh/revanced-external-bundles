@@ -36,7 +36,52 @@ async function loadBundles() {
     status.classList.add("loading");
 
     try {
-        const res = await fetch('/api/v1/snapshot');
+        const query = `
+            query Snapshot {
+                bundle {
+                    id
+                    bundle_type
+                    created_at
+                    description
+                    download_url
+                    signature_download_url
+                    is_prerelease
+                    version
+                    source {
+                        url
+                        source_metadata: source_metadatum {
+                            owner_name
+                            owner_avatar_url
+                            repo_name
+                            repo_description
+                            repo_stars
+                            repo_pushed_at
+                            is_repo_archived
+                        }
+                    }
+                    patches {
+                        name
+                        description
+                        patch_packages {
+                            package {
+                                name
+                                version
+                            }
+                        }
+                    }
+                }
+            }
+        `;
+
+        const res = await fetch('/hasura/v1/graphql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query,
+          }),
+        });
 
         if (!res.ok) {
             status.textContent = "Failed to load bundles";
@@ -44,7 +89,16 @@ async function loadBundles() {
             return;
         }
 
-        const bundles = await res.json();
+        const { data, errors } = await res.json();
+
+        if (errors) {
+            console.error('GraphQL errors:', errors);
+            status.textContent = "Failed to load bundles";
+            status.classList.remove("loading");
+            return;
+        }
+
+        const bundles = data?.bundle || [];
 
         if (!Array.isArray(bundles) || bundles.length === 0) {
             status.textContent = "No bundles available";
@@ -53,7 +107,8 @@ async function loadBundles() {
             return;
         }
 
-        allBundles = bundles;
+        // Transform GraphQL data to match the old structure
+        allBundles = bundles.map(transformBundle);
         status.classList.remove("loading");
         renderFilteredBundles();
 
@@ -62,6 +117,40 @@ async function loadBundles() {
         status.textContent = "Network error";
         status.classList.remove("loading");
     }
+}
+
+function transformBundle(bundle) {
+    const metadata = bundle.source?.source_metadata || {};
+
+    // Transform patches to include compatiblePackages
+    const patches = (bundle.patches || []).map(patch => ({
+        name: patch.name,
+        description: patch.description,
+        compatiblePackages: (patch.patch_packages || []).map(pp => ({
+            name: pp.package.name,
+            versions: pp.package.version ? [pp.package.version] : []
+        }))
+    }));
+
+    return {
+        id: bundle.id,
+        bundleType: bundle.bundle_type,
+        createdAt: bundle.created_at,
+        description: bundle.description,
+        downloadUrl: bundle.download_url,
+        signatureDownloadUrl: bundle.signature_download_url,
+        isPrerelease: bundle.is_prerelease,
+        version: bundle.version,
+        sourceUrl: bundle.source?.url || '',
+        ownerName: metadata.owner_name || '',
+        ownerAvatarUrl: metadata.owner_avatar_url || '',
+        repoName: metadata.repo_name || '',
+        repoDescription: metadata.repo_description || '',
+        repoStars: metadata.repo_stars || 0,
+        repoPushedAt: metadata.repo_pushed_at,
+        isRepoArchived: metadata.is_repo_archived,
+        patches: patches
+    };
 }
 
 function renderFilteredBundles() {
