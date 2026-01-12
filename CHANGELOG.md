@@ -1,3 +1,10 @@
+# [1.1.0-dev.5](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.4...v1.1.0-dev.5) (2026-01-12)
+
+
+### Bug Fixes
+
+* New release file and fix site ([4b27502](https://github.com/brosssh/revanced-external-bundles/commit/4b27502c5cd3af5c3a54671aff789819eed7dd8b))
+
 # [1.1.0-dev.4](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.3...v1.1.0-dev.4) (2026-01-12)
 
 
