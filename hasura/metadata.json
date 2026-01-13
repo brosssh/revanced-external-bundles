@@ -1,5 +1,5 @@
 {
-  "resource_version": 15,
+  "resource_version": 7,
   "metadata": {
     "version": 3,
     "sources": [
@@ -181,16 +181,15 @@
                 "role": "user",
                 "permission": {
                   "columns": [
-                    "created_at",
-                    "updated_at",
                     "job_id",
                     "job_type",
                     "status",
                     "id",
-                    "error"
+                    "error",
+                    "completed_at",
+                    "started_at"
                   ],
-                  "filter": {},
-                  "allow_aggregations": true
+                  "filter": {}
                 },
                 "comment": ""
               }
