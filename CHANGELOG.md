@@ -1,3 +1,10 @@
+# [1.1.0-dev.7](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.6...v1.1.0-dev.7) (2026-01-13)
+
+
+### Bug Fixes
+
+* New way of applying new Hasura metadata ([2daa1c6](https://github.com/brosssh/revanced-external-bundles/commit/2daa1c6dd4280c53728b46583d31e9848e2750bf))
+
 # [1.1.0-dev.6](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.5...v1.1.0-dev.6) (2026-01-13)
 
 
