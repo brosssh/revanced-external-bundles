@@ -65,13 +65,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm exec semantic-release
 
-      - name: Apply Hasura metadata from JSON
-        run: |
-          curl -X POST \
-            -H "X-Hasura-Admin-Secret: ${{ secrets.HASURA_ADMIN_SECRET }}" \
-            -d '{"type":"replace_metadata", "args":'"$(cat hasura/metadata.json)"'}' \
-            ${{ vars.DEPLOY_ENDPOINT }}/hasura/v1/metadata
-
       - name: Purge outdated images
         uses: snok/container-retention-policy@v3.0.1
         with:

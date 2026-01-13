@@ -58,6 +58,6 @@ fun migrationScript() {
                 RENAME COLUMN created_at TO started_at;
               END IF;
             END$$;
-        """.trimIndent())
+        """)
     }
 }

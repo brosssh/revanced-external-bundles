@@ -7,16 +7,17 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
-import me.brosssh.bundles.plugins.*
 import me.brosssh.bundles.api.routes.graphQLRoute
 import me.brosssh.bundles.api.routes.refreshRoutes
+import me.brosssh.bundles.db.migration.applyHasuraMetadata
 import me.brosssh.bundles.db.migration.migrationScript
+import me.brosssh.bundles.plugins.*
 
 fun Route.apiV1(build: Route.() -> Unit) {
     route("/api/v1", build)
 }
 
-fun Application.module() {
+suspend fun Application.module() {
     configureSerialization()
     configureDatabase()
     configureKoin()
@@ -25,6 +26,7 @@ fun Application.module() {
     configureAuthentication(Config.authenticationSecret)
 
     migrationScript()
+    applyHasuraMetadata()
 
     routing {
         route("api.json") {

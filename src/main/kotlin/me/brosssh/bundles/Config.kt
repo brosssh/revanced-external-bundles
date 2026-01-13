@@ -1,6 +1,7 @@
 package me.brosssh.bundles
 
 import io.github.cdimascio.dotenv.dotenv
+import java.net.URI
 
 object Config {
     private val dotenv = dotenv { 
@@ -16,6 +17,8 @@ object Config {
     val env: String = getEnv("ENV", "production")
     val isDebug: Boolean = env.equals("debug", ignoreCase = true)
     val version: String = object {}.javaClass.`package`.implementationVersion ?: "dev"
+    val host: String = getEnv("HOST")
+    val hostUrl: URI = if (host == "localhost") URI("http://localhost:8080") else URI("https://$host")
 
     // Database
     val databaseHost: String = getEnv("DATABASE_HOST")
@@ -28,10 +31,12 @@ object Config {
     
     // Authentication
     val authenticationSecret: String = getEnv("BACKEND_AUTHENTICATION_SECRET")
-    
+
     // GitHub
     val githubPatToken: String = getEnv("BACKEND_GITHUB_PAT_TOKEN")
 
     // Server
     val port: Int = getEnv("BACKEND_PORT").toInt()
+
+    val hasuraSecret: String = getEnv("HASURA_GRAPHQL_ADMIN_SECRET")
 }
