@@ -1,11 +1,10 @@
 package me.brosssh.bundles.integrations.github
 
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.utils.io.jvm.javaio.copyTo
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.utils.io.jvm.javaio.*
 import java.io.File
 
 class GithubClient(
@@ -13,18 +12,28 @@ class GithubClient(
     private val githubToken: String
 ) {
     private val authHeader get() = "Bearer $githubToken"
-
-    suspend fun getRelease(
+    suspend fun getReleases(
         owner: String,
-        repo: String,
-        preRelease: Boolean
-    ) =
-        client
-            .get("https://api.github.com/repos/$owner/$repo/releases") {
+        repo: String
+    ): List<GithubReleaseDto> {
+        val releases = mutableListOf<GithubReleaseDto>()
+
+        var nextUrl: String? = "https://api.github.com/repos/$owner/$repo/releases?per_page=100"
+
+        while (nextUrl != null) {
+            val response = client.get(nextUrl) {
                 header("Authorization", authHeader)
+                header("Accept", "application/vnd.github+json")
             }
-            .body<List<GithubReleaseDto>>()
-            .firstOrNull { it.prerelease == preRelease }
+
+            releases += response.body<List<GithubReleaseDto>>()
+
+            val linkHeader = response.headers["Link"]
+            nextUrl = parseNextLink(linkHeader)
+        }
+
+        return releases
+    }
 
     suspend fun getRepo(
         owner: String,
@@ -52,5 +61,16 @@ class GithubClient(
         require(parts.size >= 2) { "Invalid GitHub repo URL" }
 
         return parts[0] to parts[1]
+    }
+
+    private fun parseNextLink(linkHeader: String?): String? {
+        if (linkHeader == null) return null
+
+        return linkHeader
+            .split(",")
+            .map { it.trim() }
+            .firstOrNull { it.contains("""rel="next"""") }
+            ?.substringAfter("<")
+            ?.substringBefore(">")
     }
 }

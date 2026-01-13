@@ -41,21 +41,14 @@ class RefreshBundlesJobService(
                         }
 
                         // Update bundle table
-                        RELEASE_TYPES.forEach { releaseType ->
-                            getRelease(owner, repo, releaseType).also { releaseDto ->
-                                if (releaseDto == null) {
-                                    logger.warn("No release found for owner=${owner}, repo=${repo}, prerelease=${releaseType}")
-                                    return@forEach
-                                }
-
-                                try {
-                                    bundleRepository.upsert(
-                                        releaseDto.toDomainModel(source.intId)
-                                    )
-                                } catch (_: BundleImportError) {
-                                    logger.warn("No rvp found for owner=${owner}, repo=${repo}, prerelease=${releaseType}")
-                                    return@forEach
-                                }
+                        getReleases(owner, repo).forEach { releaseDto ->
+                            try {
+                                bundleRepository.upsert(
+                                    releaseDto.toDomainModel(source.intId)
+                                )
+                            } catch (_: BundleImportError) {
+                                logger.warn("No rvp found for owner=${owner}, repo=${repo}, version${releaseDto.tagName}")
+                                return@forEach
                             }
                         }
                     }
@@ -68,9 +61,5 @@ class RefreshBundlesJobService(
             logger.info("Source process completed")
         }
         logger.info("Process completed")
-    }
-
-    companion object {
-        private val RELEASE_TYPES = setOf(false, true)
     }
 }

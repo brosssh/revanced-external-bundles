@@ -1,3 +1,5 @@
+package me.brosssh.bundles.api.routes
+
 import io.github.smiley4.ktoropenapi.get
 import io.ktor.http.*
 import io.ktor.server.response.*
@@ -47,8 +49,8 @@ fun Route.bundleRoutes() {
             call.respond(HttpStatusCode.OK, bundle.toResponseDto())
         }
 
-        // Get by owner/repo
-        get("/{owner}/{repo}", {
+        //region Latest
+        get("/{owner}/{repo}/latest", {
             description = "Get bundle by repository owner and name"
             tags = listOf("Bundle")
 
@@ -82,7 +84,7 @@ fun Route.bundleRoutes() {
             val isPrerelease = call.request.queryParameters["prerelease"]?.toBooleanStrictOrNull() ?: false
 
             val bundle = bundleService.getBundleByQuery(
-                BundleQuery.ByRepository(owner, repo, isPrerelease)
+                BundleQuery.ByRepositoryLatest(owner, repo, isPrerelease)
             )
                 ?: return@get call.respond(
                     HttpStatusCode.NotFound,
@@ -91,5 +93,51 @@ fun Route.bundleRoutes() {
 
             call.respond(HttpStatusCode.OK, bundle.toResponseDto())
         }
+        //endregion
+
+        //region By version
+        get("/{owner}/{repo}/{version}", {
+            description = "Get bundle by repository owner, name and version"
+            tags = listOf("Bundle")
+
+            request {
+                pathParameter<String>("owner") {
+                    description = "Repository owner"
+                }
+                pathParameter<String>("repo") {
+                    description = "Repository name"
+                }
+                pathParameter<String>("version") {
+                    description = "Bundle version"
+                }
+            }
+
+            response {
+                HttpStatusCode.OK to {
+                    description = "Bundle found"
+                    body<BundleResponseDto>()
+                }
+                HttpStatusCode.NotFound to {
+                    description = "Bundle not found"
+                }
+            }
+        }) {
+            val bundleService = call.get<BundleService>()
+
+            val owner = call.parameters["owner"]!!
+            val repo = call.parameters["repo"]!!
+            val version = call.parameters["version"]!!
+
+            val bundle = bundleService.getBundleByQuery(
+                BundleQuery.ByRepositoryAndVersion(owner, repo, version)
+            )
+                ?: return@get call.respond(
+                    HttpStatusCode.NotFound,
+                    mapOf("error" to "Bundle not found")
+                )
+
+            call.respond(HttpStatusCode.OK, bundle.toResponseDto())
+        }
+        //endregion
     }
 }

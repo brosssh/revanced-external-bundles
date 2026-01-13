@@ -1,7 +1,9 @@
 package me.brosssh.bundles.repositories
 
 import me.brosssh.bundles.db.entities.BundleEntity
-import me.brosssh.bundles.db.tables.*
+import me.brosssh.bundles.db.tables.BundleTable
+import me.brosssh.bundles.db.tables.SourceMetadataTable
+import me.brosssh.bundles.db.tables.SourceTable
 import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleMetadata
 import me.brosssh.bundles.domain.models.BundleType
@@ -35,6 +37,7 @@ class BundleRepository {
         BundleTable.upsert(
             BundleTable.sourceFk,
             BundleTable.isPrerelease,
+            BundleTable.version,
             onUpdate = {
                 it[BundleTable.needPatchesUpdate] = BundleTable.needPatchesUpdate or
                         BundleTable.fileHash.neq(bundleMetadata.fileHash)
@@ -54,13 +57,27 @@ class BundleRepository {
         BundleEntity.find { BundleTable.needPatchesUpdate eq true }.toList()
     }
 
-    fun findByPk(owner: String, repo: String, prerelease: Boolean) = transaction {
+    fun findLatestByRepo(owner: String, repo: String, prerelease: Boolean) = transaction {
         (BundleTable innerJoin SourceTable innerJoin SourceMetadataTable)
             .selectAll()
             .where {
                 (SourceMetadataTable.ownerName eq owner) and
                         (SourceMetadataTable.repoName eq repo) and
-                        (BundleTable.isPrerelease eq prerelease)
+                        (BundleTable.isPrerelease eq prerelease) and
+                        (BundleTable.isLatest eq true)
+            }
+            .limit(1)
+            .map(::rowToDomain)
+            .singleOrNull()
+    }
+
+    fun findByRepoAndVersion(owner: String, repo: String, version: String)  = transaction {
+        (BundleTable innerJoin SourceTable innerJoin SourceMetadataTable)
+            .selectAll()
+            .where {
+                (SourceMetadataTable.ownerName eq owner) and
+                        (SourceMetadataTable.repoName eq repo) and
+                        (BundleTable.version eq version)
             }
             .limit(1)
             .map(::rowToDomain)
