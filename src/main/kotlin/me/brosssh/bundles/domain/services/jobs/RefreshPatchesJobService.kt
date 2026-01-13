@@ -1,13 +1,14 @@
-package me.brosssh.bundles.domain.services.refresh
+package me.brosssh.bundles.domain.services.jobs
 
 import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.entities.toBundleDomain
+import me.brosssh.bundles.domain.models.RefreshJob
 import me.brosssh.bundles.repositories.*
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class RefreshPatchesService(
+class RefreshPatchesJobService(
     refreshJobRepository: RefreshJobRepository,
     private val bundleRepository: BundleRepository,
     private val patchRepository: PatchRepository,
@@ -15,8 +16,8 @@ class RefreshPatchesService(
     private val patchPackageRepository: PatchPackageRepository
 ) : BaseRefreshJobService(refreshJobRepository) {
 
-    override val logger: Logger = LoggerFactory.getLogger(RefreshPatchesService::class.java)
-    override val jobType: String = "PATCHES"
+    override val logger: Logger = LoggerFactory.getLogger(RefreshPatchesJobService::class.java)
+    override val jobType = RefreshJob.RefreshJobType.PATCHES
 
     override suspend fun processRefresh(jobId: String) {
         logger.info("Processing patches refresh")

@@ -1,8 +1,10 @@
 package me.brosssh.bundles.di
 
 import me.brosssh.bundles.Config
-import me.brosssh.bundles.domain.services.*
-import me.brosssh.bundles.domain.services.refresh.*
+import me.brosssh.bundles.domain.services.BundleService
+import me.brosssh.bundles.domain.services.RefreshJobStatusService
+import me.brosssh.bundles.domain.services.jobs.RefreshBundlesJobService
+import me.brosssh.bundles.domain.services.jobs.RefreshPatchesJobService
 import me.brosssh.bundles.integrations.github.GithubClient
 import me.brosssh.bundles.repositories.*
 import org.koin.dsl.module
@@ -25,7 +27,7 @@ val appModule = module {
     }
 
     single {
-        RefreshBundlesService(
+        RefreshBundlesJobService(
             get(),
             get(),
             get(),
@@ -35,7 +37,7 @@ val appModule = module {
     }
 
     single {
-        RefreshPatchesService(
+        RefreshPatchesJobService(
             get(),
             get(),
             get(),
@@ -44,7 +46,7 @@ val appModule = module {
         )
     }
 
-    single {
-        BundleService(get())
-    }
+    single { BundleService(get()) }
+    single { RefreshJobStatusService(get()) }
+
 }

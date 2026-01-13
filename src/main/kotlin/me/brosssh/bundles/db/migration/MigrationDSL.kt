@@ -23,5 +23,41 @@ fun migrationScript() {
             ALTER TABLE source_metadata
             ADD COLUMN IF NOT EXISTS is_repo_archived BOOLEAN NOT NULL DEFAULT false
         """)
+
+        exec(
+            """
+            
+            ALTER TABLE refresh_jobs
+            DROP COLUMN IF EXISTS updated_at;
+            
+            ALTER TABLE refresh_jobs
+            ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
+            
+            ALTER TABLE refresh_jobs
+            ALTER COLUMN status TYPE varchar(31);
+
+            """
+        )
+
+        exec("""
+            DO $$
+            BEGIN
+              IF EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = 'refresh_jobs'
+                  AND column_name = 'created_at'
+              ) THEN       
+                
+                ALTER TABLE refresh_jobs
+                ALTER COLUMN created_at
+                TYPE TIMESTAMPTZ
+                USING to_timestamp(created_at / 1000.0);
+                
+                ALTER TABLE refresh_jobs
+                RENAME COLUMN created_at TO started_at;
+              END IF;
+            END$$;
+        """.trimIndent())
     }
 }

@@ -2,6 +2,7 @@ package me.brosssh.bundles.api.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import me.brosssh.bundles.domain.models.Bundle
 
 @Serializable
 data class BundleResponseDto(
@@ -15,12 +16,10 @@ data class BundleResponseDto(
     val signatureDownloadUrl: String
 )
 
-@Serializable
-data class BundleMetadataResponseDto(
-    val sourceUrl: String,
-    val ownerName: String,
-    val ownerAvatarUrl: String,
-    val repoName: String,
-    val repoDescription: String?,
-    val repoStars: Int
+fun Bundle.toResponseDto() = BundleResponseDto(
+    createdAt = createdAt.substringBefore("Z"),
+    description = description ?: "",
+    version = version,
+    downloadUrl = downloadUrl,
+    signatureDownloadUrl = signatureDownloadUrl ?: ""
 )

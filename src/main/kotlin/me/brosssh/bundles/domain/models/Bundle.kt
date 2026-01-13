@@ -1,14 +1,12 @@
 package me.brosssh.bundles.domain.models
 
-import app.revanced.patcher.patch.loadPatchesFromJar as loadReVancedBundle
-import app.morphe.patcher.patch.loadPatchesFromJar as loadMorpheBundle
-import me.brosssh.bundles.api.dto.BundleResponseDto
 import me.brosssh.bundles.integrations.github.GithubClient
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
-import java.util.UUID
-import kotlin.getValue
+import java.util.*
+import app.morphe.patcher.patch.loadPatchesFromJar as loadMorpheBundle
+import app.revanced.patcher.patch.loadPatchesFromJar as loadReVancedBundle
 
 sealed class Bundle(
     val version: String,
@@ -171,14 +169,6 @@ data class BundleMetadata(
 sealed class BundleImportError : Exception() {
     class ReleaseFileNotFoundError : BundleImportError()
 }
-
-fun Bundle.toResponseDto() = BundleResponseDto(
-    createdAt = createdAt.substringBefore("Z"),
-    description = description ?: "",
-    version = version,
-    downloadUrl = downloadUrl,
-    signatureDownloadUrl = signatureDownloadUrl ?: ""
-)
 
 enum class BundleType(val value: String) {
     REVANCED_V3("ReVanced:V3"),

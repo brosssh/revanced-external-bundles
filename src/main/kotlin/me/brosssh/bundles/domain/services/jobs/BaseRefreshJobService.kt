@@ -1,9 +1,10 @@
-package me.brosssh.bundles.domain.services.refresh
+package me.brosssh.bundles.domain.services.jobs
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.brosssh.bundles.db.entities.RefreshJobEntity
+import me.brosssh.bundles.domain.models.RefreshJob
 import me.brosssh.bundles.repositories.RefreshJobRepository
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.slf4j.Logger
@@ -13,7 +14,7 @@ abstract class BaseRefreshJobService (
     private val refreshJobRepository: RefreshJobRepository
 ) {
     abstract val logger: Logger
-    abstract val jobType: String
+    abstract val jobType: RefreshJob.RefreshJobType
 
     fun refresh(): String {
         val jobId = UUID.randomUUID().toString()

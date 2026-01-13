@@ -12,26 +12,14 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.upsert
 
 class BundleRepository {
-    private fun rowToBundle(row: ResultRow) =
-            Bundle.create(
-                row[BundleTable.bundleType],
-                row[BundleTable.version],
-                row[BundleTable.description],
-                row[BundleTable.createdAt],
-                row[BundleTable.downloadUrl],
-                row[BundleTable.signatureDownloadUrl],
-                row[BundleTable.sourceFk].value
-            )
-
-    fun findById(bundleId: Int) =
-        transaction {
-            BundleTable
-                .selectAll()
-                .where { BundleTable.id eq bundleId }
-                .limit(1)
-                .map(::rowToBundle)
-                .singleOrNull()
-        }
+    fun findById(bundleId: Int) = transaction {
+        BundleTable
+            .selectAll()
+            .where { BundleTable.id eq bundleId }
+            .limit(1)
+            .map(::rowToDomain)
+            .singleOrNull()
+    }
 
     fun upsert(bundleMetadata: BundleMetadata) = transaction {
         val commonFields: (UpdateBuilder<*>) -> Unit = {
@@ -75,7 +63,18 @@ class BundleRepository {
                         (BundleTable.isPrerelease eq prerelease)
             }
             .limit(1)
-            .map(::rowToBundle)
+            .map(::rowToDomain)
             .singleOrNull()
     }
+
+    private fun rowToDomain(row: ResultRow) =
+        Bundle.create(
+            row[BundleTable.bundleType],
+            row[BundleTable.version],
+            row[BundleTable.description],
+            row[BundleTable.createdAt],
+            row[BundleTable.downloadUrl],
+            row[BundleTable.signatureDownloadUrl],
+            row[BundleTable.sourceFk].value
+        )
 }

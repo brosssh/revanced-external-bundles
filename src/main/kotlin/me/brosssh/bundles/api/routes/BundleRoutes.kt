@@ -1,17 +1,15 @@
 import io.github.smiley4.ktoropenapi.get
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.route
+import io.ktor.http.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import me.brosssh.bundles.api.dto.BundleResponseDto
-import me.brosssh.bundles.domain.models.toResponseDto
+import me.brosssh.bundles.api.dto.toResponseDto
 import me.brosssh.bundles.domain.services.BundleQuery
 import me.brosssh.bundles.domain.services.BundleService
 import org.koin.ktor.ext.get
 
 fun Route.bundleRoutes() {
     route("/bundle") {
-        // Get by ID
         get("/{id}", {
             description = "Get bundle by internal ID"
             tags = listOf("Bundle")
