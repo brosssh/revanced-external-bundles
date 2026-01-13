@@ -1,3 +1,11 @@
+# [1.1.0-dev.6](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.5...v1.1.0-dev.6) (2026-01-13)
+
+
+### Features
+
+* Add polling endpoint for refresh jobs ([6316207](https://github.com/brosssh/revanced-external-bundles/commit/631620780eb213df31423bee6bc61b3246823450))
+* Add polling endpoint for refresh jobs ([fa46fcd](https://github.com/brosssh/revanced-external-bundles/commit/fa46fcd18125dd881fd133dc6f4f8bc8bc664542))
+
 # [1.1.0-dev.5](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.4...v1.1.0-dev.5) (2026-01-12)
 
 
