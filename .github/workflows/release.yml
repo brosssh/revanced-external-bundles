@@ -72,7 +72,7 @@ jobs:
         uses: actions/attest-build-provenance@v3
         with:
           subject-name: 'ReVanced External Bundles ${{ steps.release.outputs.new_release_git_tag }}'
-          subject-path: build/libs/revanced-external-bundles-*.apk
+          subject-path: build/libs/revanced-external-bundles-*.jar
 
       - name: Purge outdated images
         uses: snok/container-retention-policy@v3.0.1
