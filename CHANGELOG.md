@@ -1,6 +1,18 @@
 # [1.1.0-dev.10](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.9...v1.1.0-dev.10) (2026-01-14)
 
 
+### Bug Fixes
+
+* modernize GI actions ([222a1f9](https://github.com/brosssh/revanced-external-bundles/commit/222a1f95c4ae9300055ae0b00f19e3f26d85deda))
+
+
+### Features
+
+* Test new Hasura migration + modernize GI actions ([653d482](https://github.com/brosssh/revanced-external-bundles/commit/653d4821b015cc71ba615b9a4793deb4e5a4c3eb))
+
+# [1.1.0-dev.10](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.9...v1.1.0-dev.10) (2026-01-14)
+
+
 ### Features
 
 * Test new Hasura migration + modernize GI actions ([653d482](https://github.com/brosssh/revanced-external-bundles/commit/653d4821b015cc71ba615b9a4793deb4e5a4c3eb))
