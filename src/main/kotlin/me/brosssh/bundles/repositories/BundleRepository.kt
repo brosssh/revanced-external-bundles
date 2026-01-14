@@ -71,7 +71,7 @@ class BundleRepository {
             .singleOrNull()
     }
 
-    fun findByRepoAndVersion(owner: String, repo: String, version: String)  = transaction {
+    fun findByRepoAndVersion(owner: String, repo: String, version: String) = transaction {
         (BundleTable innerJoin SourceTable innerJoin SourceMetadataTable)
             .selectAll()
             .where {

@@ -1,5 +1,6 @@
 package me.brosssh.bundles.domain.services.jobs
 
+import me.brosssh.bundles.db.functions.refreshIsLatestFlag
 import me.brosssh.bundles.domain.models.BundleImportError
 import me.brosssh.bundles.domain.models.RefreshJob
 import me.brosssh.bundles.integrations.github.GithubClient
@@ -51,6 +52,8 @@ class RefreshBundlesJobService(
                                 return@forEach
                             }
                         }
+
+                        refreshIsLatestFlag()
                     }
                 }
             }
