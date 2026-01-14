@@ -1,3 +1,10 @@
+# [1.1.0-dev.8](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.7...v1.1.0-dev.8) (2026-01-14)
+
+
+### Features
+
+* New refresh endpoint + improve GH action ([eafd7ad](https://github.com/brosssh/revanced-external-bundles/commit/eafd7ad84dd525e581b779bfe43bf05ddf182200))
+
 # [1.1.0-dev.7](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.6...v1.1.0-dev.7) (2026-01-13)
 
 
