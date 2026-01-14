@@ -18,12 +18,8 @@ class RefreshAllJobService(
         with(logger) {
             info("Starting full refresh")
 
-            refreshBundlesJobService.refresh().also {
-                it.job.join()
-            }
-            refreshPatchesJobService.refresh().also {
-                it.job.join()
-            }
+            refreshBundlesJobService.refresh().run { job.join() }
+            refreshPatchesJobService.refresh().run { job.join() }
 
             info("Full refresh completed")
         }
