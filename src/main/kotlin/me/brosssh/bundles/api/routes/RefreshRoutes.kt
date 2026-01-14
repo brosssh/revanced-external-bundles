@@ -10,6 +10,7 @@ import me.brosssh.bundles.api.dto.JobStatusResponseDto
 import me.brosssh.bundles.api.dto.toResponseDto
 import me.brosssh.bundles.domain.models.RefreshJob
 import me.brosssh.bundles.domain.services.RefreshJobStatusService
+import me.brosssh.bundles.domain.services.jobs.RefreshAllJobService
 import me.brosssh.bundles.domain.services.jobs.RefreshBundlesJobService
 import me.brosssh.bundles.domain.services.jobs.RefreshPatchesJobService
 import org.koin.ktor.ext.get
@@ -34,8 +35,9 @@ fun Route.refreshRoutes() {
                 }
             }) {
                 with(call.get<RefreshBundlesJobService>()) {
-                    val jobId = refresh()
-                    call.respond(HttpStatusCode.Accepted, mapOf("job_id" to jobId))
+                    with(refresh()) {
+                        call.respond(HttpStatusCode.Accepted, mapOf("job_id" to jobId))
+                    }
                 }
             }
 
@@ -55,8 +57,31 @@ fun Route.refreshRoutes() {
                 }
             }) {
                 with(call.get<RefreshPatchesJobService>()) {
-                    val jobId = refresh()
-                    call.respond(HttpStatusCode.Accepted, mapOf("job_id" to jobId))
+                    with(refresh()) {
+                        call.respond(HttpStatusCode.Accepted, mapOf("job_id" to jobId))
+                    }
+                }
+            }
+
+            post("all", {
+                description = "Trigger async refresh job"
+                tags = listOf("Refresh")
+
+                securitySchemeNames("hmacAuth")
+
+                response {
+                    HttpStatusCode.Accepted to {
+                        description = "Refresh job Accepted"
+                    }
+                    code(HttpStatusCode.Accepted) {
+                        body<Map<String, String>>()
+                    }
+                }
+            }) {
+                with(call.get<RefreshAllJobService>()) {
+                    with(refresh()) {
+                        call.respond(HttpStatusCode.Accepted, mapOf("job_id" to jobId))
+                    }
                 }
             }
         }

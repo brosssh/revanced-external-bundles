@@ -2,6 +2,7 @@ package me.brosssh.bundles.domain.services.jobs
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.brosssh.bundles.db.entities.RefreshJobEntity
 import me.brosssh.bundles.domain.models.RefreshJob
@@ -16,11 +17,11 @@ abstract class BaseRefreshJobService (
     abstract val logger: Logger
     abstract val jobType: RefreshJob.RefreshJobType
 
-    fun refresh(): String {
+    fun refresh(): RefreshJobHandle {
         val jobId = UUID.randomUUID().toString()
         val jobEntityId = refreshJobRepository.create(jobId, jobType).id.value
 
-        CoroutineScope(Dispatchers.Default).launch {
+        val job = CoroutineScope(Dispatchers.Default).launch {
             try {
                 processRefresh(jobId)
 
@@ -37,8 +38,13 @@ abstract class BaseRefreshJobService (
             }
         }
 
-        return jobId
+        return RefreshJobHandle(jobId, job)
     }
 
     protected abstract suspend fun processRefresh(jobId: String)
 }
+
+data class RefreshJobHandle(
+    val jobId: String,
+    val job: Job
+)

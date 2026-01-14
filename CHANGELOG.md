@@ -1,3 +1,24 @@
+# [1.1.0-dev.10](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.9...v1.1.0-dev.10) (2026-01-14)
+
+
+### Features
+
+* Test new Hasura migration + modernize GI actions ([653d482](https://github.com/brosssh/revanced-external-bundles/commit/653d4821b015cc71ba615b9a4793deb4e5a4c3eb))
+
+# [1.1.0-dev.9](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.8...v1.1.0-dev.9) (2026-01-14)
+
+
+### Bug Fixes
+
+* remove Hasura metadata ([ec601ca](https://github.com/brosssh/revanced-external-bundles/commit/ec601ca16510adeb892558e0ff23727c27a12bd0))
+
+# [1.1.0-dev.8](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.7...v1.1.0-dev.8) (2026-01-14)
+
+
+### Features
+
+* New refresh endpoint + improve GH action ([eafd7ad](https://github.com/brosssh/revanced-external-bundles/commit/eafd7ad84dd525e581b779bfe43bf05ddf182200))
+
 # [1.1.0-dev.7](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.6...v1.1.0-dev.7) (2026-01-13)
 
 

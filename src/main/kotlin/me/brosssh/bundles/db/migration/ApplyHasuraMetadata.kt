@@ -5,11 +5,15 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import me.brosssh.bundles.Config
-import java.io.File
 
 suspend fun applyHasuraMetadata() {
     with(HttpClient()) {
-        val metadataJson = File("hasura/metadata.json").readText()
+        val metadataJson = javaClass
+                .classLoader
+                .getResourceAsStream("hasura/metadata.json")
+                ?.bufferedReader()
+                ?.readText()
+                ?: error("hasura/metadata.json not found on classpath")
 
         val response = post(Config.hostUrl.resolve("/hasura/v1/metadata").toURL()) {
             header("X-Hasura-Admin-Secret", Config.hasuraSecret)
