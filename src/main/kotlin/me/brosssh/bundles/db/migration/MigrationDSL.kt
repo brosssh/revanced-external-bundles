@@ -59,5 +59,18 @@ fun migrationScript() {
               END IF;
             END$$;
         """)
+
+
+        exec("""
+            ALTER TABLE bundle DROP COLUMN IF EXISTS is_latest;
+        """)
+
+        exec("""
+            ALTER TABLE bundle DROP CONSTRAINT bundle_source_prerelease_uq;
+        """)
+
+        exec("""
+            ALTER TABLE bundle ADD CONSTRAINT bundle_source_prerelease_uq UNIQUE (source_fk,is_prerelease);
+        """)
     }
 }

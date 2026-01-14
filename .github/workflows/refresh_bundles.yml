@@ -1,4 +1,4 @@
-name: Refresh Bundles
+name: Refresh Bundles & Patches
 
 on:
   workflow_dispatch:
@@ -8,15 +8,25 @@ on:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [Development, Production]
+
+    environment: ${{ matrix.env }}
+
     steps:
       - name: Call refresh endpoint
         env:
           SECRET: ${{ secrets.AUTHENTICATION_SECRET }}
+          DEPLOY_ENDPOINT: ${{ vars.DEPLOY_ENDPOINT }}
         run: |
           TIMESTAMP=$(date +%s)
           PAYLOAD="refresh:$TIMESTAMP"
           HMAC=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
-          curl -X POST "https://revanced-external-bundles.brosssh.com/api/v1/refresh/bundles" \
+          
+          echo "Calling refresh on $DEPLOY_ENDPOINT"
+          
+          curl -X POST "$DEPLOY_ENDPOINT/api/v1/refresh/all" \
                 -H "Authorization: Bearer $TIMESTAMP-$HMAC" \
                 -H 'accept: application/json' \
                 -d '' \

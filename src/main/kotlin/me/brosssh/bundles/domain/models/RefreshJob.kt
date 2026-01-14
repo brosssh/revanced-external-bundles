@@ -11,6 +11,7 @@ data class RefreshJob(
     val error: String? = null
 ) {
     enum class RefreshJobType {
+        ALL,
         BUNDLES,
         PATCHES
     }
