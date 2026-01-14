@@ -1,3 +1,10 @@
+# [1.1.0-dev.9](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.8...v1.1.0-dev.9) (2026-01-14)
+
+
+### Bug Fixes
+
+* remove Hasura metadata ([ec601ca](https://github.com/brosssh/revanced-external-bundles/commit/ec601ca16510adeb892558e0ff23727c27a12bd0))
+
 # [1.1.0-dev.8](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0-dev.7...v1.1.0-dev.8) (2026-01-14)
 
 
