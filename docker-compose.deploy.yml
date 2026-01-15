@@ -1,0 +1,71 @@
+# For deploy
+services:
+  postgres:
+    image: postgres:16
+    container_name: bundles-${ENV}-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PSSW}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${DATABASE_PORT}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: ghcr.io/brosssh/revanced-external-bundles:${APP_TAG:-latest}
+    container_name: bundles-${ENV}-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "8080"
+    ports:
+      - "${BACKEND_PORT}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+
+  hasura:
+    image: hasura/graphql-engine:v2.31.0
+    container_name: bundles-${ENV}-hasura
+    restart: unless-stopped
+    expose:
+      - "8080"
+    ports:
+      - "${HASURA_PORT}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PSSW}@postgres:5432/${DATABASE_NAME}
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
+      HASURA_GRAPHQL_SERVER_PATH: /hasura
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower-${ENV}
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      --label-enable
+      --interval 300
+
+volumes:
+  pgdata:
+
+networks:
+  default:
+    name: bundles-${ENV}-network

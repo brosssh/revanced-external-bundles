@@ -1,0 +1,38 @@
+name: Refresh Bundles & Patches
+# Run Production on schedule OR manual trigger from main
+# Run Development only on manual trigger from dev
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - environment: Production
+            branch: refs/heads/main
+          - environment: Development
+            branch: refs/heads/dev
+    environment: ${{ matrix.environment }}
+    if: |
+      (github.event_name == 'schedule' && matrix.environment == 'Production') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == matrix.branch)
+    steps:
+      - name: Call refresh endpoint (${{ matrix.environment }})
+        env:
+          SECRET: ${{ secrets.AUTHENTICATION_SECRET }}
+          DEPLOY_ENDPOINT: ${{ vars.DEPLOY_ENDPOINT }}
+        run: |
+          TIMESTAMP=$(date +%s)
+          PAYLOAD="refresh:$TIMESTAMP"
+          HMAC=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
+          echo "Calling refresh on $DEPLOY_ENDPOINT (${{ matrix.environment }})"
+          curl -X POST "$DEPLOY_ENDPOINT/api/v1/refresh/all" \
+            -H "Authorization: Bearer $TIMESTAMP-$HMAC" \
+            -H 'accept: application/json' \
+            -d '' \
+            -w "\nHTTP Status: %{http_code}\n"
