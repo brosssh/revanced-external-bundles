@@ -26,7 +26,7 @@ jobs:
           (github.event_name == 'schedule' && matrix.environment == 'Production') ||
           (github.event_name == 'workflow_dispatch' && github.ref == matrix.branch)
         env:
-          SECRET: ${{ secrets.AUTHENTICATION_SECRET }}
+          SECRET: ${{ secrets.BACKEND_AUTHENTICATION_SECRET }}
           DEPLOY_ENDPOINT: ${{ vars.DEPLOY_ENDPOINT }}
         run: |
           TIMESTAMP=$(date +%s)
