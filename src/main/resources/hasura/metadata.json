@@ -1,0 +1,301 @@
+{
+  "resource_version": 40,
+  "metadata": {
+    "version": 3,
+    "sources": [
+      {
+        "name": "default",
+        "kind": "postgres",
+        "tables": [
+          {
+            "table": {
+              "name": "bundle",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "source",
+                "using": {
+                  "foreign_key_constraint_on": "source_fk"
+                }
+              }
+            ],
+            "array_relationships": [
+              {
+                "name": "patches",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "bundle_fk",
+                    "table": {
+                      "name": "patch",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "is_latest",
+                    "is_prerelease",
+                    "need_patches_update",
+                    "bundle_type",
+                    "created_at",
+                    "download_url",
+                    "file_hash",
+                    "signature_download_url",
+                    "version",
+                    "id",
+                    "source_fk",
+                    "description"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "package",
+              "schema": "public"
+            },
+            "array_relationships": [
+              {
+                "name": "patch_packages",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "package_fk",
+                    "table": {
+                      "name": "patch_package",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "name",
+                    "version",
+                    "id"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "patch",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "bundle",
+                "using": {
+                  "foreign_key_constraint_on": "bundle_fk"
+                }
+              }
+            ],
+            "array_relationships": [
+              {
+                "name": "patch_packages",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "patch_fk",
+                    "table": {
+                      "name": "patch_package",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "name",
+                    "bundle_fk",
+                    "id",
+                    "description"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "patch_package",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "package",
+                "using": {
+                  "foreign_key_constraint_on": "package_fk"
+                }
+              },
+              {
+                "name": "patch",
+                "using": {
+                  "foreign_key_constraint_on": "patch_fk"
+                }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "package_fk",
+                    "patch_fk"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "refresh_jobs",
+              "schema": "public"
+            },
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "job_id",
+                    "job_type",
+                    "status",
+                    "id",
+                    "error",
+                    "completed_at",
+                    "started_at"
+                  ],
+                  "filter": {}
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "source",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "source_metadatum",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "source_fk",
+                    "table": {
+                      "name": "source_metadata",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "array_relationships": [
+              {
+                "name": "bundles",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "source_fk",
+                    "table": {
+                      "name": "bundle",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "url",
+                    "id"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "source_metadata",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "source",
+                "using": {
+                  "foreign_key_constraint_on": "source_fk"
+                }
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "user",
+                "permission": {
+                  "columns": [
+                    "is_repo_archived",
+                    "owner_avatar_url",
+                    "owner_name",
+                    "repo_description",
+                    "repo_name",
+                    "repo_pushed_at",
+                    "id",
+                    "repo_stars",
+                    "source_fk"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ]
+          }
+        ],
+        "configuration": {
+          "connection_info": {
+            "database_url": {
+              "from_env": "HASURA_GRAPHQL_DATABASE_URL"
+            },
+            "isolation_level": "read-committed",
+            "pool_settings": {
+              "connection_lifetime": 600,
+              "idle_timeout": 180,
+              "max_connections": 50,
+              "retries": 1
+            },
+            "use_prepared_statements": true
+          }
+        }
+      }
+    ]
+  }
+}

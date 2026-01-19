@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  release:
+    name: Release dev
+    environment:
+      name: ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
+      url: ${{ vars.DEPLOY_ENDPOINT }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Make sure the release step uses its own credentials:
+          # https://github.com/cycjimmy/semantic-release-action#private-packages
+          persist-credentials: false
+
+      - name: Cache Gradle
+        uses: burrunan/gradle-cache-action@v3
+
+      - name: Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew startShadowScripts
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: amd64, arm64
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v5
+        id: release
+        env:
+          DOCKER_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: 'ReVanced External Bundles ${{ steps.release.outputs.new_release_git_tag }}'
+          subject-path: build/libs/revanced-external-bundles-*.jar
+
+      - name: Purge outdated images
+        uses: snok/container-retention-policy@v3.0.1
+        with:
+          account: user
+          token: ${{ secrets.GITHUB_TOKEN }}
+          image-names: revanced-external-bundles
+          keep-n-most-recent: 5
+          cut-off: 1w
