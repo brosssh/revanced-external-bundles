@@ -17,12 +17,14 @@ jobs:
             branch: refs/heads/main
           - environment: Development
             branch: refs/heads/dev
+
     environment: ${{ matrix.environment }}
-    if: |
-      (github.event_name == 'schedule' && matrix.environment == 'Production') ||
-      (github.event_name == 'workflow_dispatch' && github.ref == matrix.branch)
+
     steps:
       - name: Call refresh endpoint (${{ matrix.environment }})
+        if: |
+          (github.event_name == 'schedule' && matrix.environment == 'Production') ||
+          (github.event_name == 'workflow_dispatch' && github.ref == matrix.branch)
         env:
           SECRET: ${{ secrets.AUTHENTICATION_SECRET }}
           DEPLOY_ENDPOINT: ${{ vars.DEPLOY_ENDPOINT }}
