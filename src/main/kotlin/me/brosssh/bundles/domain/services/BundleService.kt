@@ -1,5 +1,6 @@
 package me.brosssh.bundles.domain.services
 
+import me.brosssh.bundles.domain.models.ReleaseChannel
 import me.brosssh.bundles.repositories.BundleRepository
 
 sealed class BundleQuery {
@@ -8,6 +9,12 @@ sealed class BundleQuery {
         val owner: String,
         val repo: String,
         val isPrerelease: Boolean = false
+    ) : BundleQuery()
+
+    data class ByRepositoryAndChannel(
+        val owner: String,
+        val repo: String,
+        val channel: ReleaseChannel
     ) : BundleQuery()
 
     data class ByRepositoryAndVersion(
@@ -33,6 +40,11 @@ class BundleService (
                 query.owner,
                 query.repo,
                 query.version
+            )
+            is BundleQuery.ByRepositoryAndChannel -> bundleRepository.findByRepoAndChannel(
+                query.owner,
+                query.repo,
+                query.channel
             )
         }
 }
