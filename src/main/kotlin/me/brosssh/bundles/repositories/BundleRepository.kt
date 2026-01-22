@@ -94,7 +94,7 @@ class BundleRepository {
                 (SourceMetadataTable.ownerName eq owner) and
                         (SourceMetadataTable.repoName eq repo) and
                         (BundleTable.isLatest eq true) and
-                        (channel.predicate())
+                        channel.releaseFilter
             }
             .orderBy(BundleTable.createdAt, SortOrder.DESC)
             .limit(1)

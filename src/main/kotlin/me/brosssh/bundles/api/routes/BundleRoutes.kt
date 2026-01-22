@@ -54,6 +54,7 @@ fun Route.bundleRoutesV1() {
         get("/{owner}/{repo}/latest", {
             description = "Get bundle by repository owner and name"
             tags = listOf("Bundle")
+            deprecated = true
 
             request {
                 pathParameter<String>("owner") {
