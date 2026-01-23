@@ -1,3 +1,10 @@
+## [1.1.1-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.0...v1.1.1-dev.1) (2026-01-23)
+
+
+### Bug Fixes
+
+* Refresh latest flag only once ([f0fccf0](https://github.com/brosssh/revanced-external-bundles/commit/f0fccf065df24cf2c67eeec01d3f4a6b67a9a7f7))
+
 # [1.1.0](https://github.com/brosssh/revanced-external-bundles/compare/v1.0.0...v1.1.0) (2026-01-23)
 
 

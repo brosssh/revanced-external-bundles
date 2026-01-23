@@ -52,8 +52,6 @@ class RefreshBundlesJobService(
                                 return@forEach
                             }
                         }
-
-                        refreshIsLatestFlag()
                     }
                 }
             }
@@ -63,6 +61,8 @@ class RefreshBundlesJobService(
 
             logger.info("Source process completed")
         }
+
+        refreshIsLatestFlag()
         logger.info("Process completed")
     }
 }

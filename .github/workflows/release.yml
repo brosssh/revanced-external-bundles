@@ -9,7 +9,7 @@ on:
 
 jobs:
   release:
-    name: Release dev
+    name: Release
     environment:
       name: ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
       url: ${{ vars.DEPLOY_ENDPOINT }}
