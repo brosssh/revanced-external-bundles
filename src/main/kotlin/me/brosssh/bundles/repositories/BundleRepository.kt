@@ -7,6 +7,7 @@ import me.brosssh.bundles.db.tables.SourceTable
 import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleMetadata
 import me.brosssh.bundles.domain.models.BundleType
+import me.brosssh.bundles.domain.models.ReleaseChannel
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -81,6 +82,21 @@ class BundleRepository {
                         (SourceMetadataTable.repoName eq repo) and
                         (BundleTable.version eq version)
             }
+            .limit(1)
+            .map(::rowToDomain)
+            .singleOrNull()
+    }
+
+    fun findByRepoAndChannel(owner: String, repo: String, channel: ReleaseChannel) = transaction {
+        (BundleTable innerJoin SourceTable innerJoin SourceMetadataTable)
+            .selectAll()
+            .where {
+                (SourceMetadataTable.ownerName eq owner) and
+                        (SourceMetadataTable.repoName eq repo) and
+                        (BundleTable.isLatest eq true) and
+                        channel.releaseFilter
+            }
+            .orderBy(BundleTable.createdAt, SortOrder.DESC)
             .limit(1)
             .map(::rowToDomain)
             .singleOrNull()

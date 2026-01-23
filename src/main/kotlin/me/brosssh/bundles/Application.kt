@@ -6,7 +6,8 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
-import me.brosssh.bundles.api.routes.bundleRoutes
+import me.brosssh.bundles.api.routes.bundleRoutesV1
+import me.brosssh.bundles.api.routes.bundleRoutesV2
 import me.brosssh.bundles.api.routes.graphQLRoute
 import me.brosssh.bundles.api.routes.refreshRoutes
 import me.brosssh.bundles.db.migration.applyHasuraMetadata
@@ -15,6 +16,10 @@ import me.brosssh.bundles.plugins.*
 
 fun Route.apiV1(build: Route.() -> Unit) {
     route("/api/v1", build)
+}
+
+fun Route.apiV2(build: Route.() -> Unit) {
+    route("/api/v2", build)
 }
 
 suspend fun Application.module() {
@@ -38,7 +43,11 @@ suspend fun Application.module() {
 
         apiV1 {
             refreshRoutes()
-            bundleRoutes()
+            bundleRoutesV1()
+        }
+
+        apiV2 {
+            bundleRoutesV2()
         }
 
         graphQLRoute()
