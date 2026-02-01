@@ -86,7 +86,7 @@ dependencies {
     implementation(libs.postgresql)
 
     implementation(libs.dotenv)
-    implementation(libs.brosssh.patcher)
+    implementation(libs.revanced.patcher)
     implementation(libs.morphe.patcher)
     implementation(libs.logback)
     implementation(libs.apksig)
