@@ -8,7 +8,7 @@ koin = "3.5.3"
 openapi-tools = "5.4.0"
 dotenv = "6.5.1"
 revanced-patcher = "21.1.0-dev.5"
-morphe-patcher = "1.0.0"
+morphe-patcher = "1.1.1"
 logback = "1.5.24"
 apksig = "8.1.1"
 
