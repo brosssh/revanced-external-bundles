@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.1...v1.1.2) (2026-02-24)
+
+
+### Bug Fixes
+
+* Use new patcher for Morphe ([#23](https://github.com/brosssh/revanced-external-bundles/issues/23)) ([8fcd8fc](https://github.com/brosssh/revanced-external-bundles/commit/8fcd8fc1bb30d7b1a95041deefc0b575f4bbfe66))
+
 ## [1.1.2-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.1...v1.1.2-dev.1) (2026-02-24)
 
 
