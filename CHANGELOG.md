@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.2...v1.1.3) (2026-04-02)
+
+
+### Bug Fixes
+
+* Bump patcher to fix patches not loading ([91d1273](https://github.com/brosssh/revanced-external-bundles/commit/91d127337086827955aba3718a42d16c20423636))
+
 ## [1.1.3-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.2...v1.1.3-dev.1) (2026-04-02)
 
 
