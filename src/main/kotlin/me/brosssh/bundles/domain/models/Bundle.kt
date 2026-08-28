@@ -1,6 +1,8 @@
 package me.brosssh.bundles.domain.models
 
-import me.brosssh.bundles.integrations.github.GithubClient
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
@@ -16,7 +18,7 @@ sealed class Bundle(
     val signatureDownloadUrl: String?,
     val sourceFk: Int
 ) : KoinComponent {
-    protected val githubClient: GithubClient by inject()
+    protected val httpClient: HttpClient by inject()
     protected val processDir =
         File(System.getProperty("java.io.tmpdir"))
             .resolve("bundles")
@@ -24,7 +26,7 @@ sealed class Bundle(
 
     protected suspend fun downloadBundleFile() =
         File(processDir, UUID.randomUUID().toString()).apply {
-            githubClient.downloadFile(downloadUrl, this)
+            writeBytes(httpClient.get(downloadUrl).body<ByteArray>())
         }
 
     private var _patches: Set<Patch>? = null

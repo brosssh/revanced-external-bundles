@@ -32,8 +32,11 @@ object Config {
     // Authentication
     val authenticationSecret: String = getEnv("BACKEND_AUTHENTICATION_SECRET")
 
-    // GitHub
-    val githubPatToken: String = getEnv("BACKEND_GITHUB_PAT_TOKEN")
+    // Self-hosted git authorities, format: "host[:port]=type,..." (type = github|gitlab|gitea)
+    val gitHosts: String = getEnv("BACKEND_GIT_HOSTS", "")
+
+    // Optional authority-specific PATs, format: "host[:port]=pat,..."
+    val gitHostsPat: String = getEnv("BACKEND_GIT_HOSTS_PAT", "")
 
     // Server
     val port: Int = getEnv("BACKEND_PORT").toInt()

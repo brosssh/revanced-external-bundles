@@ -1,4 +1,4 @@
-package me.brosssh.bundles.integrations.github
+package me.brosssh.bundles.integrations.common
 
 import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleImportError
@@ -6,34 +6,23 @@ import me.brosssh.bundles.domain.models.BundleMetadata
 import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.SourceMetadata
 
-fun GithubRepoDto.toDomainModel(sourceId: Int) = SourceMetadata(
+fun RepoInfo.toDomainModel(sourceId: Int) = SourceMetadata(
     id = sourceId,
-    ownerName = owner.name,
-    ownerAvatarUrl = owner.avatarUrl,
+    ownerName = ownerName,
+    ownerAvatarUrl = ownerAvatarUrl,
     repoName = repoName,
     repoDescription = repoDescription,
-    repoStars = stars,
-    isRepoArchived = archived,
-    repoPushedAt = pushedAt
+    repoStars = repoStars,
+    isRepoArchived = isRepoArchived,
+    repoPushedAt = repoPushedAt
 )
 
-private fun String.toBundleType(): BundleType = when {
-    endsWith(".rvp") -> BundleType.REVANCED_V4
-    endsWith(".mpp") -> BundleType.MORPHE_V1
-    endsWith(".jar") -> BundleType.REVANCED_V3
-    else -> throw BundleImportError.ReleaseFileNotFoundError()
-}
-
-fun GithubReleaseDto.toDomainModel(sourceId: Int): BundleMetadata {
+fun ReleaseInfo.toDomainModel(sourceId: Int): BundleMetadata {
     val asset = assets
-        .firstOrNull {
-            it.name.endsWith(".rvp") ||
-                    it.name.endsWith(".mpp") ||
-                    it.name.endsWith(".jar")
-        }
+        .firstOrNull { it.bundleTypeValue() != null }
         ?: throw BundleImportError.ReleaseFileNotFoundError()
 
-    val bundleType = asset.name.toBundleType()
+    val bundleType = BundleType.from(asset.bundleTypeValue()!!)
     val downloadUrl = asset.browserDownloadUrl
     val digestHash = asset.digest
 
@@ -44,7 +33,7 @@ fun GithubReleaseDto.toDomainModel(sourceId: Int): BundleMetadata {
             body,
             createdAt,
             downloadUrl,
-            assets.firstOrNull { it.name.endsWith(".asc") }?.browserDownloadUrl,
+            assets.firstOrNull { it.isSignature() }?.browserDownloadUrl,
             sourceId
         ),
         fileHash = digestHash,

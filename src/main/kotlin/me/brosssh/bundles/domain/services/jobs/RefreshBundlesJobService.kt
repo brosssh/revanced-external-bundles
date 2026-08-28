@@ -3,8 +3,8 @@ package me.brosssh.bundles.domain.services.jobs
 import me.brosssh.bundles.db.functions.refreshIsLatestFlag
 import me.brosssh.bundles.domain.models.BundleImportError
 import me.brosssh.bundles.domain.models.RefreshJob
-import me.brosssh.bundles.integrations.github.GithubClient
-import me.brosssh.bundles.integrations.github.toDomainModel
+import me.brosssh.bundles.integrations.HostResolver
+import me.brosssh.bundles.integrations.common.toDomainModel
 import me.brosssh.bundles.repositories.BundleRepository
 import me.brosssh.bundles.repositories.RefreshJobRepository
 import me.brosssh.bundles.repositories.SourceMetadataRepository
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 class RefreshBundlesJobService(
     refreshJobRepository: RefreshJobRepository,
-    private val githubClient: GithubClient,
+    private val hostResolver: HostResolver,
     private val sourceRepository: SourceRepository,
     private val sourceMetadataRepository: SourceMetadataRepository,
     private val bundleRepository: BundleRepository
@@ -27,30 +27,27 @@ class RefreshBundlesJobService(
 
     override suspend fun processRefresh(jobId: String) {
         logger.info("Processing bundles refresh")
+
         sourceRepository.getAll().forEach { source ->
             logger.info("Processing source ${source.url}")
             try {
                 suspendTransaction {
-                    with(githubClient) {
-                        val (owner, repo) = parseRepoUrl(source.url)
+                    val resolved = hostResolver.resolve(source.url)
 
-                        // Update metatable
-                        getRepo(owner, repo).also { repoDto ->
-                            sourceMetadataRepository.upsert(
-                                repoDto.toDomainModel(source.intId)
+                    // Update metatable
+                    sourceMetadataRepository.upsert(
+                        resolved.client.getRepo(resolved.ref).toDomainModel(source.intId)
+                    )
+
+                    // Update bundle table
+                    resolved.client.getReleases(resolved.ref).forEach { release ->
+                        try {
+                            bundleRepository.upsert(
+                                release.toDomainModel(source.intId)
                             )
-                        }
-
-                        // Update bundle table
-                        getReleases(owner, repo).forEach { releaseDto ->
-                            try {
-                                bundleRepository.upsert(
-                                    releaseDto.toDomainModel(source.intId)
-                                )
-                            } catch (_: BundleImportError) {
-                                logger.warn("No rvp found for owner=${owner}, repo=${repo}, version${releaseDto.tagName}")
-                                return@forEach
-                            }
+                        } catch (_: BundleImportError) {
+                            logger.warn("No rvp/mpp/jar found for ${source.url}, version ${release.tagName}")
+                            return@forEach
                         }
                     }
                 }
@@ -65,4 +62,5 @@ class RefreshBundlesJobService(
         refreshIsLatestFlag()
         logger.info("Process completed")
     }
+
 }

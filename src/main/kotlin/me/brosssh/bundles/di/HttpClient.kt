@@ -6,6 +6,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
@@ -29,6 +30,10 @@ val httpClientModule = module {
             install(Logging) {
                 logger = Logger.DEFAULT
                 level = LogLevel.INFO
+                sanitizeHeader { header ->
+                    header.equals(HttpHeaders.Authorization, ignoreCase = true) ||
+                        header.equals("PRIVATE-TOKEN", ignoreCase = true)
+                }
             }
         }
     }
