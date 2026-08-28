@@ -5,7 +5,8 @@ name: Refresh Bundles & Patches
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/30 * * * *'
+    # Avoid the start of the hour, when GitHub Actions scheduled runs are most likely to be delayed or dropped.
+    - cron: '17,47 * * * *'
 
 permissions:
   contents: read

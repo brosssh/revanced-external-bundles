@@ -11,7 +11,7 @@ interface Patch {
 }
 
 class ReVancedPatchAdapter(
-    val patch: ReVancedPatch<*>
+    val patch: ReVancedPatch
 ) : Patch {
     override val name get() = patch.name
     override val description get() = patch.description
