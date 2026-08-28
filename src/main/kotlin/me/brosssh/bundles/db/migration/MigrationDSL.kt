@@ -73,5 +73,10 @@ fun migrationScript() {
         exec("""
             ALTER TABLE bundle ADD CONSTRAINT bundle_source_prerelease_uq UNIQUE ("version", source_fk, is_prerelease);
         """)
+
+        exec("""
+            ALTER TABLE source
+            ADD COLUMN IF NOT EXISTS enabled BOOLEAN NOT NULL DEFAULT true;
+        """)
     }
 }

@@ -28,7 +28,7 @@ class RefreshBundlesJobService(
     override suspend fun processRefresh(jobId: String) {
         logger.info("Processing bundles refresh")
 
-        sourceRepository.getAll().forEach { source ->
+        sourceRepository.getEnabled().forEach { source ->
             logger.info("Processing source ${source.url}")
             try {
                 suspendTransaction {

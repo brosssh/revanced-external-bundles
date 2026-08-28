@@ -10,4 +10,5 @@ class SourceEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<SourceEntity>(SourceTable)
 
     var url by SourceTable.url
+    var enabled by SourceTable.enabled
 }

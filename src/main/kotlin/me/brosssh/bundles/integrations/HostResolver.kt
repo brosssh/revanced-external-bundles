@@ -2,6 +2,7 @@ package me.brosssh.bundles.integrations
 
 import me.brosssh.bundles.integrations.common.GitHostClient
 import me.brosssh.bundles.integrations.common.GitHostClientFactory
+import me.brosssh.bundles.integrations.common.ParsedRepoUrl
 import me.brosssh.bundles.integrations.common.RepoRef
 import me.brosssh.bundles.integrations.common.parseRepoUrl
 import org.slf4j.LoggerFactory
@@ -26,13 +27,19 @@ class HostResolver(
 ) {
     private val registry: Map<String, GitHostType> = defaultRegistry(authorities)
 
-    fun resolve(url: String): ResolvedGitHost {
+    /** Parses [url] and verifies that its authority is registered without creating a client. */
+    fun requireSupported(url: String): ParsedRepoUrl {
         val parsed = parseRepoUrl(url)
-        val type = registry[parsed.authority]
-            ?: throw IllegalArgumentException(
-                "Unsupported git authority '${parsed.authority}'. Register it via BACKEND_GIT_HOSTS " +
-                    "(e.g. '${parsed.authority}=gitea', '${parsed.authority}=gitlab', etc.)."
-            )
+        require(parsed.authority in registry) {
+            "Unsupported git authority '${parsed.authority}'. Register it via BACKEND_GIT_HOSTS " +
+                "(e.g. '${parsed.authority}=gitea', '${parsed.authority}=gitlab', etc.)."
+        }
+        return parsed
+    }
+
+    fun resolve(url: String): ResolvedGitHost {
+        val parsed = requireSupported(url)
+        val type = registry.getValue(parsed.authority)
         val factory = factories[type]
             ?: error("No GitHostClientFactory registered for $type")
         val hostClient = factory.create(parsed.scheme, parsed.authority)

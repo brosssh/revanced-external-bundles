@@ -12,9 +12,11 @@ import me.brosssh.bundles.api.routes.graphQLRoute
 import me.brosssh.bundles.api.v1.routes.bundleRoutes as bundleRoutesV1
 import me.brosssh.bundles.api.v1.routes.refreshRoutes
 import me.brosssh.bundles.api.v2.routes.bundleRoutes as bundleRoutesV2
+import me.brosssh.bundles.db.SourceManifestSync
 import me.brosssh.bundles.db.migration.applyHasuraMetadata
 import me.brosssh.bundles.db.migration.migrationScript
 import me.brosssh.bundles.plugins.*
+import org.koin.ktor.ext.inject
 
 fun Route.apiV1(build: Route.() -> Unit) {
     route("/api/v1", build)
@@ -38,6 +40,10 @@ suspend fun Application.module() {
     install(IgnoreTrailingSlash)
 
     migrationScript()
+
+    val sourceManifestSync by inject<SourceManifestSync>()
+    log.info(sourceManifestSync.sync().summary)
+
     applyHasuraMetadata()
 
     routing {

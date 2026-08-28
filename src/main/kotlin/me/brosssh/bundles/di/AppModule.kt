@@ -1,6 +1,7 @@
 package me.brosssh.bundles.di
 
 import me.brosssh.bundles.Config
+import me.brosssh.bundles.db.SourceManifestSync
 import me.brosssh.bundles.domain.services.BundleService
 import me.brosssh.bundles.domain.services.RefreshJobStatusService
 import me.brosssh.bundles.domain.services.jobs.RefreshAllJobService
@@ -70,5 +71,6 @@ val appModule = module {
 
     single { BundleService(get()) }
     single { RefreshJobStatusService(get()) }
+    single { SourceManifestSync(get()) }
 
 }

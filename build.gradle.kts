@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.postgresql)
 
     implementation(libs.dotenv)
+    implementation(libs.tomlj)
     implementation(libs.revanced.patcher)
     implementation(libs.morphe.patcher)
     implementation(libs.logback)
@@ -97,6 +98,19 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+val validateSources by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Validate the tracked sources manifest (src/main/resources/sources.toml)"
+    dependsOn(tasks.named("classes"))
+    mainClass.set("me.brosssh.bundles.db.SourceManifestSync")
+    classpath = sourceSets.main.get().runtimeClasspath
+}
+
+tasks.named("check") {
+    dependsOn(validateSources)
+}
+
 kotlin {
     jvmToolchain(21)
 }
