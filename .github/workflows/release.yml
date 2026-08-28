@@ -75,7 +75,7 @@ jobs:
           subject-path: build/libs/revanced-external-bundles-*.jar
 
       - name: Purge outdated images
-        uses: snok/container-retention-policy@v3.0.1
+        uses: snok/container-retention-policy@v3.1.0
         with:
           account: user
           token: ${{ secrets.GITHUB_TOKEN }}
