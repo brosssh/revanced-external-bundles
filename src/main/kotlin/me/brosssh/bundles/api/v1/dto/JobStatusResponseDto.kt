@@ -1,4 +1,4 @@
-package me.brosssh.bundles.api.dto
+package me.brosssh.bundles.api.v1.dto
 
 import kotlinx.serialization.Serializable
 import me.brosssh.bundles.domain.models.RefreshJob

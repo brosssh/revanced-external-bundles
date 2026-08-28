@@ -1,4 +1,4 @@
-package me.brosssh.bundles.api.routes
+package me.brosssh.bundles.api.v1.routes
 
 import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.post
@@ -6,8 +6,8 @@ import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import me.brosssh.bundles.api.dto.JobStatusResponseDto
-import me.brosssh.bundles.api.dto.toResponseDto
+import me.brosssh.bundles.api.v1.dto.JobStatusResponseDto
+import me.brosssh.bundles.api.v1.dto.toResponseDto
 import me.brosssh.bundles.domain.models.RefreshJob
 import me.brosssh.bundles.domain.services.RefreshJobStatusService
 import me.brosssh.bundles.domain.services.jobs.RefreshAllJobService

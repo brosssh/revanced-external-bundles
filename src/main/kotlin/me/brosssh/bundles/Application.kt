@@ -7,11 +7,11 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.IgnoreTrailingSlash
-import me.brosssh.bundles.api.routes.bundleRoutesV1
-import me.brosssh.bundles.api.routes.bundleRoutesV2
 import me.brosssh.bundles.api.v3.routes.bundleRoutes as bundleRoutesV3
 import me.brosssh.bundles.api.routes.graphQLRoute
-import me.brosssh.bundles.api.routes.refreshRoutes
+import me.brosssh.bundles.api.v1.routes.bundleRoutes as bundleRoutesV1
+import me.brosssh.bundles.api.v1.routes.refreshRoutes
+import me.brosssh.bundles.api.v2.routes.bundleRoutes as bundleRoutesV2
 import me.brosssh.bundles.db.migration.applyHasuraMetadata
 import me.brosssh.bundles.db.migration.migrationScript
 import me.brosssh.bundles.plugins.*
