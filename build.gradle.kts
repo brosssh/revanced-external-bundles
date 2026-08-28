@@ -103,6 +103,9 @@ val validateSources by tasks.registering(JavaExec::class) {
     group = "verification"
     description = "Validate the tracked sources manifest (src/main/resources/sources.toml)"
     dependsOn(tasks.named("classes"))
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    })
     mainClass.set("me.brosssh.bundles.db.SourceManifestSync")
     classpath = sourceSets.main.get().runtimeClasspath
 }
