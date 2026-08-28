@@ -15,7 +15,10 @@ class GitHostCredentials private constructor(
          * so tokens may contain `=`; commas are reserved as entry separators. Validation errors
          * identify an entry by position and never include its token.
          */
-        fun fromEnv(value: String): GitHostCredentials {
+        fun fromEnv(
+            value: String,
+            legacyGithubPatToken: String = ""
+        ): GitHostCredentials {
             val pats = mutableMapOf<String, String>()
             val configuredAuthorities = mutableSetOf<String>()
 
@@ -38,6 +41,10 @@ class GitHostCredentials private constructor(
                     }
                     pats[authority] = pat
                 }
+
+            if ("github.com" !in pats && legacyGithubPatToken.isNotBlank()) {
+                pats["github.com"] = legacyGithubPatToken.trim()
+            }
 
             return GitHostCredentials(pats)
         }

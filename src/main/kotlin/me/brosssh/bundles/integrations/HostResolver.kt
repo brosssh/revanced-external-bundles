@@ -30,9 +30,13 @@ class HostResolver(
     /** Parses [url] and verifies that its authority is registered without creating a client. */
     fun requireSupported(url: String): ParsedRepoUrl {
         val parsed = parseRepoUrl(url)
-        require(parsed.authority in registry) {
+        val type = registry[parsed.authority]
+        require(type != null) {
             "Unsupported git authority '${parsed.authority}'. Register it via BACKEND_GIT_HOSTS " +
                 "(e.g. '${parsed.authority}=gitea', '${parsed.authority}=gitlab', etc.)."
+        }
+        require(isRepositoryRoot(type, parsed.ref)) {
+            "${type.name.lowercase()} source URL must point to a repository root."
         }
         return parsed
     }
@@ -53,6 +57,18 @@ class HostResolver(
 
     companion object {
         private val logger = LoggerFactory.getLogger(HostResolver::class.java)
+
+        private fun isRepositoryRoot(type: GitHostType, ref: RepoRef): Boolean {
+            if (ref.repo.endsWith(".git", ignoreCase = true)) return false
+
+            val namespaceParts = ref.namespace.split('/')
+            return when (type) {
+                GitHostType.GITHUB,
+                GitHostType.GITEA -> namespaceParts.size == 1
+
+                GitHostType.GITLAB -> namespaceParts.none { it == "-" } && ref.repo != "-"
+            }
+        }
 
         /** Well-known SaaS authorities plus extra `host[:port]=type` entries from BACKEND_GIT_HOSTS. */
         fun defaultRegistry(extra: Map<String, GitHostType> = emptyMap()): Map<String, GitHostType> =

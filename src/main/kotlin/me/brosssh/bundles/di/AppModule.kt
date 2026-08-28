@@ -27,7 +27,10 @@ val appModule = module {
     single { PatchPackageRepository() }
 
     single {
-        GitHostCredentials.fromEnv(Config.gitHostsPat)
+        GitHostCredentials.fromEnv(
+            Config.gitHostsPat,
+            Config.legacyGithubPatToken
+        )
     }
 
     single {

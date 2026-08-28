@@ -38,6 +38,9 @@ object Config {
     // Optional authority-specific PATs, format: "host[:port]=pat,..."
     val gitHostsPat: String = getEnv("BACKEND_GIT_HOSTS_PAT", "")
 
+    // Deprecated GitHub-only PAT retained so existing deployments keep authenticating.
+    val legacyGithubPatToken: String = getEnv("BACKEND_GITHUB_PAT_TOKEN", "")
+
     // Server
     val port: Int = getEnv("BACKEND_PORT").toInt()
 

@@ -36,7 +36,6 @@ data class GitlabReleaseDto(
     @SerialName("tag_name")
     val tagName: String,
     val description: String? = null,
-    val prerelease: Boolean = false,
     @SerialName("released_at")
     val releasedAt: String? = null,
     @SerialName("created_at")

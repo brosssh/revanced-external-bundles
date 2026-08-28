@@ -11,6 +11,28 @@ import me.brosssh.bundles.integrations.common.RepoInfo
 import me.brosssh.bundles.integrations.common.RepoRef
 import me.brosssh.bundles.integrations.common.ReleaseInfo
 import me.brosssh.bundles.integrations.common.resolveAvatar
+import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
+
+// GitLab has no native prerelease flag, so use the SemVer prerelease component.
+private val semanticVersionPrerelease = Regex(
+    """^[vV]?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)-""" +
+        """[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$"""
+)
+
+internal fun isGitlabPrereleaseTag(tagName: String): Boolean =
+    semanticVersionPrerelease.matches(tagName)
+
+internal fun normalizeGitlabTimestamp(value: String?): String =
+    value
+        ?.takeIf { it.isNotBlank() }
+        ?.let {
+            OffsetDateTime.parse(it)
+                .toInstant()
+                .truncatedTo(ChronoUnit.SECONDS)
+                .toString()
+        }
+        .orEmpty()
 
 /**
  * Client for GitLab (gitlab.com and self-hosted instances).
@@ -57,7 +79,7 @@ class GitlabHostClient(
             repoDescription = project.description,
             repoStars = project.stars ?: 0,
             isRepoArchived = project.archived ?: false,
-            repoPushedAt = (project.lastActivityAt ?: "").take(20)
+            repoPushedAt = normalizeGitlabTimestamp(project.lastActivityAt)
         )
     }
 
@@ -92,7 +114,7 @@ class GitlabHostClient(
 fun GitlabReleaseDto.toReleaseInfo() = ReleaseInfo(
     tagName = tagName,
     body = description ?: "",
-    prerelease = prerelease,
+    prerelease = isGitlabPrereleaseTag(tagName),
     createdAt = (releasedAt ?: createdAt ?: ""),
     assets = assets.links.map { AssetInfo(it.name, it.url, null) }
 )

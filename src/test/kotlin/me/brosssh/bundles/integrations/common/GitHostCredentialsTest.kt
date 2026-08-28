@@ -26,6 +26,27 @@ class GitHostCredentialsTest {
     }
 
     @Test
+    fun `legacy GitHub PAT is used when the common map does not configure GitHub`() {
+        val credentials = GitHostCredentials.fromEnv(
+            "gitlab.com=glpat-abc",
+            legacyGithubPatToken = "legacy-token"
+        )
+
+        assertEquals("legacy-token", credentials.patFor("github.com"))
+        assertEquals("glpat-abc", credentials.patFor("gitlab.com"))
+    }
+
+    @Test
+    fun `common map GitHub PAT takes precedence over the legacy PAT`() {
+        val credentials = GitHostCredentials.fromEnv(
+            "github.com=current-token",
+            legacyGithubPatToken = "legacy-token"
+        )
+
+        assertEquals("current-token", credentials.patFor("github.com"))
+    }
+
+    @Test
     fun `comma is reserved as the entry separator`() {
         assertFailsWith<IllegalArgumentException> {
             GitHostCredentials.fromEnv("github.com=token,fragment")
