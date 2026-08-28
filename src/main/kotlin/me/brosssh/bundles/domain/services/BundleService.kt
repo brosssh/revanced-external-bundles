@@ -22,6 +22,17 @@ sealed class BundleQuery {
         val repo: String,
         val version: String
     ) : BundleQuery()
+
+    data class BySourceAndChannel(
+        val sourceUrl: String,
+        val channel: ReleaseChannel
+    ) : BundleQuery()
+
+    data class BySourceAndVersion(
+        val sourceUrl: String,
+        val version: String,
+        val channel: ReleaseChannel
+    ) : BundleQuery()
 }
 
 class BundleService (
@@ -44,6 +55,15 @@ class BundleService (
             is BundleQuery.ByRepositoryAndChannel -> bundleRepository.findByRepoAndChannel(
                 query.owner,
                 query.repo,
+                query.channel
+            )
+            is BundleQuery.BySourceAndChannel -> bundleRepository.findBySourceAndChannel(
+                query.sourceUrl,
+                query.channel
+            )
+            is BundleQuery.BySourceAndVersion -> bundleRepository.findBySourceAndVersion(
+                query.sourceUrl,
+                query.version,
                 query.channel
             )
         }

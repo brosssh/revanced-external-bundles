@@ -102,6 +102,41 @@ class BundleRepository {
             .singleOrNull()
     }
 
+    fun findBySourceAndChannel(sourceUrl: String, channel: ReleaseChannel) = transaction {
+        (BundleTable innerJoin SourceTable)
+            .selectAll()
+            .where {
+                sourceUrlFilter(sourceUrl) and
+                        (BundleTable.isLatest eq true) and
+                        channel.releaseFilter
+            }
+            .orderBy(BundleTable.createdAt, SortOrder.DESC)
+            .limit(1)
+            .map(::rowToDomain)
+            .singleOrNull()
+    }
+
+    fun findBySourceAndVersion(
+        sourceUrl: String,
+        version: String,
+        channel: ReleaseChannel
+    ) = transaction {
+        (BundleTable innerJoin SourceTable)
+            .selectAll()
+            .where {
+                sourceUrlFilter(sourceUrl) and
+                        (BundleTable.version eq version) and
+                        channel.releaseFilter
+            }
+            .orderBy(BundleTable.createdAt, SortOrder.DESC)
+            .limit(1)
+            .map(::rowToDomain)
+            .singleOrNull()
+    }
+
+    private fun sourceUrlFilter(sourceUrl: String) =
+        (SourceTable.url eq sourceUrl) or (SourceTable.url eq "$sourceUrl/")
+
     private fun rowToDomain(row: ResultRow) =
         Bundle.create(
             row[BundleTable.bundleType],
