@@ -1,7 +1,7 @@
 package me.brosssh.bundles.db.entities
 
 import me.brosssh.bundles.db.tables.BundleTable
-import me.brosssh.bundles.domain.models.*
+import me.brosssh.bundles.domain.models.Bundle
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity
 import org.jetbrains.exposed.v1.dao.IntEntityClass
@@ -18,6 +18,9 @@ class BundleEntity(id: EntityID<Int>) : IntEntity(id) {
     var fileHash by BundleTable.fileHash
     var bundleType by BundleTable.bundleType
     var needPatchesUpdate by BundleTable.needPatchesUpdate
+    var patcherRuntime by BundleTable.patcherRuntime
+    var patcherFailure by BundleTable.patcherFailure
+    var patcherFailureFingerprint by BundleTable.patcherFailureFingerprint
     var sourceFk by BundleTable.sourceFk
     var sourceEntity by SourceEntity referencedOn BundleTable.sourceFk
 }

@@ -12,6 +12,9 @@ object BundleTable : IntIdTable("bundle") {
     val isLatest = bool("is_latest")
     val fileHash = varchar("file_hash", 255).nullable()
     val needPatchesUpdate = bool("need_patches_update")
+    val patcherRuntime = varchar("patcher_runtime", 255).nullable()
+    val patcherFailure = text("patcher_failure").nullable()
+    val patcherFailureFingerprint = varchar("patcher_failure_fingerprint", 64).nullable()
     val bundleType = varchar("bundle_type", 255)
     val sourceFk = reference("source_fk", SourceTable.id)
 

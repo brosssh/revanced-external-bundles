@@ -41,6 +41,13 @@ object Config {
     // Deprecated GitHub-only PAT retained so existing deployments keep authenticating.
     val legacyGithubPatToken: String = getEnv("BACKEND_GITHUB_PAT_TOKEN", "")
 
+    // Isolated patcher workers
+    val patcherRuntimeDir: String = getEnv("BACKEND_PATCHER_RUNTIME_DIR", "build/patcher-runtimes")
+    val patcherWorkerMaxProcesses: Int = getEnv("BACKEND_PATCHER_WORKER_MAX_PROCESSES", "4").toInt()
+    val patcherWorkerMaxPerRuntime: Int = getEnv("BACKEND_PATCHER_WORKER_MAX_PER_RUNTIME", "2").toInt()
+    val patcherWorkerIdleSeconds: Long = getEnv("BACKEND_PATCHER_WORKER_IDLE_SECONDS", "300").toLong()
+    val patcherRefreshConcurrency: Int = getEnv("BACKEND_PATCHER_REFRESH_CONCURRENCY", "4").toInt()
+
     // Server
     val port: Int = getEnv("BACKEND_PORT").toInt()
 

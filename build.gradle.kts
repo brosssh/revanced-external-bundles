@@ -88,8 +88,6 @@ dependencies {
 
     implementation(libs.dotenv)
     implementation(libs.tomlj)
-    implementation(libs.revanced.patcher)
-    implementation(libs.morphe.patcher)
     implementation(libs.logback)
     implementation(libs.apksig)
     implementation(libs.semver4j)

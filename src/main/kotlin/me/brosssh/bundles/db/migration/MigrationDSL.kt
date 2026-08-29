@@ -78,5 +78,20 @@ fun migrationScript() {
             ALTER TABLE source
             ADD COLUMN IF NOT EXISTS enabled BOOLEAN NOT NULL DEFAULT true;
         """)
+
+        exec("""
+            ALTER TABLE bundle
+            ADD COLUMN IF NOT EXISTS patcher_runtime VARCHAR(255);
+        """)
+
+        exec("""
+            ALTER TABLE bundle
+            ADD COLUMN IF NOT EXISTS patcher_failure TEXT;
+        """)
+
+        exec("""
+            ALTER TABLE bundle
+            ADD COLUMN IF NOT EXISTS patcher_failure_fingerprint VARCHAR(64);
+        """)
     }
 }

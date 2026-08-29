@@ -7,8 +7,6 @@ postgresql = "42.7.3"
 koin = "3.5.3"
 openapi-tools = "5.4.0"
 dotenv = "6.5.1"
-revanced-patcher = "22.1.0-dev.1"
-morphe-patcher = "1.11.0"
 logback = "1.5.24"
 apksig = "8.1.1"
 tomlj = "1.1.1"
@@ -51,8 +49,6 @@ postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" 
 # Other
 dotenv = { module = "io.github.cdimascio:dotenv-kotlin", version.ref = "dotenv" }
 tomlj = { module = "org.tomlj:tomlj", version.ref = "tomlj" }
-revanced-patcher = { module = "app.revanced:patcher-jvm", version.ref = "revanced-patcher" }
-morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
 semver4j = { module = "org.semver4j:semver4j", version.ref = "semver4j" }

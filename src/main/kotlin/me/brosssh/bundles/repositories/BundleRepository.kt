@@ -1,6 +1,5 @@
 package me.brosssh.bundles.repositories
 
-import me.brosssh.bundles.db.entities.BundleEntity
 import me.brosssh.bundles.db.tables.BundleTable
 import me.brosssh.bundles.db.tables.SourceMetadataTable
 import me.brosssh.bundles.db.tables.SourceTable
@@ -12,7 +11,14 @@ import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.upsert
+
+data class BundlePatchCandidate(
+    val id: Int,
+    val bundle: Bundle,
+    val patcherRuntime: String?
+)
 
 class BundleRepository {
     fun findById(bundleId: Int) = transaction {
@@ -50,14 +56,53 @@ class BundleRepository {
         ) { bundle ->
             bundle[sourceFk] = bundleMetadata.bundle.sourceFk
             bundle[isPrerelease] = bundleMetadata.isPrerelease
-            bundle[needPatchesUpdate] = bundleMetadata.bundle.bundleType != BundleType.REVANCED_V3
+            // Queue every newly imported bundle for patch extraction; isolated workers support
+            // all recognized bundle types, including legacy ReVanced V3.
+            bundle[needPatchesUpdate] = true
 
             commonFields(bundle)
         }
     }
 
     fun getBundlesNeedPatchesUpdate() = transaction {
-        BundleEntity.find { BundleTable.needPatchesUpdate eq true }.toList()
+        BundleTable
+            .selectAll()
+            .where { BundleTable.needPatchesUpdate eq true }
+            .map { row ->
+                BundlePatchCandidate(
+                    id = row[BundleTable.id].value,
+                    bundle = rowToDomain(row),
+                    patcherRuntime = row[BundleTable.patcherRuntime]
+                )
+            }
+    }
+
+    fun markPatcherRuntimeExhausted(
+        bundleId: Int,
+        runtimeFingerprint: String,
+        failure: String
+    ) = transaction {
+        BundleTable.update({ BundleTable.id eq bundleId }) {
+            it[BundleTable.needPatchesUpdate] = false
+            it[BundleTable.patcherFailure] = failure
+            it[BundleTable.patcherFailureFingerprint] = runtimeFingerprint
+        }.also { updated ->
+            check(updated == 1) { "Bundle $bundleId disappeared while recording patcher runtime exhaustion" }
+        }
+    }
+
+    fun requeuePatcherRuntimeFailures(
+        bundleType: BundleType,
+        runtimeFingerprint: String
+    ) = transaction {
+        BundleTable.update({
+            (BundleTable.bundleType eq bundleType.value) and
+                (BundleTable.needPatchesUpdate eq false) and
+                BundleTable.patcherFailureFingerprint.isNotNull() and
+                (BundleTable.patcherFailureFingerprint neq runtimeFingerprint)
+        }) {
+            it[BundleTable.needPatchesUpdate] = true
+        }
     }
 
     fun findLatestByRepo(owner: String, repo: String, prerelease: Boolean) = transaction {
