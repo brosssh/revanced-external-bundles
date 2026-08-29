@@ -2,14 +2,18 @@ package me.brosssh.build
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaToolchainService
 
 @Suppress("unused")
 class PatcherRuntimesPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.pluginManager.withPlugin("java") {
+            val java = project.extensions.getByType(JavaPluginExtension::class.java)
+            val javaToolchains = project.extensions.getByType(JavaToolchainService::class.java)
             val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
             val manifest = project.layout.buildDirectory.file("generated/patcher-runtimes/manifest.json")
             val generateManifest = project.tasks.register(
@@ -19,6 +23,7 @@ class PatcherRuntimesPlugin : Plugin<Project> {
                 group = "build"
                 description = "Validate patcher-runtimes.toml and generate its normalized build manifest"
                 dependsOn(project.tasks.named("classes"))
+                javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
                 classpath = sourceSets.named("main").get().runtimeClasspath
                 mainClass.set(
                     "me.brosssh.bundles.workers.config.PatcherRuntimeBuildManifestGenerator"
