@@ -45,6 +45,7 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-/docs/
+/docs/*
+!/docs/patcher-runtimes.md
 .idea
 .env

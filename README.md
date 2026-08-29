@@ -56,6 +56,8 @@ Validate manifest changes before opening a pull request:
 ./gradlew validateSources
 ```
 
+Patcher runtime compatibility is configured in [`patcher-runtimes.toml`](src/main/resources/patcher-runtimes.toml) using SemVer ranges powered by [semver4j](https://github.com/semver4j/semver4j). See the [runtime guide](docs/patcher-runtimes.md) for details.
+
 ## 📜 License
 
 ReVanced External Bundles is licensed under the AGPLv3 license. Please see the [LICENSE](LICENSE) file for more information.
