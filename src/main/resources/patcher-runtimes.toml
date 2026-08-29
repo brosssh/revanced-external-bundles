@@ -1,0 +1,31 @@
+[worker]
+timeout-seconds = 60
+max-heap = "512m"
+restart-attempts = 1
+
+[bundle-types."Morphe:V1"]
+adapter = "morphe-v1"
+# Bundles built before Patcher-Version was introduced use this runtime.
+fallback-runtimes = ["app.morphe:morphe-patcher:1.1.1"]
+
+[bundle-types."Morphe:V1".runtimes]
+"app.morphe:morphe-patcher:1.2.0" = "<=1.2.0"
+"app.morphe:morphe-patcher:1.11.0" = ">1.2.0"
+
+[bundle-types."ReVanced:V3"]
+adapter = "revanced-v3"
+# Minimal newest-first set verified against the stored ReVanced:V3 bundles.
+fallback-runtimes = [
+    "app.revanced:revanced-patcher:19.3.1",
+    "app.revanced:revanced-patcher:15.0.3",
+    "app.revanced:revanced-patcher:11.0.4",
+]
+
+[bundle-types."ReVanced:V4"]
+adapter = "revanced-v4"
+# Minimal newest-first set verified against the stored ReVanced:V4 bundles.
+fallback-runtimes = [
+    "app.revanced:patcher-jvm:22.1.0-dev.1",
+    "app.revanced:revanced-patcher:21.1.0-dev.5",
+    "app.revanced:revanced-patcher:20.0.2",
+]

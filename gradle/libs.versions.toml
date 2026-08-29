@@ -12,6 +12,7 @@ morphe-patcher = "1.11.0"
 logback = "1.5.24"
 apksig = "8.1.1"
 tomlj = "1.1.1"
+semver4j = "6.0.0"
 
 [libraries]
 # Ktor
@@ -54,6 +55,7 @@ revanced-patcher = { module = "app.revanced:patcher-jvm", version.ref = "revance
 morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
+semver4j = { module = "org.semver4j:semver4j", version.ref = "semver4j" }
 
 # Kotlin Test
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -62,3 +64,4 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+patcher-runtimes = { id = "me.brosssh.patcher-runtimes" }
