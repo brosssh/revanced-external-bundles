@@ -3,6 +3,9 @@ package me.brosssh.bundles.workers.config
 import me.brosssh.bundles.domain.models.BundleType
 import org.semver4j.Semver
 import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.util.HexFormat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -135,6 +138,24 @@ class PatcherRuntimeRegistryTest {
         assertEquals(
             base.fingerprint(BundleType.REVANCED_V4),
             base.copy(worker = base.worker.copy(maxHeap = "1g")).fingerprint(BundleType.REVANCED_V4)
+        )
+    }
+
+    @Test
+    fun `Morphe fingerprint invalidates failures from the manifest-first selector`() {
+        val config = testConfig()
+
+        assertNotEquals(
+            legacySelectionFingerprint(config, BundleType.MORPHE_V1),
+            config.fingerprint(BundleType.MORPHE_V1)
+        )
+        assertEquals(
+            legacySelectionFingerprint(config, BundleType.REVANCED_V3),
+            config.fingerprint(BundleType.REVANCED_V3)
+        )
+        assertEquals(
+            legacySelectionFingerprint(config, BundleType.REVANCED_V4),
+            config.fingerprint(BundleType.REVANCED_V4)
         )
     }
 
@@ -276,6 +297,25 @@ class PatcherRuntimeRegistryTest {
         bundleType: String,
         transform: (BundleRuntimeConfig) -> BundleRuntimeConfig
     ) = copy(bundleTypes = bundleTypes + (bundleType to transform(bundleTypes.getValue(bundleType))))
+
+    private fun legacySelectionFingerprint(config: PatcherRuntimeConfig, bundleType: BundleType): String {
+        val definition = config.bundleTypes.getValue(bundleType.value)
+        val normalizedSelection = buildString {
+            appendLine("patcher-runtime-selection-v1")
+            appendLine(bundleType.value)
+            appendLine("adapter=${definition.adapter}")
+            definition.fallbackRuntimes.forEach { coordinate ->
+                appendLine("fallback=$coordinate")
+            }
+            definition.runtimes.toSortedMap().forEach { (coordinate, rangeText) ->
+                appendLine("runtime=$coordinate:${parseVersionRange(rangeText)}")
+            }
+        }
+        return HexFormat.of().formatHex(
+            MessageDigest.getInstance("SHA-256")
+                .digest(normalizedSelection.toByteArray(StandardCharsets.UTF_8))
+        )
+    }
 
     private fun PatcherRuntimeConfig.fingerprint(bundleType: BundleType) =
         PatcherRuntimeRegistry.from(this).runtimeSelectionFingerprint(bundleType)

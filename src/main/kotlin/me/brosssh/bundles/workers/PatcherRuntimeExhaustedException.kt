@@ -7,11 +7,20 @@ data class PatcherRuntimeRejection(
     val reason: String
 )
 
-class PatcherRuntimeExhaustedException internal constructor(
+sealed class PatcherBundleTerminalException(
     val bundleType: BundleType,
     val runtimeFingerprint: String,
+    message: String,
+    cause: Throwable? = null
+) : RuntimeException(message, cause)
+
+class PatcherRuntimeExhaustedException internal constructor(
+    bundleType: BundleType,
+    runtimeFingerprint: String,
     val rejections: List<PatcherRuntimeRejection>
-) : RuntimeException(
+) : PatcherBundleTerminalException(
+    bundleType,
+    runtimeFingerprint,
     buildString {
         append("All ${bundleType.value} patcher runtimes rejected the bundle: ")
         append(rejections.joinToString { rejection ->
@@ -23,3 +32,15 @@ class PatcherRuntimeExhaustedException internal constructor(
         require(rejections.isNotEmpty()) { "Runtime exhaustion requires at least one rejection" }
     }
 }
+
+class PatcherRuntimeSelectionException internal constructor(
+    bundleType: BundleType,
+    runtimeFingerprint: String,
+    reason: String,
+    cause: Throwable
+) : PatcherBundleTerminalException(
+    bundleType,
+    runtimeFingerprint,
+    "Cannot select a ${bundleType.value} patcher runtime: $reason",
+    cause
+)

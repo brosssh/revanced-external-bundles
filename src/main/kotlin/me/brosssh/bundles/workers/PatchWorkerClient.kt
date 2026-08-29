@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -90,18 +91,24 @@ internal class PatchWorkerClient(
 
     fun terminate() {
         val current = process
-        runCatching { output?.close() }
-        runCatching { input?.close() }
+        val currentOutput = output
+        val currentInput = input
+        process = null
         output = null
         input = null
-        process = null
 
+        // On Windows, closing a Process input stream while another thread is blocked reading it can
+        // block until the child exits. Kill the worker first so the blocked protocol read is released.
         if (current != null) {
-            current.destroy()
+            runCatching { current.destroy() }
             if (!runCatching { current.waitFor(2, TimeUnit.SECONDS) }.getOrDefault(false)) {
-                current.destroyForcibly()
+                runCatching { current.destroyForcibly() }
+                runCatching { current.waitFor(2, TimeUnit.SECONDS) }
             }
         }
+
+        runCatching { currentOutput?.close() }
+        runCatching { currentInput?.close() }
     }
 
     override fun close() = terminate()
@@ -129,7 +136,7 @@ internal class PatchWorkerClient(
         )
         val classpath = listOf(
             System.getProperty("java.class.path"),
-            runtimeDirectory.resolve("*").toString()
+            runtimeDirectory.toAbsolutePath().normalize().toString() + File.separator + "*"
         ).joinToString(System.getProperty("path.separator"))
 
         val started = ProcessBuilder(

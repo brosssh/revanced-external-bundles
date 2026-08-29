@@ -9,6 +9,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import me.brosssh.bundles.db.entities.BundleEntity
+import me.brosssh.bundles.db.tables.BundleTable
 import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.Patch
 import me.brosssh.bundles.domain.models.RefreshJob
@@ -18,8 +19,10 @@ import me.brosssh.bundles.repositories.PackageRepository
 import me.brosssh.bundles.repositories.PatchPackageRepository
 import me.brosssh.bundles.repositories.PatchRepository
 import me.brosssh.bundles.repositories.RefreshJobRepository
-import me.brosssh.bundles.workers.PatcherRuntimeExhaustedException
+import me.brosssh.bundles.workers.PatcherBundleTerminalException
 import me.brosssh.bundles.workers.PatchWorkerManager
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -74,19 +77,30 @@ class RefreshPatchesJobService(
                             processCandidate(candidate)
                         } catch (error: CancellationException) {
                             throw error
-                        } catch (error: PatcherRuntimeExhaustedException) {
-                            bundleRepository.markPatcherRuntimeExhausted(
+                        } catch (error: PatcherBundleTerminalException) {
+                            val recorded = bundleRepository.markPatcherTerminalFailure(
                                 bundleId = candidate.id,
+                                expectedBundleType = candidate.bundle.bundleType,
                                 runtimeFingerprint = error.runtimeFingerprint,
-                                failure = error.message.orEmpty()
+                                failure = error.message.orEmpty(),
+                                expectedFileHash = candidate.fileHash,
+                                expectedDownloadUrl = candidate.bundle.downloadUrl
                             )
-                            logger.warn(
-                                "All configured {} runtimes rejected bundle {}; " +
-                                    "suppressing retries until the runtime configuration changes",
-                                error.bundleType.value,
-                                candidate.id,
-                                error
-                            )
+                            if (recorded) {
+                                logger.warn(
+                                    "Patch extraction permanently rejected {} bundle {}; " +
+                                        "suppressing retries until the artifact or runtime configuration changes",
+                                    error.bundleType.value,
+                                    candidate.id,
+                                    error
+                                )
+                            } else {
+                                logger.info(
+                                    "Discarded terminal patch failure for bundle {} because its artifact changed " +
+                                        "or a newer refresh already completed",
+                                    candidate.id
+                                )
+                            }
                         } catch (error: Exception) {
                             // Download and worker infrastructure failures remain queued for retry.
                             logger.warn("Something went wrong while processing bundle ${candidate.id}", error)
@@ -111,15 +125,37 @@ class RefreshPatchesJobService(
 
             val extraction = candidate.bundle.patches(candidate.patcherRuntime)
 
-            suspendTransaction {
-                val bundleEntity = requireNotNull(BundleEntity.findById(candidate.id)) {
+            val persisted = suspendTransaction {
+                val current = requireNotNull(
+                    BundleTable
+                        .selectAll()
+                        .where { BundleTable.id eq candidate.id }
+                        .forUpdate()
+                        .singleOrNull()
+                ) {
                     "Bundle ${candidate.id} disappeared during patch extraction"
                 }
+                val artifactUnchanged =
+                    current[BundleTable.bundleType] == candidate.bundle.bundleType.value &&
+                        current[BundleTable.fileHash] == candidate.fileHash &&
+                        current[BundleTable.downloadUrl] == candidate.bundle.downloadUrl
+                if (!artifactUnchanged) return@suspendTransaction false
+
+                val bundleEntity = requireNotNull(BundleEntity.findById(candidate.id))
                 replacePatches(bundleEntity, extraction.patches)
                 bundleEntity.patcherRuntime = extraction.patcherRuntime
                 bundleEntity.patcherFailure = null
                 bundleEntity.patcherFailureFingerprint = null
                 bundleEntity.needPatchesUpdate = false
+                true
+            }
+
+            if (!persisted) {
+                logger.info(
+                    "Discarded extracted patches for bundle {} because its artifact changed",
+                    candidate.id
+                )
+                return@withLock
             }
 
             val elapsedMillis = (System.nanoTime() - startedAt) / 1_000_000

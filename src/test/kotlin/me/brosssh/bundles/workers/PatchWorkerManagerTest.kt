@@ -18,6 +18,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.jar.Attributes
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
 import kotlin.system.measureTimeMillis
@@ -45,6 +47,33 @@ class PatchWorkerManagerTest {
             assertTrue(manager.loadPatches(BundleType.MORPHE_V1, bundle).patches.isEmpty())
             assertTrue(manager.loadPatches(BundleType.MORPHE_V1, bundle).patches.isEmpty())
         }
+    }
+
+    @Test
+    fun `reads Morphe patcher version when the manifest is not first`() = runBlocking {
+        val attempted = mutableListOf<String>()
+        PatchWorkerManager(
+            config = testConfig(),
+            runtimeRoot = Path.of("build/patcher-runtimes"),
+            poolSettings = defaultPoolSettings,
+            clientFactory = { runtime, _, _ ->
+                object : PatchWorkerTransport {
+                    override fun request(bundleBytes: ByteArray): Set<Patch> {
+                        attempted += runtime.coordinate
+                        return emptySet()
+                    }
+
+                    override fun close() = Unit
+                }
+            }
+        ).use { manager ->
+            manager.loadPatches(
+                BundleType.MORPHE_V1,
+                morpheBundleWithDelayedManifest("1.3.3")
+            )
+        }
+
+        assertEquals(listOf("app.morphe:morphe-patcher:1.11.0"), attempted)
     }
 
     @Test
@@ -203,6 +232,59 @@ class PatchWorkerManagerTest {
     }
 
     @Test
+    fun `does not try another runtime after a timeout`() = runBlocking {
+        val attempted = mutableListOf<String>()
+        PatchWorkerManager(
+            config = testConfig(),
+            runtimeRoot = Path.of("build/patcher-runtimes"),
+            poolSettings = defaultPoolSettings,
+            clientFactory = { runtime, _, _ ->
+                object : PatchWorkerTransport {
+                    override fun request(bundleBytes: ByteArray): Set<Patch> {
+                        attempted += runtime.coordinate
+                        throw PatchWorkerTimeoutException("request timed out")
+                    }
+
+                    override fun close() = Unit
+                }
+            }
+        ).use { manager ->
+            assertFailsWith<PatchWorkerTimeoutException> {
+                manager.loadPatches(BundleType.REVANCED_V3, byteArrayOf(1))
+            }
+        }
+
+        assertEquals(listOf("app.revanced:revanced-patcher:19.3.1"), attempted)
+    }
+
+    @Test
+    fun `terminalizes invalid and unsupported Morphe patcher versions`() = runBlocking {
+        val clientsCreated = AtomicInteger()
+        PatchWorkerManager(
+            config = testConfigWithUnsupportedMorpheVersion(),
+            runtimeRoot = Path.of("build/patcher-runtimes"),
+            poolSettings = defaultPoolSettings,
+            clientFactory = { _, _, _ ->
+                clientsCreated.incrementAndGet()
+                error("Runtime selection failures must not allocate a worker")
+            }
+        ).use { manager ->
+            listOf("not-a-version", "999.0.0").forEach { version ->
+                val error = assertFailsWith<PatcherRuntimeSelectionException> {
+                    manager.loadPatches(BundleType.MORPHE_V1, emptyMorpheBundle(version))
+                }
+                assertEquals(BundleType.MORPHE_V1, error.bundleType)
+                assertEquals(
+                    manager.runtimeSelectionFingerprint(BundleType.MORPHE_V1),
+                    error.runtimeFingerprint
+                )
+            }
+        }
+
+        assertEquals(0, clientsCreated.get())
+    }
+
+    @Test
     fun `limits concurrent workers per runtime`() = runBlocking {
         val active = AtomicInteger()
         val peak = AtomicInteger()
@@ -335,14 +417,42 @@ class PatchWorkerManagerTest {
         )
     )
 
+    private fun testConfigWithUnsupportedMorpheVersion(): PatcherRuntimeConfig {
+        val config = testConfig()
+        val morphe = config.bundleTypes.getValue("Morphe:V1")
+        return config.copy(
+            bundleTypes = config.bundleTypes + (
+                "Morphe:V1" to morphe.copy(
+                    runtimes = mapOf(
+                        "app.morphe:morphe-patcher:1.2.0" to "<=1.2.0"
+                    )
+                )
+            )
+        )
+    }
+
     private fun emptyMorpheBundle(patcherVersion: String): ByteArray {
-        val manifest = Manifest().apply {
-            mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
-            mainAttributes.putValue("Patcher-Version", patcherVersion)
-        }
+        val manifest = morpheManifest(patcherVersion)
         return ByteArrayOutputStream().also { bytes ->
             JarOutputStream(bytes, manifest).use { }
         }.toByteArray()
+    }
+
+    private fun morpheBundleWithDelayedManifest(patcherVersion: String): ByteArray =
+        ByteArrayOutputStream().also { bytes ->
+            JarOutputStream(bytes).use { jar ->
+                jar.putNextEntry(JarEntry("example/First.class"))
+                jar.write(byteArrayOf(0))
+                jar.closeEntry()
+                jar.putNextEntry(JarEntry(JarFile.MANIFEST_NAME))
+                morpheManifest(patcherVersion).write(jar)
+                jar.closeEntry()
+            }
+        }.toByteArray()
+
+    private fun morpheManifest(patcherVersion: String) = Manifest().apply {
+        mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
+        mainAttributes.putValue("Patcher-Version", patcherVersion)
     }
 }
 

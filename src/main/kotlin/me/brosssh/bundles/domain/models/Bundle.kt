@@ -2,6 +2,7 @@ package me.brosssh.bundles.domain.models
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -20,7 +21,9 @@ sealed class Bundle(
     private val patchWorkerManager: PatchWorkerManager by inject()
 
     private suspend fun downloadBundleBytes() =
-        httpClient.get(downloadUrl).body<ByteArray>()
+        httpClient.get(downloadUrl) {
+            expectSuccess = true
+        }.body<ByteArray>()
 
     private var _patchExtraction: PatchExtractionResult? = null
 

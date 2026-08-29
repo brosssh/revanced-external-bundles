@@ -28,6 +28,12 @@ class PatcherRuntimeRegistry private constructor(
             appendLine("patcher-runtime-selection-v1")
             appendLine(bundleType.value)
             appendLine("adapter=${definition.adapter}")
+            if (bundleType == BundleType.MORPHE_V1) {
+                // Morphe runtime selection depends on how Patcher-Version is discovered in the
+                // bundle. Changing this marker intentionally requeues terminal failures created by
+                // the older manifest-first reader after switching to an any-entry manifest scan.
+                appendLine("declared-version-reader=manifest-any-entry-v2")
+            }
             definition.fallbackRuntimes.forEach { runtime ->
                 appendLine("fallback=${runtime.coordinate}")
             }

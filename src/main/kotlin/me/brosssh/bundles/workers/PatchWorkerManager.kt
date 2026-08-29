@@ -19,7 +19,9 @@ import java.nio.file.Path
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.jar.JarInputStream
+import java.util.jar.JarFile
+import java.util.jar.Manifest
+import java.util.zip.ZipInputStream
 
 data class PatchExtractionResult(
     val patches: Set<Patch>,
@@ -85,11 +87,30 @@ class PatchWorkerManager internal constructor(
         bundleBytes: ByteArray,
         cachedRuntime: String? = null
     ): PatchExtractionResult {
-        val declaredPatcherVersion = when (bundleType) {
-            BundleType.MORPHE_V1 -> readManifestPatcherVersion(bundleBytes)
-            BundleType.REVANCED_V3, BundleType.REVANCED_V4 -> null
+        val runtimeFingerprint = runtimeSelectionFingerprint(bundleType)
+        val declaredPatcherVersion = try {
+            when (bundleType) {
+                BundleType.MORPHE_V1 -> readManifestPatcherVersion(bundleBytes)
+                BundleType.REVANCED_V3, BundleType.REVANCED_V4 -> null
+            }
+        } catch (error: Exception) {
+            throw PatcherRuntimeSelectionException(
+                bundleType,
+                runtimeFingerprint,
+                error.message ?: "the bundle manifest is malformed",
+                error
+            )
         }
-        val candidates = registry.resolveCandidates(bundleType, declaredPatcherVersion, cachedRuntime)
+        val candidates = try {
+            registry.resolveCandidates(bundleType, declaredPatcherVersion, cachedRuntime)
+        } catch (error: RuntimeException) {
+            throw PatcherRuntimeSelectionException(
+                bundleType,
+                runtimeFingerprint,
+                error.message ?: "the declared patcher version is invalid",
+                error
+            )
+        }
         val failures = mutableListOf<Pair<ResolvedPatcherRuntime, Exception>>()
 
         candidates.forEachIndexed { index, runtime ->
@@ -98,6 +119,8 @@ class PatchWorkerManager internal constructor(
                 val patches = runInterruptible(Dispatchers.IO) { slot.client.request(bundleBytes) }
                 return PatchExtractionResult(patches, runtime.coordinate)
             } catch (error: CancellationException) {
+                throw error
+            } catch (error: PatchWorkerTimeoutException) {
                 throw error
             } catch (error: Exception) {
                 failures += runtime to error
@@ -121,7 +144,7 @@ class PatchWorkerManager internal constructor(
         if (failures.isNotEmpty() && rejections.size == failures.size) {
             throw PatcherRuntimeExhaustedException(
                 bundleType = bundleType,
-                runtimeFingerprint = runtimeSelectionFingerprint(bundleType),
+                runtimeFingerprint = runtimeFingerprint,
                 rejections = rejections
             )
         }
@@ -258,13 +281,20 @@ class PatchWorkerManager internal constructor(
         logger.info("Validated {} isolated patcher runtimes in {}", registry.runtimes.size, runtimeRoot)
     }
 
-    private fun readManifestPatcherVersion(bundleBytes: ByteArray): String? =
-        JarInputStream(ByteArrayInputStream(bundleBytes)).use { jar ->
-            jar.manifest?.mainAttributes
-                ?.getValue("Patcher-Version")
-                ?.trim()
-                ?.takeIf(String::isNotEmpty)
+    private fun readManifestPatcherVersion(bundleBytes: ByteArray): String? {
+        ZipInputStream(ByteArrayInputStream(bundleBytes)).use { archive ->
+            while (true) {
+                val entry = archive.nextEntry ?: break
+                if (!entry.isDirectory && entry.name.equals(JarFile.MANIFEST_NAME, ignoreCase = true)) {
+                    return Manifest(archive).mainAttributes
+                        .getValue("Patcher-Version")
+                        ?.trim()
+                        ?.takeIf(String::isNotEmpty)
+                }
+            }
         }
+        return null
+    }
 
     private class WorkerSlot(
         val runtime: ResolvedPatcherRuntime,
