@@ -50,6 +50,8 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 Bundle sources are tracked in [`src/main/resources/sources.toml`](src/main/resources/sources.toml). Add a canonical repository URL to that file, or set `enabled = false` to pause refreshes while preserving its cached bundles and patches. Removing an entry also soft-disables it at the next backend start; source data is never deleted automatically.
 
+Copy the [source update pull request template](.github/PULL_REQUEST_TEMPLATE/source-update.md) into the pull request description and complete it before submitting.
+
 Validate manifest changes before opening a pull request:
 
 ```shell
