@@ -7,49 +7,16 @@
 url = "https://github.com/crimera/piko"
 
 [[sources]]
-url = "https://github.com/crimera/revanced-integrations"
-
-[[sources]]
 url = "https://github.com/anddea/revanced-patches"
-
-[[sources]]
-url = "https://github.com/anddea/revanced-integrations"
 
 [[sources]]
 url = "https://github.com/Aunali321/ReVancedExperiments"
 
 [[sources]]
-url = "https://github.com/revanced/revanced-integrations"
-
-[[sources]]
-url = "https://github.com/jkennethcarino/privacy-revanced-patches"
-
-[[sources]]
-url = "https://github.com/jkennethcarino/privacy-revanced-integrations"
-
-[[sources]]
 url = "https://github.com/YT-Advanced/ReX-patches"
 
 [[sources]]
-url = "https://github.com/YT-Advanced/ReX-integrations"
-
-[[sources]]
-url = "https://github.com/IndusAryan/twitter-patches"
-
-[[sources]]
-url = "https://github.com/rufusin/revanced-patches"
-
-[[sources]]
-url = "https://github.com/rufusin/revanced-integrations"
-
-[[sources]]
 url = "https://github.com/indrastorms/dropped-patches"
-
-[[sources]]
-url = "https://github.com/inotia00/revanced-patches"
-
-[[sources]]
-url = "https://github.com/inotia00/revanced-integrations"
 
 [[sources]]
 url = "https://github.com/sakarie9/BiliRoamingM"
@@ -68,6 +35,7 @@ url = "https://github.com/1fexd/revanced-patches"
 
 [[sources]]
 url = "https://github.com/revanced/revanced-patches"
+enabled = false
 
 [[sources]]
 url = "https://github.com/xrogers/revanced-patches-galaxy"
@@ -83,9 +51,6 @@ url = "https://github.com/d4n3436/revanced-patches-android5"
 
 [[sources]]
 url = "https://github.com/ayushtnm/gmscore-patches"
-
-[[sources]]
-url = "https://github.com/inotia00/revanced-patches-arsclib"
 
 [[sources]]
 url = "https://github.com/lennyRBLX/apk-patches"
@@ -107,9 +72,6 @@ url = "https://github.com/forsyth47/revanced-patches"
 
 [[sources]]
 url = "https://github.com/brosssh/morphe-patches"
-
-[[sources]]
-url = "https://github.com/hoo-dles/revanced-custom-patches"
 
 [[sources]]
 url = "https://github.com/vinceTheProgrammer/sticknodes-patches"
@@ -145,9 +107,6 @@ url = "https://github.com/liaralabs/revanced-patches"
 url = "https://github.com/MorpheApp/morphe-patches"
 
 [[sources]]
-url = "https://github.com/wchill/rvx-morphed"
-
-[[sources]]
 url = "https://github.com/wchill/patcheddit"
 
 [[sources]]
@@ -157,7 +116,7 @@ url = "https://github.com/blazskufca/revanced-patch"
 url = "https://github.com/hoo-dles/morphe-patches"
 
 [[sources]]
-url = "https://github.com/IMXEren/mix-patches"
+url = "https://gitlab.com/IMXEren/mix-patches"
 
 [[sources]]
 url = "https://github.com/wchill/anddea-rvx-morphed"
@@ -215,9 +174,6 @@ url = "https://github.com/alim-zanibekov/ultrasandbox"
 
 [[sources]]
 url = "https://github.com/ameenalasady/ameen-morphe"
-
-[[sources]]
-url = "https://github.com/ameenalasady/photogrid-morphe"
 
 [[sources]]
 url = "https://github.com/arandomhooman/hoomans-morphe-patches"
@@ -365,6 +321,7 @@ url = "https://github.com/Pa-kon/morphe-screenshot-patches"
 
 [[sources]]
 url = "https://github.com/kun-codes/npci-bhim-morphe-patches"
+enabled = false
 
 [[sources]]
 url = "https://github.com/PrathxmOp/ytmusic-patches"
@@ -503,9 +460,6 @@ url = "https://github.com/furkngld/tiktok-lite-patches-for-morphe"
 
 [[sources]]
 url = "https://github.com/eZ4RK0/morphe-patches"
-
-[[sources]]
-url = "https://github.com/liongalahad/nuviotv-patches"
 
 [[sources]]
 url = "https://github.com/Alastor-Kaneki/Morphe-Patches"
@@ -719,3 +673,39 @@ url = "https://github.com/rafag00/morphe-patches"
 
 [[sources]]
 url = "https://github.com/csagataj2/morphe-patches"
+
+[[sources]]
+url = "https://github.com/alan7383/sofatime-patches"
+
+[[sources]]
+url = "https://github.com/ciraolone/morphe-watch-later"
+
+[[sources]]
+url = "https://github.com/Freeman022026/rustore-privacy-patches"
+
+[[sources]]
+url = "https://github.com/hxreborn/hxreborn-tiktok-patches"
+
+[[sources]]
+url = "https://github.com/kuntal-devrat/diskwala-patches"
+
+[[sources]]
+url = "https://github.com/NullWaypoint/morphe-patches"
+
+[[sources]]
+url = "https://github.com/Okazakee/iptv-morphe-patches"
+
+[[sources]]
+url = "https://github.com/VinkyV/AppleMusicPatches"
+
+[[sources]]
+url = "https://gitlab.com/gltieo/revanced-patches"
+
+[[sources]]
+url = "https://gitlab.com/inotia00/proguard-patches"
+
+[[sources]]
+url = "https://gitlab.com/inotia00/x-shim"
+
+[[sources]]
+url = "https://gitlab.com/Paresh-Maheshwari/paresh-patches"
