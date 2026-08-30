@@ -50,11 +50,6 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: amd64, arm64
-
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
