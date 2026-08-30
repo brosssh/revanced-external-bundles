@@ -18,6 +18,12 @@
     "@semantic-release/changelog",
     "gradle-semantic-release-plugin",
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./gradlew startShadowScripts"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": [
