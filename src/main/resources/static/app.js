@@ -917,22 +917,27 @@ function renderBundle(bundle, target) {
     target.appendChild(card);
 
     const copyBtn = card.querySelector(".copy-btn");
+    const copyButtonLabel = copyBtn.textContent.trim();
+    let copyFeedbackTimeout;
+    const showCopyFeedback = (text, copied = false) => {
+        clearTimeout(copyFeedbackTimeout);
+        copyBtn.textContent = text;
+        copyBtn.classList.toggle("copied", copied);
+        copyFeedbackTimeout = setTimeout(() => {
+            copyBtn.textContent = copyButtonLabel;
+            copyBtn.classList.remove("copied");
+        }, 1500);
+    };
     copyBtn.addEventListener("click", async () => {
         // The copied value must be absolute: it is pasted into the patched-app
         // manager, which resolves it from the device, not from this page.
         const url = new URL(copyBtn.dataset.url, location.origin).href;
         try {
             await navigator.clipboard.writeText(url);
-            const originalText = copyBtn.textContent;
-            copyBtn.textContent = "Copied!";
-            copyBtn.classList.add("copied");
-            setTimeout(() => {
-                copyBtn.textContent = originalText;
-                copyBtn.classList.remove("copied");
-            }, 1500);
+            showCopyFeedback("Copied!", true);
         } catch (err) {
             console.error("Failed to copy:", err);
-            copyBtn.textContent = "Failed!";
+            showCopyFeedback("Failed!");
         }
     });
 

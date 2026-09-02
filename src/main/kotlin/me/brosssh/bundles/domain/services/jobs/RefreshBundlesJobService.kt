@@ -51,9 +51,8 @@ class RefreshBundlesJobService(
                         }
                     }
                 }
-            }
-            catch (e: Exception) {
-                logger.warn("Something went wrong while processing, error: ${e.cause}, ${e.message}, ${e.stackTrace}")
+            } catch (error: Exception) {
+                logger.warn("Failed to process source {}", source.url, error)
             }
 
             logger.info("Source process completed")

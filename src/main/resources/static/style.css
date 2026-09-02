@@ -218,7 +218,7 @@ h1 {
     width: 100%;
     display: grid;
     gap: 16px;
-    align-items: stretch;
+    align-items: start;
     will-change: transform;
 }
 
@@ -227,7 +227,6 @@ h1 {
 }
 
 #results .virtual-row .bundle-item {
-    height: 100%;
     margin-bottom: 0;
 }
 
