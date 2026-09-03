@@ -33,7 +33,7 @@ abstract class BaseRefreshJobService (
                 suspendTransaction {
                     logger.error("Error during refresh", e)
                     RefreshJobEntity[jobEntityId]
-                        .setFailed("${e.message} - ${e.cause} - ${e.stackTrace}")
+                        .setFailed(e.message ?: e.cause?.message ?: e.javaClass.simpleName)
                 }
             }
         }

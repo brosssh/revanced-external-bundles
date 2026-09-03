@@ -1,3 +1,51 @@
+# [1.3.0-dev.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-09-03)
+
+
+### Bug Fixes
+
+* improve refresh errors and bundle card feedback ([#49](https://github.com/brosssh/revanced-external-bundles/issues/49)) [skip ci] ([ee764a8](https://github.com/brosssh/revanced-external-bundles/commit/ee764a877a75d86aa91ca42bdd7d01dccc706e5b))
+
+
+### Features
+
+* **workers:** defer unavailable git host work ([#47](https://github.com/brosssh/revanced-external-bundles/issues/47)) ([9205b66](https://github.com/brosssh/revanced-external-bundles/commit/9205b6658a99619358ba81a86b66aba133dffd93))
+
+# [1.3.0-dev.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-09-01)
+
+
+### Bug Fixes
+
+* enforce disabled source visibility ([2e72b2e](https://github.com/brosssh/revanced-external-bundles/commit/2e72b2e66fb303bdad5e5089afde478b66ec8e00))
+* redact Hasura admin secret from client logs ([9184510](https://github.com/brosssh/revanced-external-bundles/commit/918451062f5d567c1b5446f6b7ae7bf37280b57e))
+* **web-ui:** preserve scroll position when changing views ([4984fae](https://github.com/brosssh/revanced-external-bundles/commit/4984faeb1f36b73ccd22c695865608d2dde1e0b4))
+
+
+### Features
+
+* add disabled source hard deletion ([3ca1d95](https://github.com/brosssh/revanced-external-bundles/commit/3ca1d95ef32c87dc004aaaa76679d040446e48a0))
+* **web-ui:** improve bundle browser ([da0f955](https://github.com/brosssh/revanced-external-bundles/commit/da0f955108d58ff719040bf532d9434ada2fb2bf))
+
+# [1.3.0-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.2.1-dev.2...v1.3.0-dev.1) (2026-08-31)
+
+
+### Features
+
+* **web-ui:** improve bundle browser ([#46](https://github.com/brosssh/revanced-external-bundles/issues/46)) ([5690aab](https://github.com/brosssh/revanced-external-bundles/commit/5690aab62991a4617168950e478d90fb58476ae4))
+
+## [1.2.1-dev.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.2.1-dev.1...v1.2.1-dev.2) (2026-08-31)
+
+
+### Bug Fixes
+
+* **sources:** hide data from disabled sources ([#44](https://github.com/brosssh/revanced-external-bundles/issues/44)) ([f75095f](https://github.com/brosssh/revanced-external-bundles/commit/f75095fa5d41847ad670e2423f8aa6e4e3db2193))
+
+## [1.2.1-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.2.0...v1.2.1-dev.1) (2026-08-30)
+
+
+### Performance Improvements
+
+* **build:** avoid rebuilding release artifacts in Docker ([#43](https://github.com/brosssh/revanced-external-bundles/issues/43)) ([1778d20](https://github.com/brosssh/revanced-external-bundles/commit/1778d20b3bab561ede9541d623e80acecf96e59f))
+
 # [1.2.0](https://github.com/brosssh/revanced-external-bundles/compare/v1.1.3...v1.2.0) (2026-08-30)
 
 

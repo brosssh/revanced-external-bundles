@@ -6,6 +6,7 @@ import me.brosssh.bundles.Config
 import me.brosssh.bundles.db.SourceManifestSync
 import me.brosssh.bundles.domain.services.BundleService
 import me.brosssh.bundles.domain.services.RefreshJobStatusService
+import me.brosssh.bundles.domain.services.SourceService
 import me.brosssh.bundles.domain.services.jobs.RefreshAllJobService
 import me.brosssh.bundles.domain.services.jobs.RefreshBundlesJobService
 import me.brosssh.bundles.domain.services.jobs.RefreshPatchesJobService
@@ -30,6 +31,7 @@ val appModule = module {
     single { RefreshJobRepository() }
     single { PackageRepository() }
     single { PatchPackageRepository() }
+    single { GitHostRateLimitRepository() }
 
     single(createdAtStart = true) {
         PatchWorkerManager(
@@ -67,6 +69,8 @@ val appModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
             get()
         )
     }
@@ -92,6 +96,7 @@ val appModule = module {
     }
 
     single { BundleService(get()) }
+    single { SourceService(get()) }
     single { RefreshJobStatusService(get()) }
     single { SourceManifestSync(get()) }
 

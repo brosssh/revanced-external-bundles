@@ -4,6 +4,7 @@ ktor = "3.2.3"
 exposed = "1.0.0-rc-4"
 hikari = "5.1.0"
 postgresql = "42.7.3"
+h2 = "2.3.232"
 koin = "3.5.3"
 openapi-tools = "5.4.0"
 dotenv = "6.5.1"
@@ -20,6 +21,7 @@ ktor-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation-j
 ktor-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
 ktor-call-logging = { module = "io.ktor:ktor-server-call-logging-jvm", version.ref = "ktor" }
 ktor-auth = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
+ktor-test-host = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 
 # Ktor client
 ktor-client-core = { module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor" }
@@ -27,6 +29,7 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp-jvm", version.ref = 
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation-jvm", version.ref = "ktor" }
 ktor-client-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock-jvm", version.ref = "ktor" }
 
 # Ktor OpenAPI tools
 ktor-swagger-ui = { module = "io.github.smiley4:ktor-swagger-ui", version.ref = "openapi-tools" }
@@ -45,6 +48,7 @@ exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", v
 # Hikari & Postgres
 hikari-cp = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
 
 # Other
 dotenv = { module = "io.github.cdimascio:dotenv-kotlin", version.ref = "dotenv" }

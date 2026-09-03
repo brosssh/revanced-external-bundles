@@ -22,7 +22,8 @@ fun Application.configureDatabase() {
             RefreshJobTable,
             SourceTable,
             SourceMetadataTable,
-            PatchPackageTable
+            PatchPackageTable,
+            GitHostRateLimitTable
         )
     }
 }

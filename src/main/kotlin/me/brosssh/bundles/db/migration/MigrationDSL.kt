@@ -80,6 +80,20 @@ fun migrationScript() {
         """)
 
         exec("""
+            ALTER TABLE source
+            ADD COLUMN IF NOT EXISTS unavailable_reason TEXT;
+        """)
+
+        exec("""
+            CREATE TABLE IF NOT EXISTS git_host_rate_limit (
+                authority VARCHAR(255) NOT NULL,
+                credential_fingerprint VARCHAR(64) NOT NULL,
+                rate_limited_until TIMESTAMPTZ NOT NULL,
+                PRIMARY KEY (authority, credential_fingerprint)
+            );
+        """)
+
+        exec("""
             ALTER TABLE bundle
             ADD COLUMN IF NOT EXISTS patcher_runtime VARCHAR(255);
         """)
