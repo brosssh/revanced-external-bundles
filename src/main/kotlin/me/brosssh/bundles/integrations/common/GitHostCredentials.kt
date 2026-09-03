@@ -1,6 +1,8 @@
 package me.brosssh.bundles.integrations.common
 
 import java.net.URI
+import java.security.MessageDigest
+import java.util.HexFormat
 
 /** Authority-keyed personal access tokens for git hosts. */
 class GitHostCredentials private constructor(
@@ -9,7 +11,17 @@ class GitHostCredentials private constructor(
     /** Returns the PAT configured for [authority]. */
     fun patFor(authority: String): String? = pats[authority.lowercase()]
 
+    /** Stable credential identity for persisted rate-limit state; never exposes the PAT itself. */
+    fun fingerprintFor(authority: String): String =
+        patFor(authority)?.let { pat ->
+            HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-256").digest(pat.toByteArray(Charsets.UTF_8))
+            )
+        } ?: ANONYMOUS_FINGERPRINT
+
     companion object {
+        const val ANONYMOUS_FINGERPRINT = "anonymous"
+
         /**
          * Parses comma-separated `host[:port]=pat` entries. The first `=` separates the authority,
          * so tokens may contain `=`; commas are reserved as entry separators. Validation errors

@@ -2,7 +2,11 @@ package me.brosssh.bundles.integrations.gitlab
 
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.*
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import me.brosssh.bundles.integrations.common.AssetInfo
 import me.brosssh.bundles.integrations.common.GitHostClient
 import me.brosssh.bundles.integrations.common.GitHostCredentials
@@ -10,6 +14,9 @@ import me.brosssh.bundles.integrations.common.GitHostClientFactory
 import me.brosssh.bundles.integrations.common.RepoInfo
 import me.brosssh.bundles.integrations.common.RepoRef
 import me.brosssh.bundles.integrations.common.ReleaseInfo
+import me.brosssh.bundles.integrations.common.parseEpochSeconds
+import me.brosssh.bundles.integrations.common.parseHttpDate
+import me.brosssh.bundles.integrations.common.resolvedRateLimitDeadline
 import me.brosssh.bundles.integrations.common.resolveAvatar
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
@@ -57,11 +64,31 @@ class GitlabHostClient(
         pat?.let { header("PRIVATE-TOKEN", it) }
     }
 
+    override fun rateLimitDeadline(
+        status: HttpStatusCode,
+        headers: Headers,
+        now: OffsetDateTime
+    ): OffsetDateTime? {
+        val rateLimited =
+            status == HttpStatusCode.TooManyRequests ||
+                (status == HttpStatusCode.Forbidden &&
+                    headers["RateLimit-Remaining"]?.trim() == "0")
+        if (!rateLimited) return null
+
+        return resolvedRateLimitDeadline(
+            retryAfter = headers[HttpHeaders.RetryAfter],
+            reset = parseEpochSeconds(headers["RateLimit-Reset"])
+                ?: parseHttpDate(headers["RateLimit-ResetTime"]),
+            now = now
+        )
+    }
+
     private fun projectId(ref: RepoRef) = "${ref.namespace}/${ref.repo}".replace("/", "%2F")
 
     override suspend fun getRepo(ref: RepoRef): RepoInfo {
         val project = client
             .get("$baseUrl/api/v4/projects/${projectId(ref)}") {
+                expectSuccess = true
                 authenticate()
             }
             .body<GitlabProjectDto>()
@@ -91,6 +118,7 @@ class GitlabHostClient(
             val page = nextPage
             val response = client
                 .get("$baseUrl/api/v4/projects/${projectId(ref)}/releases?per_page=100&page=$page") {
+                    expectSuccess = true
                     authenticate()
                 }
             releases += response.body<List<GitlabReleaseDto>>().map { it.toReleaseInfo() }

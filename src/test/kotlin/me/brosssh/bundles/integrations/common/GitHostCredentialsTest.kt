@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 class GitHostCredentialsTest {
@@ -44,6 +45,20 @@ class GitHostCredentialsTest {
         )
 
         assertEquals("current-token", credentials.patFor("github.com"))
+    }
+
+    @Test
+    fun `credential fingerprints are stable without storing the PAT`() {
+        val credentials = GitHostCredentials.fromEnv("github.com=super-secret-token")
+        val fingerprint = credentials.fingerprintFor("GITHUB.COM")
+
+        assertEquals(64, fingerprint.length)
+        assertEquals(fingerprint, credentials.fingerprintFor("github.com"))
+        assertNotEquals("super-secret-token", fingerprint)
+        assertEquals(
+            GitHostCredentials.ANONYMOUS_FINGERPRINT,
+            credentials.fingerprintFor("gitlab.com")
+        )
     }
 
     @Test

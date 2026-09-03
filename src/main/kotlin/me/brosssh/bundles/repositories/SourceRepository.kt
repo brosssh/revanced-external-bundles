@@ -12,10 +12,17 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 
 class SourceRepository {
     fun getEnabled(): List<SourceEntity> = transaction {
         SourceEntity.find { SourceTable.enabled eq true }.toList()
+    }
+
+    fun setUnavailableReason(sourceId: Int, reason: String?) = transaction {
+        SourceTable.update({ SourceTable.id eq sourceId }) {
+            it[unavailableReason] = reason
+        }
     }
 
     fun hardDelete(sourceUrl: String): SourceDeletionResult = transaction {

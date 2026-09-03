@@ -260,7 +260,8 @@
                   "columns": [
                     "url",
                     "id",
-                    "enabled"
+                    "enabled",
+                    "unavailable_reason"
                   ],
                   "filter": {},
                   "allow_aggregations": true

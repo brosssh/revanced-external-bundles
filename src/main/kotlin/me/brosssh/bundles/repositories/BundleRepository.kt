@@ -9,6 +9,7 @@ import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.ReleaseChannel
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
@@ -82,7 +83,9 @@ class BundleRepository {
         (BundleTable innerJoin SourceTable)
             .selectAll()
             .where {
-                (BundleTable.needPatchesUpdate eq true) and enabledSourceFilter
+                (BundleTable.needPatchesUpdate eq true) and
+                    enabledSourceFilter and
+                    availableSourceFilter
             }
             .map { row ->
                 BundlePatchCandidate(
@@ -126,7 +129,10 @@ class BundleRepository {
             (BundleTable.bundleType eq bundleType.value) and
                 (BundleTable.needPatchesUpdate eq false) and
                 BundleTable.patcherFailureFingerprint.isNotNull() and
-                (BundleTable.patcherFailureFingerprint neq runtimeFingerprint)
+                (BundleTable.patcherFailureFingerprint neq runtimeFingerprint) and
+                (BundleTable.sourceFk inSubQuery SourceTable
+                    .select(SourceTable.id)
+                    .where { availableSourceFilter })
         }) {
             it[BundleTable.needPatchesUpdate] = true
         }
@@ -212,6 +218,10 @@ class BundleRepository {
     // v1 and v2 expose only bundles from enabled sources; explicit v3 lookups do not use this filter.
     private val enabledSourceFilter: Op<Boolean>
         get() = SourceTable.enabled eq true
+
+    // Temporarily unavailable sources remain served but do not enter the patch extraction queue.
+    private val availableSourceFilter: Op<Boolean>
+        get() = SourceTable.unavailableReason.isNull()
 
     private fun sourceUrlFilter(sourceUrl: String) =
         (SourceTable.url eq sourceUrl) or (SourceTable.url eq "$sourceUrl/")

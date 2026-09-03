@@ -94,6 +94,7 @@ dependencies {
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.ktor.test.host)
+    testImplementation(libs.ktor.client.mock)
     testRuntimeOnly(libs.h2)
 }
 

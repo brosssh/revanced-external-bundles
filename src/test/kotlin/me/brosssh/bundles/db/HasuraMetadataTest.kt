@@ -10,6 +10,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class HasuraMetadataTest {
@@ -43,6 +44,14 @@ class HasuraMetadataTest {
 
         assertTrue("enabled" in columns)
         assertEquals(JsonObject(emptyMap()), permission["filter"])
+    }
+
+    @Test
+    fun `public bundle data does not expose raw patcher failures`() {
+        val columns = userPermission("bundle")["columns"]!!.jsonArray
+            .map { it.jsonPrimitive.content }
+
+        assertFalse("patcher_failure" in columns)
     }
 
     private fun enabledSourceFilter() = buildJsonObject {

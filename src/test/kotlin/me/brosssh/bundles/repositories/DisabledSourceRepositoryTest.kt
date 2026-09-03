@@ -22,6 +22,7 @@ import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -75,6 +76,50 @@ class DisabledSourceRepositoryTest {
         assertNotNull(repository.findByRepoAndVersion(OWNER, REPO, VERSION))
         assertNotNull(repository.findByRepoAndChannel(OWNER, REPO, ReleaseChannel.STABLE))
         assertEquals(1, repository.getBundlesNeedPatchesUpdate().size)
+    }
+
+    @Test
+    fun `unavailable sources remain served but are filtered from patch extraction`() {
+        val fixture = insertSource(enabled = true)
+        val repository = BundleRepository()
+        val sourceRepository = SourceRepository()
+
+        sourceRepository.setUnavailableReason(fixture.sourceId, "451: Unavailable For Legal Reasons")
+
+        assertNotNull(repository.findById(fixture.bundleId))
+        assertNotNull(repository.findBySourceAndVersion(SOURCE_URL, VERSION, ReleaseChannel.STABLE))
+        assertTrue(repository.getBundlesNeedPatchesUpdate().isEmpty())
+
+        sourceRepository.setUnavailableReason(fixture.sourceId, null)
+
+        assertEquals(1, repository.getBundlesNeedPatchesUpdate().size)
+    }
+
+    @Test
+    fun `unavailable sources are excluded from runtime failure requeue`() {
+        val fixture = insertSource(enabled = true)
+        val repository = BundleRepository()
+        val sourceRepository = SourceRepository()
+        transaction(database) {
+            BundleTable.update({ BundleTable.id eq fixture.bundleId }) {
+                it[needPatchesUpdate] = false
+                it[patcherFailure] = "terminal"
+                it[patcherFailureFingerprint] = "old"
+            }
+        }
+        sourceRepository.setUnavailableReason(fixture.sourceId, "404: Not Found")
+
+        assertEquals(0, repository.requeuePatcherRuntimeFailures(BundleType.REVANCED_V4, "new"))
+        transaction(database) {
+            assertFalse(BundleTable.selectAll().single()[BundleTable.needPatchesUpdate])
+        }
+
+        sourceRepository.setUnavailableReason(fixture.sourceId, null)
+
+        assertEquals(1, repository.requeuePatcherRuntimeFailures(BundleType.REVANCED_V4, "new"))
+        transaction(database) {
+            assertTrue(BundleTable.selectAll().single()[BundleTable.needPatchesUpdate])
+        }
     }
 
     @Test

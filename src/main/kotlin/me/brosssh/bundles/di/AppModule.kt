@@ -31,6 +31,7 @@ val appModule = module {
     single { RefreshJobRepository() }
     single { PackageRepository() }
     single { PatchPackageRepository() }
+    single { GitHostRateLimitRepository() }
 
     single(createdAtStart = true) {
         PatchWorkerManager(
@@ -64,6 +65,8 @@ val appModule = module {
 
     single {
         RefreshBundlesJobService(
+            get(),
+            get(),
             get(),
             get(),
             get(),
