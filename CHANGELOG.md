@@ -1,3 +1,15 @@
+# [1.3.0-dev.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-09-03)
+
+
+### Bug Fixes
+
+* improve refresh errors and bundle card feedback ([#49](https://github.com/brosssh/revanced-external-bundles/issues/49)) [skip ci] ([ee764a8](https://github.com/brosssh/revanced-external-bundles/commit/ee764a877a75d86aa91ca42bdd7d01dccc706e5b))
+
+
+### Features
+
+* **workers:** defer unavailable git host work ([#47](https://github.com/brosssh/revanced-external-bundles/issues/47)) ([9205b66](https://github.com/brosssh/revanced-external-bundles/commit/9205b6658a99619358ba81a86b66aba133dffd93))
+
 # [1.3.0-dev.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-09-01)
 
 
