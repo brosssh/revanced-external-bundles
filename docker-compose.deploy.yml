@@ -1,8 +1,12 @@
 # For deploy
+# docker-compose.yml uses this value as the Compose project name; requiring it here
+# keeps Production and Development as separate projects when both run on one host.
+name: ${DEPLOY_PROJECT_NAME:?DEPLOY_PROJECT_NAME must be set for deployments}
+
 services:
   postgres:
     image: postgres:16
-    container_name: bundles-${ENV}-postgres
+    container_name: bundles-${ENV:?ENV must be set}-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
@@ -19,11 +23,16 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/brosssh/revanced-external-bundles:${APP_TAG:-latest}
-    container_name: bundles-${ENV}-app
+    image: ghcr.io/brosssh/revanced-external-bundles:${APP_TAG:?APP_TAG must be set}
+    container_name: bundles-${ENV:?ENV must be set}-app
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      BACKEND_PORT: 8080
+      BACKEND_PATCHER_RUNTIME_DIR: /app/patcher-runtimes
+      DATABASE_HOST: postgres
+      HASURA_INTERNAL_URL: http://hasura:8080
     expose:
       - "8080"
     ports:
@@ -31,13 +40,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      hasura:
+        condition: service_healthy
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=${ENV:?ENV must be set}"
 
 
   hasura:
     image: hasura/graphql-engine:v2.31.0
-    container_name: bundles-${ENV}-hasura
+    container_name: bundles-${ENV:?ENV must be set}-hasura
     restart: unless-stopped
     expose:
       - "8080"
@@ -51,21 +63,31 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: user
-      HASURA_GRAPHQL_SERVER_PATH: /hasura
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   watchtower:
     image: containrrr/watchtower
-    container_name: watchtower-${ENV}
+    container_name: watchtower-${ENV:?ENV must be set}
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.scope=${ENV:?ENV must be set}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: >
       --label-enable
+      --scope ${ENV:?ENV must be set}
       --interval 300
 
 volumes:
   pgdata:
+    name: ${DATABASE_VOLUME_NAME:?DATABASE_VOLUME_NAME must be set}
+    external: true
 
 networks:
   default:
-    name: bundles-${ENV}-network
+    name: bundles-${ENV:?ENV must be set}-network
