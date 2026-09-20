@@ -2,8 +2,11 @@ package me.brosssh.bundles.integrations.gitea
 
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.*
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import me.brosssh.bundles.integrations.common.GitHostClient
 import me.brosssh.bundles.integrations.common.GitHostCredentials
 import me.brosssh.bundles.integrations.common.GitHostClientFactory
@@ -13,6 +16,8 @@ import me.brosssh.bundles.integrations.common.ReleaseInfo
 import me.brosssh.bundles.integrations.common.AssetInfo
 import me.brosssh.bundles.integrations.common.nextPageUrl
 import me.brosssh.bundles.integrations.common.resolveAvatar
+import me.brosssh.bundles.integrations.common.resolvedRateLimitDeadline
+import java.time.OffsetDateTime
 
 /**
  * Client for Gitea-compatible instances, including Forgejo and the Forgejo-based Codeberg service.
@@ -37,9 +42,24 @@ class GiteaHostClient(
         pat?.let { header(HttpHeaders.Authorization, "token $it") }
     }
 
+    override fun rateLimitDeadline(
+        status: HttpStatusCode,
+        headers: Headers,
+        now: OffsetDateTime
+    ): OffsetDateTime? {
+        if (status != HttpStatusCode.TooManyRequests) return null
+
+        return resolvedRateLimitDeadline(
+            retryAfter = headers[HttpHeaders.RetryAfter],
+            reset = null,
+            now = now
+        )
+    }
+
     override suspend fun getRepo(ref: RepoRef): RepoInfo =
         client
             .get("$baseUrl/api/v1/repos/${ref.namespace}/${ref.repo}") {
+                expectSuccess = true
                 authenticate()
             }
             .body<GiteaRepoDto>()
@@ -52,6 +72,7 @@ class GiteaHostClient(
 
         while (nextUrl != null) {
             val response = client.get(nextUrl) {
+                expectSuccess = true
                 authenticate()
             }
             releases += response.body<List<GiteaReleaseDto>>()

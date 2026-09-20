@@ -18,6 +18,12 @@
     "@semantic-release/changelog",
     "gradle-semantic-release-plugin",
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./gradlew startShadowScripts"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": [
@@ -53,10 +59,6 @@
           "linux/amd64",
           "linux/arm64"
         ],
-        "dockerArgs": {
-           "GITHUB_ACTOR": null,
-           "GITHUB_TOKEN": null,
-        },
         "dockerBuildCacheFrom": "ghcr.io/brosssh/revanced-external-bundles:latest"
       }
     ],

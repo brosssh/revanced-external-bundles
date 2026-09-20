@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.IgnoreTrailingSlash
 import me.brosssh.bundles.api.v3.routes.bundleRoutes as bundleRoutesV3
+import me.brosssh.bundles.api.v3.routes.sourceRoutes
 import me.brosssh.bundles.api.routes.graphQLRoute
 import me.brosssh.bundles.api.v1.routes.bundleRoutes as bundleRoutesV1
 import me.brosssh.bundles.api.v1.routes.refreshRoutes
@@ -15,6 +16,7 @@ import me.brosssh.bundles.api.v2.routes.bundleRoutes as bundleRoutesV2
 import me.brosssh.bundles.db.SourceManifestSync
 import me.brosssh.bundles.db.migration.applyHasuraMetadata
 import me.brosssh.bundles.db.migration.migrationScript
+import me.brosssh.bundles.domain.services.SourceService
 import me.brosssh.bundles.plugins.*
 import org.koin.ktor.ext.inject
 
@@ -42,6 +44,7 @@ suspend fun Application.module() {
     migrationScript()
 
     val sourceManifestSync by inject<SourceManifestSync>()
+    val sourceService by inject<SourceService>()
     log.info(sourceManifestSync.sync().summary)
 
     applyHasuraMetadata()
@@ -65,6 +68,7 @@ suspend fun Application.module() {
 
         apiV3 {
             bundleRoutesV3()
+            sourceRoutes(Config.hasuraSecret, sourceService::hardDelete)
         }
 
         graphQLRoute()

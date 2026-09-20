@@ -4,36 +4,72 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Bundle Search</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght,ROND@6..144,1..1000,100&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.14/purify.min.js"></script>
     </head>
     <body>
-    <div class="container">
-        <h1>Bundle Search</h1>
-        <p class="subtitle">Search for ReVanced patch bundles</p>
+    <div class="container grid-view-enabled">
+        <div class="page-header">
+            <div>
+                <h1>Bundle Search</h1>
+                <p class="subtitle">Search for ReVanced patch bundles</p>
+            </div>
+            <button id="admin-access" class="admin-access" type="button">Admin access</button>
+        </div>
         <div class="search-row">
             <input
                     type="text"
                     id="search"
+                    aria-label="Search bundles"
                     placeholder="Search bundles by source URL or name..."
                     autocomplete="off"
             >
             <input
                     type="text"
                     id="package-filter"
+                    aria-label="Filter by package"
                     placeholder="Filter by package (e.g., com.google.android.youtube)"
                     autocomplete="off"
             >
+        </div>
+        <div class="filter-row">
+            <label class="filter-field">
+                <span>Source</span>
+                <select id="source-filter">
+                    <option value="">All sources</option>
+                </select>
+            </label>
+            <label class="filter-field">
+                <span>Bundle version</span>
+                <select id="bundle-version-filter" disabled>
+                    <option value="">All versions</option>
+                </select>
+            </label>
+            <label class="filter-field">
+                <span>Bundle type</span>
+                <select id="bundle-type-filter">
+                    <option value="">All types</option>
+                </select>
+            </label>
         </div>
         <div class="filter-buttons">
             <button class="filter-btn" data-filter="all">All</button>
             <button class="filter-btn active" data-filter="release">Release</button>
             <button class="filter-btn" data-filter="prerelease">Prerelease</button>
+            <button id="disabled-sources-toggle" class="changelog-toggle" type="button" hidden>Show disabled sources</button>
+            <button id="toggle-all-changelogs" class="changelog-toggle" type="button" disabled>Show all changelogs</button>
+            <button id="view-toggle" class="view-toggle" type="button" aria-pressed="true">List view</button>
         </div>
         <div id="status">Loading bundles...</div>
-        <ul id="results"></ul>
+        <div id="results" class="grid-view">
+            <div class="v-track" id="v-track"></div>
+        </div>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
     </body>
     </html>

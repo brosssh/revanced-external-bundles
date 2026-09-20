@@ -52,7 +52,13 @@
                     "source_fk",
                     "description"
                   ],
-                  "filter": {},
+                  "filter": {
+                    "source": {
+                      "enabled": {
+                        "_eq": true
+                      }
+                    }
+                  },
                   "allow_aggregations": true
                 },
                 "comment": ""
@@ -131,7 +137,15 @@
                     "id",
                     "description"
                   ],
-                  "filter": {},
+                  "filter": {
+                    "bundle": {
+                      "source": {
+                        "enabled": {
+                          "_eq": true
+                        }
+                      }
+                    }
+                  },
                   "allow_aggregations": true
                 },
                 "comment": ""
@@ -165,7 +179,17 @@
                     "package_fk",
                     "patch_fk"
                   ],
-                  "filter": {},
+                  "filter": {
+                    "patch": {
+                      "bundle": {
+                        "source": {
+                          "enabled": {
+                            "_eq": true
+                          }
+                        }
+                      }
+                    }
+                  },
                   "allow_aggregations": true
                 },
                 "comment": ""
@@ -235,7 +259,9 @@
                 "permission": {
                   "columns": [
                     "url",
-                    "id"
+                    "id",
+                    "enabled",
+                    "unavailable_reason"
                   ],
                   "filter": {},
                   "allow_aggregations": true

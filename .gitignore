@@ -49,3 +49,4 @@ bin/
 !/docs/patcher-runtimes.md
 .idea
 .env
+node_modules/

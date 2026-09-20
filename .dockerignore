@@ -1,0 +1,6 @@
+**
+!build/
+!build/libs/
+!build/libs/revanced-external-bundles-all.jar
+!build/patcher-runtimes/
+!build/patcher-runtimes/**

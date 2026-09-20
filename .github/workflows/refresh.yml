@@ -1,6 +1,6 @@
 name: Refresh Bundles & Patches
-# Run Production on schedule OR manual trigger from main
-# Run Development only on manual trigger from dev
+# Run Production and Development on the same schedule
+# Manual triggers refresh only the environment matching the selected branch
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Call refresh endpoint (${{ matrix.environment }})
         if: |
-          (github.event_name == 'schedule' && matrix.environment == 'Production') ||
+          github.event_name == 'schedule' ||
           (github.event_name == 'workflow_dispatch' && github.ref == matrix.branch)
         env:
           SECRET: ${{ secrets.BACKEND_AUTHENTICATION_SECRET }}

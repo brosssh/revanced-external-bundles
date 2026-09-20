@@ -32,7 +32,8 @@ val httpClientModule = module {
                 level = LogLevel.INFO
                 sanitizeHeader { header ->
                     header.equals(HttpHeaders.Authorization, ignoreCase = true) ||
-                        header.equals("PRIVATE-TOKEN", ignoreCase = true)
+                        header.equals("PRIVATE-TOKEN", ignoreCase = true) ||
+                        header.equals("X-Hasura-Admin-Secret", ignoreCase = true)
                 }
             }
         }
