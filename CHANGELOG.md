@@ -1,3 +1,10 @@
+# [1.3.0-dev.4](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0-dev.3...v1.3.0-dev.4) (2026-09-20)
+
+
+### Bug Fixes
+
+* refresh development bundles on schedule ([3bc8020](https://github.com/brosssh/revanced-external-bundles/commit/3bc802028d9a5982d91cb8e6441d52a79bde588a))
+
 # [1.3.0-dev.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-09-03)
 
 
