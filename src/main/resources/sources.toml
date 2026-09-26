@@ -779,3 +779,30 @@ enabled = false
 [[sources]]
 url = "https://github.com/liongalahad/nuviotv-patches"
 enabled = false
+
+[[sources]]
+url = "https://github.com/BholeyKaBhakt/revanced-patches-xtra"
+
+[[sources]]
+url = "https://github.com/andronedev/revanced-patches"
+
+[[sources]]
+url = "https://github.com/areteruhiro/linegms"
+
+[[sources]]
+url = "https://github.com/brosssh/revanced-patches"
+
+[[sources]]
+url = "https://github.com/lisouseInaikyrios/revanced-patches"
+
+[[sources]]
+url = "https://github.com/nk521/revanced-patches"
+
+[[sources]]
+url = "https://github.com/scrazzz/my-revanced-patches"
+
+[[sources]]
+url = "https://github.com/wchill/revanced-patches"
+
+[[sources]]
+url = "https://github.com/whyvl/revanced-patches-repo"
