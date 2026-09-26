@@ -9,7 +9,6 @@ import me.brosssh.bundles.db.tables.SourceTable
 import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.ReleaseChannel
 import me.brosssh.bundles.domain.models.SourceDeletionResult
-import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -100,6 +99,14 @@ class DisabledSourceRepositoryTest {
     fun `patch refresh processes latest bundles before historical backlog`() {
         val fixture = insertSource(enabled = true)
         val (historicalId, latestId) = transaction(database) {
+            val historicalSourceId = SourceTable.insertAndGetId {
+                it[url] = "https://github.com/example/historical-patches"
+                it[enabled] = true
+            }
+            val latestSourceId = SourceTable.insertAndGetId {
+                it[url] = "https://github.com/example/latest-patches"
+                it[enabled] = true
+            }
             val historicalId = BundleTable.insertAndGetId {
                 it[version] = "v2.0.0"
                 it[createdAt] = "2026-04-30T00:00:00Z"
@@ -111,7 +118,7 @@ class DisabledSourceRepositoryTest {
                 it[fileHash] = null
                 it[needPatchesUpdate] = true
                 it[bundleType] = BundleType.REVANCED_V4.value
-                it[sourceFk] = EntityID(fixture.sourceId, SourceTable)
+                it[sourceFk] = historicalSourceId
             }
             val latestId = BundleTable.insertAndGetId {
                 it[version] = "v3.0.0-dev.1"
@@ -124,7 +131,7 @@ class DisabledSourceRepositoryTest {
                 it[fileHash] = null
                 it[needPatchesUpdate] = true
                 it[bundleType] = BundleType.REVANCED_V4.value
-                it[sourceFk] = EntityID(fixture.sourceId, SourceTable)
+                it[sourceFk] = latestSourceId
             }
             historicalId.value to latestId.value
         }
