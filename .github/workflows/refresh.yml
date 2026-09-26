@@ -9,13 +9,17 @@ on:
     - cron: '17,47 * * * *'
 
 permissions:
-  contents: read
+  contents: write
   deployments: write
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    concurrency:
+      group: refresh-${{ matrix.environment }}
+      cancel-in-progress: false
     strategy:
+      fail-fast: false
       matrix:
         include:
           - environment: Production
@@ -26,6 +30,7 @@ jobs:
     environment: ${{ matrix.environment }}
     steps:
       - name: Call refresh endpoint (${{ matrix.environment }})
+        id: refresh
         if: |
           github.event_name == 'schedule' ||
           (github.event_name == 'workflow_dispatch' && github.ref == matrix.branch)
@@ -37,13 +42,53 @@ jobs:
           PAYLOAD="refresh:$TIMESTAMP"
           HMAC=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
           echo "Calling refresh on $DEPLOY_ENDPOINT (${{ matrix.environment }})"
-          curl -X POST "$DEPLOY_ENDPOINT/api/v1/refresh/all" \
+          curl --fail-with-body --connect-timeout 15 --max-time 60 -X POST "$DEPLOY_ENDPOINT/api/v1/refresh/all" \
             -H "Authorization: Bearer $TIMESTAMP-$HMAC" \
             -H 'accept: application/json' \
             -d '' \
             -w "\nHTTP Status: %{http_code}\n"
           
           echo "current_env=${{ matrix.environment }}" >> $GITHUB_OUTPUT
+
+      - name: Checkout matching source branch
+        if: steps.refresh.outputs.current_env != ''
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Set up Python
+        if: steps.refresh.outputs.current_env != ''
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Sync database sources to ${{ matrix.branch }}
+        if: steps.refresh.outputs.current_env != ''
+        env:
+          DEPLOY_ENDPOINT: ${{ vars.DEPLOY_ENDPOINT }}
+          BACKEND_GIT_HOSTS: ${{ vars.BACKEND_GIT_HOSTS }}
+          TARGET_REF: ${{ matrix.branch }}
+        run: |
+          TARGET_BRANCH="${TARGET_REF#refs/heads/}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch origin "$TARGET_BRANCH"
+            # Recompute additions against the latest branch after concurrent pushes.
+            # This checkout contains only this job's generated manifest commit.
+            git reset --hard "origin/$TARGET_BRANCH"
+            python .github/scripts/sync_sources.py --endpoint "$DEPLOY_ENDPOINT"
+            git add src/main/resources/sources.toml
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            git commit -m "chore(sources): sync ${{ matrix.environment }} database sources [skip ci]"
+            if git push origin "HEAD:$TARGET_REF"; then
+              exit 0
+            fi
+          done
+          echo "Source sync could not push to $TARGET_REF after three attempts" >&2
+          exit 1
 
   # This is ass I know, waiting for https://github.com/orgs/community/discussions/36919
   cleanup_deployment:

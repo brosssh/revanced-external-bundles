@@ -1,7 +1,7 @@
 # Canonical list of tracked patch-bundle sources.
 #
-# Add/remove/disable a source here, then backend startup reconciles it with the database.
-# Removed entries are soft-disabled: cached bundles and patches are preserved.
+# Add a source or set enabled = false, then startup reconciles it with the database.
+# Keep disabled entries: omission does not disable sources, and refresh runners restore missing URLs.
 
 [[sources]]
 url = "https://github.com/crimera/piko"
@@ -709,3 +709,73 @@ url = "https://gitlab.com/inotia00/x-shim"
 
 [[sources]]
 url = "https://gitlab.com/Paresh-Maheshwari/paresh-patches"
+
+# Retired sources removed in #41. Keep explicit tombstones so synchronization cannot re-enable them.
+
+[[sources]]
+url = "https://github.com/crimera/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/anddea/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/revanced/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/jkennethcarino/privacy-revanced-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/jkennethcarino/privacy-revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/YT-Advanced/ReX-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/IndusAryan/twitter-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/rufusin/revanced-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/rufusin/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/inotia00/revanced-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/inotia00/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/inotia00/revanced-patches-arsclib"
+enabled = false
+
+[[sources]]
+url = "https://github.com/hoo-dles/revanced-custom-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/wchill/rvx-morphed"
+enabled = false
+
+[[sources]]
+url = "https://github.com/IMXEren/mix-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/ameenalasady/photogrid-morphe"
+enabled = false
+
+[[sources]]
+url = "https://github.com/liongalahad/nuviotv-patches"
+enabled = false
