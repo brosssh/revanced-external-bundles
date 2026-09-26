@@ -102,6 +102,12 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.register("assembleRelease") {
+    group = "build"
+    description = "Assemble the release shadow JAR and isolated patcher runtimes"
+    dependsOn(tasks.named("shadowJar"))
+}
+
 val validateSources by tasks.registering(JavaExec::class) {
     group = "verification"
     description = "Validate the tracked sources manifest (src/main/resources/sources.toml)"

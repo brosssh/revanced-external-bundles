@@ -87,6 +87,11 @@ class BundleRepository {
                     enabledSourceFilter and
                     availableSourceFilter
             }
+            // Populate visible releases before the backlog of historical bundle versions.
+            .orderBy(
+                BundleTable.isLatest to SortOrder.DESC,
+                BundleTable.createdAt to SortOrder.DESC
+            )
             .map { row ->
                 BundlePatchCandidate(
                     id = row[BundleTable.id].value,

@@ -9,6 +9,7 @@ import me.brosssh.bundles.db.tables.SourceTable
 import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.ReleaseChannel
 import me.brosssh.bundles.domain.models.SourceDeletionResult
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -93,6 +94,45 @@ class DisabledSourceRepositoryTest {
         sourceRepository.setUnavailableReason(fixture.sourceId, null)
 
         assertEquals(1, repository.getBundlesNeedPatchesUpdate().size)
+    }
+
+    @Test
+    fun `patch refresh processes latest bundles before historical backlog`() {
+        val fixture = insertSource(enabled = true)
+        val (historicalId, latestId) = transaction(database) {
+            val historicalId = BundleTable.insertAndGetId {
+                it[version] = "v2.0.0"
+                it[createdAt] = "2026-04-30T00:00:00Z"
+                it[description] = null
+                it[downloadUrl] = "https://example.com/historical.rvp"
+                it[signatureDownloadUrl] = null
+                it[isPrerelease] = false
+                it[isLatest] = false
+                it[fileHash] = null
+                it[needPatchesUpdate] = true
+                it[bundleType] = BundleType.REVANCED_V4.value
+                it[sourceFk] = EntityID(fixture.sourceId, SourceTable)
+            }
+            val latestId = BundleTable.insertAndGetId {
+                it[version] = "v3.0.0-dev.1"
+                it[createdAt] = "2026-04-01T00:00:00Z"
+                it[description] = null
+                it[downloadUrl] = "https://example.com/latest.rvp"
+                it[signatureDownloadUrl] = null
+                it[isPrerelease] = true
+                it[isLatest] = true
+                it[fileHash] = null
+                it[needPatchesUpdate] = true
+                it[bundleType] = BundleType.REVANCED_V4.value
+                it[sourceFk] = EntityID(fixture.sourceId, SourceTable)
+            }
+            historicalId.value to latestId.value
+        }
+
+        assertEquals(
+            listOf(latestId, fixture.bundleId, historicalId),
+            BundleRepository().getBundlesNeedPatchesUpdate().map { it.id }
+        )
     }
 
     @Test
