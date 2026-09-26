@@ -121,8 +121,24 @@ class RefreshPatchesJobService(
         val lock = bundleLocks[candidate.id % bundleLocks.size]
         lock.withLock {
             val startedAt = System.nanoTime()
-            logger.info("Processing refresh for bundle ${candidate.id}")
+            val stillPending = suspendTransaction {
+                BundleTable
+                    .selectAll()
+                    .where { BundleTable.id eq candidate.id }
+                    .singleOrNull()
+                    ?.let { current ->
+                        current[BundleTable.needPatchesUpdate] &&
+                            current[BundleTable.bundleType] == candidate.bundle.bundleType.value &&
+                            current[BundleTable.fileHash] == candidate.fileHash &&
+                            current[BundleTable.downloadUrl] == candidate.bundle.downloadUrl
+                    } == true
+            }
+            if (!stillPending) {
+                logger.info("Skipped stale patch refresh for bundle {}", candidate.id)
+                return@withLock
+            }
 
+            logger.info("Processing refresh for bundle ${candidate.id}")
             val extraction = candidate.bundle.patches(candidate.patcherRuntime)
 
             val persisted = suspendTransaction {
@@ -139,7 +155,9 @@ class RefreshPatchesJobService(
                     current[BundleTable.bundleType] == candidate.bundle.bundleType.value &&
                         current[BundleTable.fileHash] == candidate.fileHash &&
                         current[BundleTable.downloadUrl] == candidate.bundle.downloadUrl
-                if (!artifactUnchanged) return@suspendTransaction false
+                if (!artifactUnchanged || !current[BundleTable.needPatchesUpdate]) {
+                    return@suspendTransaction false
+                }
 
                 val bundleEntity = requireNotNull(BundleEntity.findById(candidate.id))
                 replacePatches(bundleEntity, extraction.patches)
@@ -152,7 +170,7 @@ class RefreshPatchesJobService(
 
             if (!persisted) {
                 logger.info(
-                    "Discarded extracted patches for bundle {} because its artifact changed",
+                    "Discarded extracted patches for bundle {} because its artifact changed or another refresh completed",
                     candidate.id
                 )
                 return@withLock

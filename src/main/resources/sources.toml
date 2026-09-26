@@ -1,7 +1,7 @@
 # Canonical list of tracked patch-bundle sources.
 #
-# Add/remove/disable a source here, then backend startup reconciles it with the database.
-# Removed entries are soft-disabled: cached bundles and patches are preserved.
+# Add a source or set enabled = false, then startup reconciles it with the database.
+# Keep disabled entries: omission does not disable sources, and refresh runners restore missing URLs.
 
 [[sources]]
 url = "https://github.com/crimera/piko"
@@ -709,3 +709,442 @@ url = "https://gitlab.com/inotia00/x-shim"
 
 [[sources]]
 url = "https://gitlab.com/Paresh-Maheshwari/paresh-patches"
+
+# Retired sources removed in #41. Keep explicit tombstones so synchronization cannot re-enable them.
+
+[[sources]]
+url = "https://github.com/crimera/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/anddea/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/revanced/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/jkennethcarino/privacy-revanced-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/jkennethcarino/privacy-revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/YT-Advanced/ReX-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/IndusAryan/twitter-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/rufusin/revanced-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/rufusin/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/inotia00/revanced-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/inotia00/revanced-integrations"
+enabled = false
+
+[[sources]]
+url = "https://github.com/inotia00/revanced-patches-arsclib"
+enabled = false
+
+[[sources]]
+url = "https://github.com/hoo-dles/revanced-custom-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/wchill/rvx-morphed"
+enabled = false
+
+[[sources]]
+url = "https://github.com/IMXEren/mix-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/ameenalasady/photogrid-morphe"
+enabled = false
+
+[[sources]]
+url = "https://github.com/liongalahad/nuviotv-patches"
+enabled = false
+
+[[sources]]
+url = "https://github.com/BholeyKaBhakt/revanced-patches-xtra"
+
+[[sources]]
+url = "https://github.com/andronedev/revanced-patches"
+
+[[sources]]
+url = "https://github.com/areteruhiro/linegms"
+
+[[sources]]
+url = "https://github.com/brosssh/revanced-patches"
+
+[[sources]]
+url = "https://github.com/lisouseInaikyrios/revanced-patches"
+
+[[sources]]
+url = "https://github.com/nk521/revanced-patches"
+
+[[sources]]
+url = "https://github.com/scrazzz/my-revanced-patches"
+
+[[sources]]
+url = "https://github.com/wchill/revanced-patches"
+
+[[sources]]
+url = "https://github.com/whyvl/revanced-patches-repo"
+
+[[sources]]
+url = "https://github.com/0-BlackSpectrum-0/channel-blacklist-patch"
+
+[[sources]]
+url = "https://github.com/6ixfalls/revanced-patches"
+
+[[sources]]
+url = "https://github.com/AgentKosticka/Jam-Patches"
+
+[[sources]]
+url = "https://github.com/Akash-Sriram/De-Vanced"
+
+[[sources]]
+url = "https://github.com/Akash-Sriram/morphe-google-photos"
+
+[[sources]]
+url = "https://github.com/Akshayykadam/Pixel-Camera"
+
+[[sources]]
+url = "https://github.com/Akshayykadam/PixelBoard"
+
+[[sources]]
+url = "https://github.com/AlecBlance/android-patches"
+
+[[sources]]
+url = "https://github.com/Allvoid/arsound"
+
+[[sources]]
+url = "https://github.com/Amitaisela/travian-morphe-patches"
+
+[[sources]]
+url = "https://github.com/Canic/twitch-morphe-patch"
+
+[[sources]]
+url = "https://github.com/ComoEstaisAmigos/ck-zombies-morphe-patches"
+
+[[sources]]
+url = "https://github.com/DarioDKM/ringconn-patches"
+
+[[sources]]
+url = "https://github.com/Epxec/android-patches"
+
+[[sources]]
+url = "https://github.com/FoxxoOwO/foxxo-patches"
+
+[[sources]]
+url = "https://github.com/Fripe070/PixivPatches"
+
+[[sources]]
+url = "https://github.com/Gamer92000/pixelcamera-patches"
+
+[[sources]]
+url = "https://github.com/Hari-sys786/telegram-patches"
+
+[[sources]]
+url = "https://github.com/HelioFloxZ/HelioFloxZ-Patches"
+
+[[sources]]
+url = "https://github.com/HellLord77/media-patches"
+
+[[sources]]
+url = "https://github.com/HellveticaStandard/HellveticaPatches"
+
+[[sources]]
+url = "https://github.com/ImEnigma2x0/morphe-maloja-patch"
+
+[[sources]]
+url = "https://github.com/Insane96/Pinterest-patch"
+
+[[sources]]
+url = "https://github.com/JCapretta/chessable-patches"
+
+[[sources]]
+url = "https://github.com/JacobPlaysGames/CrimeRadar-Morphe-Patches"
+
+[[sources]]
+url = "https://github.com/Jagannath70086/jagas-morphe-patches"
+
+[[sources]]
+url = "https://github.com/Jeff-tek/jeff-patches"
+
+[[sources]]
+url = "https://github.com/LimeLimes/cbc-patches"
+
+[[sources]]
+url = "https://github.com/Nai64/Nai64ExtraPatches"
+
+[[sources]]
+url = "https://github.com/NextStepTeam/DnevnikNextPatch"
+
+[[sources]]
+url = "https://github.com/Plyrs1/morphe-patches"
+
+[[sources]]
+url = "https://github.com/PyFlat-JR/Morphe-Patches"
+
+[[sources]]
+url = "https://github.com/SatanMerde/D-moniakPatches"
+
+[[sources]]
+url = "https://github.com/SergeyBelentev/voice-over-translation-revanced"
+
+[[sources]]
+url = "https://github.com/Solvo37/vk-video-morphe-patches"
+
+[[sources]]
+url = "https://github.com/Supperelias2/sbs-morphe-patches"
+
+[[sources]]
+url = "https://github.com/Supperelias2/sbs-tv-morphe-patches"
+
+[[sources]]
+url = "https://github.com/SysAdminDoc/Hushfacebook"
+
+[[sources]]
+url = "https://github.com/SysAdminDoc/hushfeed"
+
+[[sources]]
+url = "https://github.com/ThetaBird/revanced-telemetry"
+
+[[sources]]
+url = "https://github.com/Thewanwan/bestapp"
+
+[[sources]]
+url = "https://github.com/TimBuckrue/nyt-games-vrr-patch"
+
+[[sources]]
+url = "https://github.com/Trimpsuz/morphe-busuu"
+
+[[sources]]
+url = "https://github.com/WaggBR/Wagg13Patch_Morphe"
+
+[[sources]]
+url = "https://github.com/YYDarlinker/morphe-ai-caption-translator"
+
+[[sources]]
+url = "https://github.com/Zanuaimi/UniPatches"
+
+[[sources]]
+url = "https://github.com/adderalladmiral/psychonaut-journal-patches"
+
+[[sources]]
+url = "https://github.com/ahmedyarub/morphe-patches"
+
+[[sources]]
+url = "https://github.com/aidancrane/reddit-default-browser-patch"
+
+[[sources]]
+url = "https://github.com/ak800i/mixplorer-patches-for-morphe"
+
+[[sources]]
+url = "https://github.com/akzzy/Morphi-Patcho"
+
+[[sources]]
+url = "https://github.com/alalloush/xperia-1v-camera-patches"
+
+[[sources]]
+url = "https://github.com/archie9211/morphe-patches"
+
+[[sources]]
+url = "https://github.com/atticadayz/tiktok-mini-drama-revanced-patch"
+
+[[sources]]
+url = "https://github.com/ausamnco/gboard-enc-patches"
+
+[[sources]]
+url = "https://github.com/axfree/wecatch-cjk-revanced-patch"
+
+[[sources]]
+url = "https://github.com/bearinmindcat/morphe-patches"
+
+[[sources]]
+url = "https://github.com/benzophury/oraimo-health-morphe-patches"
+
+[[sources]]
+url = "https://github.com/bruddaa/bruddas-morphe-patches"
+
+[[sources]]
+url = "https://github.com/cingxcong/telegram-morphe-patches-"
+
+[[sources]]
+url = "https://github.com/crimera/piko-newx"
+
+[[sources]]
+url = "https://github.com/debakarr/morphe-patches"
+
+[[sources]]
+url = "https://github.com/dhrubonai/morphe-patches"
+
+[[sources]]
+url = "https://github.com/dowjames/morphe-patches"
+
+[[sources]]
+url = "https://github.com/drnhzn/supreme-patches"
+
+[[sources]]
+url = "https://github.com/drosoCode/morphe-patches"
+
+[[sources]]
+url = "https://github.com/dumb-software/T2C-App-Patch-Morphe"
+
+[[sources]]
+url = "https://github.com/dumketo/multi-app-patches"
+
+[[sources]]
+url = "https://github.com/dunecache/oyasumi-patches"
+
+[[sources]]
+url = "https://github.com/ekazrahul100-web/redgifs-audio-patch"
+
+[[sources]]
+url = "https://github.com/enccmp/mn-patches"
+
+[[sources]]
+url = "https://github.com/eweddwg/belkart-pay-patches"
+
+[[sources]]
+url = "https://github.com/giaaaacomo/nifty-patches-selection"
+
+[[sources]]
+url = "https://github.com/h19e8p/auto-expand-for-x"
+
+[[sources]]
+url = "https://github.com/hackingguy/morphe-patches"
+
+[[sources]]
+url = "https://github.com/headboy99/headboy-morphe-patches"
+
+[[sources]]
+url = "https://github.com/ihatenodejs/aidans-patches"
+
+[[sources]]
+url = "https://github.com/jjjusf16-sys/3jPatch_Morphe"
+
+[[sources]]
+url = "https://github.com/jrddupont/discord-patches"
+
+[[sources]]
+url = "https://github.com/lchanc3/morphe-patches"
+
+[[sources]]
+url = "https://github.com/loan-mgt/moovit-patch"
+
+[[sources]]
+url = "https://github.com/lootdev78/psylos-morphe-patches"
+
+[[sources]]
+url = "https://github.com/mahirsn/mahirsn-patches"
+
+[[sources]]
+url = "https://github.com/mich111discord/MightyMichs-Patches"
+
+[[sources]]
+url = "https://github.com/mvaishak/letterboxd-morphe-patches"
+
+[[sources]]
+url = "https://github.com/newuser7171/telegram-morphe-patches-"
+
+[[sources]]
+url = "https://github.com/nickcomua/airofit-pro2-morphe-patches"
+
+[[sources]]
+url = "https://github.com/non7043/365score-patches"
+
+[[sources]]
+url = "https://github.com/ns1207/morphe-patches-template"
+
+[[sources]]
+url = "https://github.com/permissionBRICK/youtube-home-assistant-patches"
+
+[[sources]]
+url = "https://github.com/phamleduy04/duy-patches"
+
+[[sources]]
+url = "https://github.com/picarica/My-moprhe-patches"
+
+[[sources]]
+url = "https://github.com/pixincreate/morpheus"
+
+[[sources]]
+url = "https://github.com/pmaxhogan/vantage-patches"
+
+[[sources]]
+url = "https://github.com/rahaaatul/morphe-patches"
+
+[[sources]]
+url = "https://github.com/rahul9999xda/telegram-morphe-patches"
+
+[[sources]]
+url = "https://github.com/raphaelbahat/zotero-self-hosted-sync"
+
+[[sources]]
+url = "https://github.com/roflsunriz/google-app-revanced"
+
+[[sources]]
+url = "https://github.com/roflsunriz/povo-2.0-revanced"
+
+[[sources]]
+url = "https://github.com/roflsunriz/ymail-revanced"
+
+[[sources]]
+url = "https://github.com/ryuya0124/gemini-microg-patches"
+
+[[sources]]
+url = "https://github.com/sashade8-ship-it/dual-vot-patches"
+
+[[sources]]
+url = "https://github.com/spicetify/morphe-patches"
+
+[[sources]]
+url = "https://github.com/testiwy268/morphe-patches"
+
+[[sources]]
+url = "https://github.com/thegibbonn/morphe-patches-anilili"
+
+[[sources]]
+url = "https://github.com/thejaustin/smartlauncher-morphe-patches"
+
+[[sources]]
+url = "https://github.com/virzak/morphe-patches"
+
+[[sources]]
+url = "https://github.com/xxxR3Dxxx/R3D-PatchLab"
+
+[[sources]]
+url = "https://github.com/yann-soliman/morphe-patches"
+
+[[sources]]
+url = "https://github.com/ymshin-dev/edge-window-patches"
+
+[[sources]]
+url = "https://github.com/zeldrisho/morphe-patches"
+
+[[sources]]
+url = "https://gitlab.com/dhl0/morphe-patches"
+
+[[sources]]
+url = "https://github.com/KR1901/sofascore-font-revanced"
+
+[[sources]]
+url = "https://github.com/feixiangdao/letterboxd-stremio-nuvio-morphe-patch"

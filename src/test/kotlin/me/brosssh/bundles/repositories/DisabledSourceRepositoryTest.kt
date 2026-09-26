@@ -96,6 +96,53 @@ class DisabledSourceRepositoryTest {
     }
 
     @Test
+    fun `patch refresh processes latest bundles before historical backlog`() {
+        val fixture = insertSource(enabled = true)
+        val (historicalId, latestId) = transaction(database) {
+            val historicalSourceId = SourceTable.insertAndGetId {
+                it[url] = "https://github.com/example/historical-patches"
+                it[enabled] = true
+            }
+            val latestSourceId = SourceTable.insertAndGetId {
+                it[url] = "https://github.com/example/latest-patches"
+                it[enabled] = true
+            }
+            val historicalId = BundleTable.insertAndGetId {
+                it[version] = "v2.0.0"
+                it[createdAt] = "2026-04-30T00:00:00Z"
+                it[description] = null
+                it[downloadUrl] = "https://example.com/historical.rvp"
+                it[signatureDownloadUrl] = null
+                it[isPrerelease] = false
+                it[isLatest] = false
+                it[fileHash] = null
+                it[needPatchesUpdate] = true
+                it[bundleType] = BundleType.REVANCED_V4.value
+                it[sourceFk] = historicalSourceId
+            }
+            val latestId = BundleTable.insertAndGetId {
+                it[version] = "v3.0.0-dev.1"
+                it[createdAt] = "2026-04-01T00:00:00Z"
+                it[description] = null
+                it[downloadUrl] = "https://example.com/latest.rvp"
+                it[signatureDownloadUrl] = null
+                it[isPrerelease] = true
+                it[isLatest] = true
+                it[fileHash] = null
+                it[needPatchesUpdate] = true
+                it[bundleType] = BundleType.REVANCED_V4.value
+                it[sourceFk] = latestSourceId
+            }
+            historicalId.value to latestId.value
+        }
+
+        assertEquals(
+            listOf(latestId, fixture.bundleId, historicalId),
+            BundleRepository().getBundlesNeedPatchesUpdate().map { it.id }
+        )
+    }
+
+    @Test
     fun `unavailable sources are excluded from runtime failure requeue`() {
         val fixture = insertSource(enabled = true)
         val repository = BundleRepository()

@@ -13,19 +13,25 @@ import org.tomlj.TomlTable
 /**
  * Reconciles the canonical tracked-source manifest with the database at startup.
  *
- * Missing rows are inserted, entries absent from the manifest are soft-disabled, and re-added
- * entries are enabled again. Cached bundles and patches are never deleted.
+ * Missing rows are inserted and explicit manifest states take precedence. Database-only sources
+ * remain discoverable until the refresh workflow adds them to the manifest. Disable sources with
+ * an explicit enabled = false entry; omission is not a disable instruction.
  */
 class SourceManifestSync(
     private val hostResolver: HostResolver
 ) {
-    fun sync(): SyncResult {
-        val entries = loadManifest()
+    fun sync(entries: List<ManifestEntry> = loadManifest()): SyncResult {
         validate(entries, hostResolver)
 
         val result = SyncResult()
         transaction {
-            entries.forEach { entry ->
+            // Recover sources disabled by the old omission-based policy. Explicit disabled entries
+            // (including retired sources) win because they precede database-only entries.
+            val databaseEntries = SourceEntity.all().mapNotNull { source ->
+                val parsed = runCatching { hostResolver.requireSupported(source.url) }.getOrNull()
+                if (parsed?.canonicalUrl == source.url) ManifestEntry(source.url) else null
+            }
+            (entries + databaseEntries).distinctBy { it.url }.forEach { entry ->
                 val existing = SourceEntity.find { SourceTable.url eq entry.url }
                     .orderBy(SourceTable.id to SortOrder.ASC)
                     .toList()
@@ -50,14 +56,6 @@ class SourceManifestSync(
                         result.disabled++
                     }
             }
-
-            val manifestUrls = entries.mapTo(mutableSetOf()) { it.url }
-            SourceEntity.all()
-                .filter { it.enabled && it.url !in manifestUrls }
-                .forEach {
-                    it.enabled = false
-                    result.disabled++
-                }
         }
         return result
     }
