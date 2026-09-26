@@ -17,8 +17,6 @@ object Config {
     val env: String = getEnv("ENV", "production")
     val isDebug: Boolean = env.equals("debug", ignoreCase = true)
     val version: String = object {}.javaClass.`package`.implementationVersion ?: "dev"
-    val host: String = getEnv("HOST")
-    val hostUrl: URI = if (host == "localhost") URI("http://localhost:8080") else URI("https://$host")
 
     // Database
     val databaseHost: String = getEnv("DATABASE_HOST")
@@ -51,5 +49,7 @@ object Config {
     // Server
     val port: Int = getEnv("BACKEND_PORT").toInt()
 
+    private val hasuraPort: String = getEnv("HASURA_PORT", "8082")
+    val hasuraInternalUrl: URI = URI(getEnv("HASURA_INTERNAL_URL", "http://localhost:$hasuraPort"))
     val hasuraSecret: String = getEnv("HASURA_GRAPHQL_ADMIN_SECRET")
 }
