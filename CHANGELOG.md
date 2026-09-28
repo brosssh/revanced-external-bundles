@@ -1,3 +1,10 @@
+# [1.4.0-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.1-dev.3...v1.4.0-dev.1) (2026-09-28)
+
+
+### Features
+
+* **mapper:** prefer explicit patch bundles over generic JARs ([#54](https://github.com/brosssh/revanced-external-bundles/issues/54)) ([2f0bb60](https://github.com/brosssh/revanced-external-bundles/commit/2f0bb60c395d876e12b6a90f7ca8f7bb4eca9c87))
+
 ## [1.3.1-dev.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.1-dev.2...v1.3.1-dev.3) (2026-09-27)
 
 
