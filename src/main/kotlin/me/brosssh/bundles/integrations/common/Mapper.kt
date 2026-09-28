@@ -3,7 +3,6 @@ package me.brosssh.bundles.integrations.common
 import me.brosssh.bundles.domain.models.Bundle
 import me.brosssh.bundles.domain.models.BundleImportError
 import me.brosssh.bundles.domain.models.BundleMetadata
-import me.brosssh.bundles.domain.models.BundleType
 import me.brosssh.bundles.domain.models.SourceMetadata
 
 fun RepoInfo.toDomainModel(sourceId: Int) = SourceMetadata(
@@ -18,11 +17,9 @@ fun RepoInfo.toDomainModel(sourceId: Int) = SourceMetadata(
 )
 
 fun ReleaseInfo.toDomainModel(sourceId: Int): BundleMetadata {
-    val asset = assets
-        .firstOrNull { it.bundleTypeValue() != null }
+    val (asset, bundleType) = assets.choosePatchBundle()
         ?: throw BundleImportError.ReleaseFileNotFoundError()
 
-    val bundleType = BundleType.from(asset.bundleTypeValue()!!)
     val downloadUrl = asset.browserDownloadUrl
     val digestHash = asset.digest
 
@@ -33,7 +30,7 @@ fun ReleaseInfo.toDomainModel(sourceId: Int): BundleMetadata {
             body,
             createdAt,
             downloadUrl,
-            assets.firstOrNull { it.isSignature() }?.browserDownloadUrl,
+            assets.chooseSignature(asset)?.browserDownloadUrl,
             sourceId
         ),
         fileHash = digestHash,
