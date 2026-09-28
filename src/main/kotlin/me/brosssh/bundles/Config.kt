@@ -47,6 +47,8 @@ object Config {
     val patcherWorkerMaxPerRuntime: Int = getEnv("BACKEND_PATCHER_WORKER_MAX_PER_RUNTIME", "2").toInt()
     val patcherWorkerIdleSeconds: Long = getEnv("BACKEND_PATCHER_WORKER_IDLE_SECONDS", "300").toLong()
     val patcherRefreshConcurrency: Int = getEnv("BACKEND_PATCHER_REFRESH_CONCURRENCY", "4").toInt()
+    val patcherHistoricalRefreshBatchSize: Int =
+        getEnv("BACKEND_PATCHER_HISTORICAL_REFRESH_BATCH_SIZE", "25").toInt()
 
     // Server
     val port: Int = getEnv("BACKEND_PORT").toInt()

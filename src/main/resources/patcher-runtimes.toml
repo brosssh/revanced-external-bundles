@@ -10,7 +10,7 @@ fallback-runtimes = ["app.morphe:morphe-patcher:1.1.1"]
 
 [bundle-types."Morphe:V1".runtimes]
 "app.morphe:morphe-patcher:1.2.0" = "<=1.2.0"
-"app.morphe:morphe-patcher:1.11.0" = ">1.2.0"
+"app.morphe:morphe-patcher:1.14.1" = ">1.2.0"
 
 [bundle-types."ReVanced:V3"]
 adapter = "revanced-v3"

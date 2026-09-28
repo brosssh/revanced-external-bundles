@@ -73,7 +73,7 @@ class PatchWorkerManagerTest {
             )
         }
 
-        assertEquals(listOf("app.morphe:morphe-patcher:1.11.0"), attempted)
+        assertEquals(listOf("app.morphe:morphe-patcher:1.14.1"), attempted)
     }
 
     @Test
@@ -161,7 +161,7 @@ class PatchWorkerManagerTest {
         val bundles = mapOf(
             BundleType.MORPHE_V1 to Pair(
                 emptyMorpheBundle("1.3.3"),
-                listOf("app.morphe:morphe-patcher:1.11.0")
+                listOf("app.morphe:morphe-patcher:1.14.1")
             ),
             BundleType.REVANCED_V4 to Pair(
                 byteArrayOf(1),
@@ -393,7 +393,7 @@ class PatchWorkerManagerTest {
                 fallbackRuntimes = listOf("app.morphe:morphe-patcher:1.1.1"),
                 runtimes = mapOf(
                     "app.morphe:morphe-patcher:1.2.0" to "<=1.2.0",
-                    "app.morphe:morphe-patcher:1.11.0" to ">1.2.0"
+                    "app.morphe:morphe-patcher:1.14.1" to ">1.2.0"
                 )
             ),
             "ReVanced:V3" to BundleRuntimeConfig(

@@ -180,13 +180,16 @@ function setupVirtualizer(anchorBundleIndex = null) {
     }
 }
 
-const BUNDLE_FIELDS = `
+function bundleFields(includeFailureFingerprint = true) {
+    return `
     id
     bundle_type
     created_at
     description
     download_url
     signature_download_url
+    need_patches_update
+    ${includeFailureFingerprint ? "patcher_failure_fingerprint" : ""}
     is_prerelease
     version
     source {
@@ -213,6 +216,7 @@ const BUNDLE_FIELDS = `
         }
     }
 `;
+}
 
 let currentFilter = "release";
 let currentSearchQuery = "";
@@ -383,13 +387,13 @@ async function loadBundles(secret = null) {
     status.textContent = "Loading bundles...";
     status.classList.add("loading");
 
-    const query = `
+    const query = fields => `
         query Snapshot {
             bundle(
               where: { is_latest: { _eq: true } }
               order_by: { source: { source_metadatum: { repo_stars: desc } } }
             ) {
-                ${BUNDLE_FIELDS}
+                ${fields}
             }
             ${secret ? `source {
                     url
@@ -405,7 +409,7 @@ async function loadBundles(secret = null) {
     `;
 
     try {
-        const data = await requestGraphQL(query, {}, secret);
+        const data = await requestBundleGraphQL(query, {}, secret);
         const bundles = data?.bundle || [];
         disabledSources = secret
             ? (data?.source || []).filter(source => !source.enabled).map(transformDisabledSource)
@@ -450,10 +454,38 @@ async function requestGraphQL(query, variables = {}, secret = null) {
 
     const payload = await response.json();
     if (payload.errors) {
-        throw new Error(payload.errors.map(error => error.message).join('; '));
+        const error = new Error(payload.errors.map(error => error.message).join('; '));
+        error.graphQLErrors = payload.errors;
+        throw error;
     }
 
     return payload.data;
+}
+
+function isMissingPatcherFailureFingerprintError(error) {
+    const messages = error.graphQLErrors?.map(item => item.message) || [error.message];
+    return messages.some(message =>
+        typeof message === "string" &&
+        message.includes("patcher_failure_fingerprint") &&
+        /not found|does not exist|unknown field|cannot query field/i.test(message)
+    );
+}
+
+async function requestBundleGraphQL(buildQuery, variables = {}, secret = null) {
+    try {
+        return await requestGraphQL(buildQuery(bundleFields()), variables, secret);
+    } catch (error) {
+        if (!isMissingPatcherFailureFingerprintError(error)) throw error;
+
+        const data = await requestGraphQL(buildQuery(bundleFields(false)), variables, secret);
+        return {
+            ...data,
+            bundle: (data?.bundle || []).map(bundle => ({
+                ...bundle,
+                patchMetadataVerified: false
+            }))
+        };
+    }
 }
 
 async function selectSource(sourceUrl) {
@@ -515,7 +547,7 @@ async function selectBundleVersion(version) {
     status.textContent = "Loading bundle...";
     status.classList.add("loading");
 
-    const query = `
+    const query = fields => `
         query BundleVersion($sourceUrl: String!, $version: String!) {
             bundle(
               where: {
@@ -524,13 +556,13 @@ async function selectBundleVersion(version) {
               }
               order_by: { created_at: desc }
             ) {
-                ${BUNDLE_FIELDS}
+                ${fields}
             }
         }
     `;
 
     try {
-        const data = await requestGraphQL(query, {
+        const data = await requestBundleGraphQL(query, {
             sourceUrl: currentSourceUrl,
             version
         }, adminSecret);
@@ -663,9 +695,13 @@ function transformDisabledSource(source) {
 
 function transformBundle(bundle) {
     const metadata = bundle.source?.source_metadata || {};
+    const patchMetadataCurrent =
+        bundle.patchMetadataVerified !== false &&
+        bundle.need_patches_update !== true &&
+        !bundle.patcher_failure_fingerprint;
 
     // Transform patches to include compatiblePackages
-    const patches = (bundle.patches || []).map(patch => ({
+    const patches = (patchMetadataCurrent ? (bundle.patches || []) : []).map(patch => ({
         name: patch.name,
         description: patch.description,
         compatiblePackages: (patch.patch_packages || []).map(pp => ({

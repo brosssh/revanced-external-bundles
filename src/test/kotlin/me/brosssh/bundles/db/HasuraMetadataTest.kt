@@ -47,10 +47,11 @@ class HasuraMetadataTest {
     }
 
     @Test
-    fun `public bundle data does not expose raw patcher failures`() {
+    fun `public bundle data exposes freshness marker without raw patcher failures`() {
         val columns = userPermission("bundle")["columns"]!!.jsonArray
             .map { it.jsonPrimitive.content }
 
+        assertTrue("patcher_failure_fingerprint" in columns)
         assertFalse("patcher_failure" in columns)
     }
 

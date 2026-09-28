@@ -1,3 +1,31 @@
+# [1.4.0-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.1-dev.3...v1.4.0-dev.1) (2026-09-28)
+
+
+### Features
+
+* **mapper:** prefer explicit patch bundles over generic JARs ([#54](https://github.com/brosssh/revanced-external-bundles/issues/54)) ([2f0bb60](https://github.com/brosssh/revanced-external-bundles/commit/2f0bb60c395d876e12b6a90f7ca8f7bb4eca9c87))
+
+## [1.3.1-dev.3](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.1-dev.2...v1.3.1-dev.3) (2026-09-27)
+
+
+### Bug Fixes
+
+* **refresh:** improve patch scheduling, recovery, and metadata freshness ([42e6ded](https://github.com/brosssh/revanced-external-bundles/commit/42e6ded7a8c3e6a444f5bde00357ce457eb5ce81))
+
+## [1.3.1-dev.2](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.1-dev.1...v1.3.1-dev.2) (2026-09-26)
+
+
+### Bug Fixes
+
+* **refresh:** prioritize visible patch bundles ([#52](https://github.com/brosssh/revanced-external-bundles/issues/52)) ([a26947f](https://github.com/brosssh/revanced-external-bundles/commit/a26947fd6625da407819d1a76bd74c78433e7638))
+
+## [1.3.1-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0...v1.3.1-dev.1) (2026-09-26)
+
+
+### Bug Fixes
+
+* restore bundle discovery and sync source manifests ([0e04a51](https://github.com/brosssh/revanced-external-bundles/commit/0e04a51cfea033ffccd23e4658dfa848341fdf17))
+
 # [1.3.0](https://github.com/brosssh/revanced-external-bundles/compare/v1.2.0...v1.3.0) (2026-09-20)
 
 
