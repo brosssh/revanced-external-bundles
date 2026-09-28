@@ -1,2 +1,4 @@
+name: ${DEPLOY_PROJECT_NAME:-revanced-external-bundles}
+
 include:
   - path: docker-compose.${DEPLOY_ENV:-local}.yml

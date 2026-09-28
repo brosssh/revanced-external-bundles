@@ -42,6 +42,27 @@ The API will be available at `http://localhost:8080` by default.
 - **GraphQL Playground**: http://localhost:8080/hasura/console
 - **Web Interface**: http://localhost:8080
 
+### Deployment
+
+For Docker deployments, set `DEPLOY_ENV=deploy` and configure a separate `.env` for each environment.
+
+Required deployment values include:
+
+- `DEPLOY_PROJECT_NAME` — unique Compose project name, such as `bundles-production` or `bundles-development`
+- `ENV` - unique environment name, such as `production` or `development`
+- `APP_TAG` - `main` for Production or `dev` for Development
+- `DATABASE_VOLUME_NAME` - the PostgreSQL Docker volume used by that environment
+
+The PostgreSQL volume is treated as external and must already exist. Existing deployments must set `DATABASE_VOLUME_NAME` to their current PostgreSQL volume name to preserve existing data. For a new deployment, create the volume first, for example:
+
+```shell
+docker volume create bundles-production-pgdata
+```
+
+Production and Development must use different project names and database volumes. If both run on the same Docker host, `DATABASE_PORT`, `BACKEND_PORT`, and `HASURA_PORT` must also use different host ports.
+
+After changing deployment configuration, redeploy/recreate the Compose stack. Watchtower can update the application image, but it cannot apply Compose configuration changes.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
