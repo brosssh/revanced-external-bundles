@@ -1,3 +1,10 @@
+## [1.4.1-dev.1](https://github.com/brosssh/revanced-external-bundles/compare/v1.4.0...v1.4.1-dev.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* **refresh:** sync sources before starting refresh ([8ef3e02](https://github.com/brosssh/revanced-external-bundles/commit/8ef3e02846d012fea081b3bb9a785a7122b83c5e))
+
 # [1.4.0](https://github.com/brosssh/revanced-external-bundles/compare/v1.3.0...v1.4.0) (2026-10-07)
 
 
