@@ -1,6 +1,7 @@
 package me.brosssh.bundles.domain.services.jobs
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -17,11 +18,17 @@ abstract class BaseRefreshJobService (
     abstract val logger: Logger
     abstract val jobType: RefreshJob.RefreshJobType
 
-    fun refresh(): RefreshJobHandle {
+    private val refreshLock = Any()
+    private var activeRefresh: RefreshJobHandle? = null
+
+    fun refresh(): RefreshJobHandle = synchronized(refreshLock) {
+        activeRefresh?.takeIf { !it.job.isCompleted }?.let { return@synchronized it }
+
         val jobId = UUID.randomUUID().toString()
         val jobEntityId = refreshJobRepository.create(jobId, jobType).id.value
 
-        val job = CoroutineScope(Dispatchers.Default).launch {
+        // Publish the handle before work can finish, so concurrent triggers share one job.
+        val job = CoroutineScope(Dispatchers.Default).launch(start = CoroutineStart.LAZY) {
             try {
                 processRefresh(jobId)
 
@@ -38,7 +45,15 @@ abstract class BaseRefreshJobService (
             }
         }
 
-        return RefreshJobHandle(jobId, job)
+        val handle = RefreshJobHandle(jobId, job)
+        activeRefresh = handle
+        job.invokeOnCompletion {
+            synchronized(refreshLock) {
+                if (activeRefresh === handle) activeRefresh = null
+            }
+        }
+        job.start()
+        handle
     }
 
     protected abstract suspend fun processRefresh(jobId: String)

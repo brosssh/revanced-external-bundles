@@ -85,12 +85,17 @@ runtime may use more than one process.
 
 Pool limits are configured separately from the runtime compatibility table:
 
-| Environment variable                     | Default | Meaning                                      |
-|------------------------------------------|--------:|----------------------------------------------|
-| `BACKEND_PATCHER_WORKER_MAX_PROCESSES`   |       4 | Maximum patcher JVMs across all runtimes     |
-| `BACKEND_PATCHER_WORKER_MAX_PER_RUNTIME` |       2 | Maximum JVMs for one runtime                 |
-| `BACKEND_PATCHER_WORKER_IDLE_SECONDS`    |     300 | Idle time before a worker is stopped         |
-| `BACKEND_PATCHER_REFRESH_CONCURRENCY`    |       4 | Bundles downloaded and extracted at one time |
+| Environment variable                              | Default | Meaning                                                       |
+|---------------------------------------------------|--------:|---------------------------------------------------------------|
+| `BACKEND_PATCHER_WORKER_MAX_PROCESSES`            |       4 | Maximum patcher JVMs across all runtimes                      |
+| `BACKEND_PATCHER_WORKER_MAX_PER_RUNTIME`          |       2 | Maximum JVMs for one runtime                                  |
+| `BACKEND_PATCHER_WORKER_IDLE_SECONDS`             |     300 | Idle time before a worker is stopped                          |
+| `BACKEND_PATCHER_REFRESH_CONCURRENCY`             |       4 | Bundles downloaded and extracted at one time                  |
+| `BACKEND_PATCHER_HISTORICAL_REFRESH_BATCH_SIZE`   |      25 | Historical bundles processed after the visible/latest pass    |
+
+Visible/latest bundles are always attempted before historical backlog. The historical batch is deliberately bounded so a
+large archive backlog cannot monopolize the recurring refresh job. Historical retries are ordered by least-recent attempt so a
+persistently failing bundle cannot starve untouched backlog. Set the historical batch size to `0` to disable historical processing.
 
 When the global limit is reached, the pool reclaims an idle runtime slot or waits for a worker. Each process uses the
 heap limit from `[worker]` (`-Xmx512m` by default). With the default process limit, the maximum patcher heap allocation

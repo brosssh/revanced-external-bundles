@@ -95,6 +95,12 @@ fun migrationScript() {
 
         exec("""
             ALTER TABLE bundle
+            ADD COLUMN IF NOT EXISTS patch_refresh_attempted_at TIMESTAMPTZ NOT NULL
+            DEFAULT '1970-01-01T00:00:00Z';
+        """)
+
+        exec("""
+            ALTER TABLE bundle
             ADD COLUMN IF NOT EXISTS patcher_runtime VARCHAR(255);
         """)
 

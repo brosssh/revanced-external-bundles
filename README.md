@@ -48,7 +48,11 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ### Adding or disabling a bundle source
 
-Bundle sources are tracked in [`src/main/resources/sources.toml`](src/main/resources/sources.toml). Add a canonical repository URL to that file, or set `enabled = false` to pause refreshes while preserving its cached bundles and patches. Removing an entry also soft-disables it at the next backend start; source data is never deleted automatically.
+Manage bundle sources in [`src/main/resources/sources.toml`](src/main/resources/sources.toml). Add a canonical repository URL to enable a source, or set `enabled = false` to hide it from search and stop refreshes without deleting cached data. Changes take effect when the backend starts. Keep disabled entries in the file; removing an entry does not disable its source.
+
+The refresh workflow adds missing database sources to the matching branch: Production updates `main`, and Development updates `dev`. Added sources default to enabled. Existing entries and disabled settings are preserved. Automatic source updates skip CI and do not trigger a release.
+
+The workflow and sync script must be present on both branches, and the workflow token must have permission to push to them. If you use custom Git hosts, set each environment's `BACKEND_GIT_HOSTS` Actions variable to match its backend configuration.
 
 Copy the [source update pull request template](.github/PULL_REQUEST_TEMPLATE/source-update.md) into the pull request description and complete it before submitting.
 

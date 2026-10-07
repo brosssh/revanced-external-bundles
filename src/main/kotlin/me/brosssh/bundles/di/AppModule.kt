@@ -83,7 +83,8 @@ val appModule = module {
             get(),
             get(),
             get(),
-            refreshConcurrency = Config.patcherRefreshConcurrency
+            refreshConcurrency = Config.patcherRefreshConcurrency,
+            historicalBatchSize = Config.patcherHistoricalRefreshBatchSize
         )
     }
 

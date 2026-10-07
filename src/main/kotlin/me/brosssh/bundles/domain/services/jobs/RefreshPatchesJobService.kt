@@ -21,11 +21,16 @@ import me.brosssh.bundles.repositories.PatchRepository
 import me.brosssh.bundles.repositories.RefreshJobRepository
 import me.brosssh.bundles.workers.PatcherBundleTerminalException
 import me.brosssh.bundles.workers.PatchWorkerManager
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class RefreshPatchesJobService(
     refreshJobRepository: RefreshJobRepository,
@@ -34,7 +39,8 @@ class RefreshPatchesJobService(
     private val packageRepository: PackageRepository,
     private val patchPackageRepository: PatchPackageRepository,
     private val patchWorkerManager: PatchWorkerManager,
-    refreshConcurrency: Int
+    refreshConcurrency: Int,
+    private val historicalBatchSize: Int
 ) : BaseRefreshJobService(refreshJobRepository) {
 
     override val logger: Logger = LoggerFactory.getLogger(RefreshPatchesJobService::class.java)
@@ -47,8 +53,13 @@ class RefreshPatchesJobService(
 
     init {
         require(refreshConcurrency > 0) { "Patcher refresh concurrency must be positive" }
+        require(historicalBatchSize >= 0) { "Historical patch refresh batch size cannot be negative" }
         refreshSemaphore = Semaphore(refreshConcurrency)
-        logger.info("Patch refresh concurrency limited to {} bundle(s)", refreshConcurrency)
+        logger.info(
+            "Patch refresh concurrency limited to {} bundle(s); historical batch size is {}",
+            refreshConcurrency,
+            historicalBatchSize
+        )
     }
 
     override suspend fun processRefresh(jobId: String) {
@@ -66,9 +77,37 @@ class RefreshPatchesJobService(
             }
         }
 
-        val candidates = bundleRepository.getBundlesNeedPatchesUpdate()
-        logger.info("Processing patches refresh for {} bundle(s)", candidates.size)
+        val latestCandidates = bundleRepository.getLatestBundlesNeedPatchesUpdate()
+        logger.info(
+            "Processing patches refresh for {} latest/visible bundle(s)",
+            latestCandidates.size
+        )
+        processCandidates(latestCandidates)
 
+        val remainingLatest = bundleRepository.getLatestBundlesNeedPatchesUpdate()
+        if (remainingLatest.isNotEmpty()) {
+            logger.warn(
+                "{} latest/visible bundle(s) remain queued after this pass; " +
+                    "they will be retried first on the next refresh",
+                remainingLatest.size
+            )
+        }
+
+        if (historicalBatchSize > 0) {
+            val historicalCandidates =
+                bundleRepository.getHistoricalBundlesNeedPatchesUpdate(historicalBatchSize)
+            logger.info(
+                "Processing patches refresh for {} historical bundle(s), capped at {}",
+                historicalCandidates.size,
+                historicalBatchSize
+            )
+            processCandidates(historicalCandidates)
+        }
+
+        logger.info("Process completed")
+    }
+
+    private suspend fun processCandidates(candidates: List<BundlePatchCandidate>) {
         coroutineScope {
             candidates.map { candidate ->
                 async {
@@ -109,8 +148,6 @@ class RefreshPatchesJobService(
                 }
             }.awaitAll()
         }
-
-        logger.info("Process completed")
     }
 
     /**
@@ -121,8 +158,26 @@ class RefreshPatchesJobService(
         val lock = bundleLocks[candidate.id % bundleLocks.size]
         lock.withLock {
             val startedAt = System.nanoTime()
-            logger.info("Processing refresh for bundle ${candidate.id}")
+            val markedPending = suspendTransaction {
+                val hashMatches = candidate.fileHash?.let { expectedHash ->
+                    BundleTable.fileHash eq expectedHash
+                } ?: BundleTable.fileHash.isNull()
+                BundleTable.update({
+                    (BundleTable.id eq candidate.id) and
+                        (BundleTable.needPatchesUpdate eq true) and
+                        (BundleTable.bundleType eq candidate.bundle.bundleType.value) and
+                        hashMatches and
+                        (BundleTable.downloadUrl eq candidate.bundle.downloadUrl)
+                }) {
+                    it[patchRefreshAttemptedAt] = OffsetDateTime.now(ZoneOffset.UTC)
+                } > 0
+            }
+            if (!markedPending) {
+                logger.info("Skipped stale patch refresh for bundle {}", candidate.id)
+                return@withLock
+            }
 
+            logger.info("Processing refresh for bundle ${candidate.id}")
             val extraction = candidate.bundle.patches(candidate.patcherRuntime)
 
             val persisted = suspendTransaction {
@@ -139,7 +194,9 @@ class RefreshPatchesJobService(
                     current[BundleTable.bundleType] == candidate.bundle.bundleType.value &&
                         current[BundleTable.fileHash] == candidate.fileHash &&
                         current[BundleTable.downloadUrl] == candidate.bundle.downloadUrl
-                if (!artifactUnchanged) return@suspendTransaction false
+                if (!artifactUnchanged || !current[BundleTable.needPatchesUpdate]) {
+                    return@suspendTransaction false
+                }
 
                 val bundleEntity = requireNotNull(BundleEntity.findById(candidate.id))
                 replacePatches(bundleEntity, extraction.patches)
@@ -152,7 +209,7 @@ class RefreshPatchesJobService(
 
             if (!persisted) {
                 logger.info(
-                    "Discarded extracted patches for bundle {} because its artifact changed",
+                    "Discarded extracted patches for bundle {} because its artifact changed or another refresh completed",
                     candidate.id
                 )
                 return@withLock

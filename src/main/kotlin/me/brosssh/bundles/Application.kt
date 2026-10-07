@@ -14,10 +14,12 @@ import me.brosssh.bundles.api.v1.routes.bundleRoutes as bundleRoutesV1
 import me.brosssh.bundles.api.v1.routes.refreshRoutes
 import me.brosssh.bundles.api.v2.routes.bundleRoutes as bundleRoutesV2
 import me.brosssh.bundles.db.SourceManifestSync
+import me.brosssh.bundles.db.functions.refreshIsLatestFlag
 import me.brosssh.bundles.db.migration.applyHasuraMetadata
 import me.brosssh.bundles.db.migration.migrationScript
 import me.brosssh.bundles.domain.services.SourceService
 import me.brosssh.bundles.plugins.*
+import me.brosssh.bundles.repositories.RefreshJobRepository
 import org.koin.ktor.ext.inject
 
 fun Route.apiV1(build: Route.() -> Unit) {
@@ -42,6 +44,22 @@ suspend fun Application.module() {
     install(IgnoreTrailingSlash)
 
     migrationScript()
+
+    // Refresh coordination is in-process. No refresh coroutine can survive an app restart,
+    // so any STARTED row present before this process begins is an interrupted previous job.
+    val refreshJobRepository by inject<RefreshJobRepository>()
+    val interruptedRefreshJobs = refreshJobRepository.failStartedJobs(
+        "Application restarted before the refresh job completed"
+    )
+    // Reconcile this on every startup. If a previous startup failed after marking jobs failed
+    // but before recalculating the flags, there is no STARTED row left to key recovery from.
+    refreshIsLatestFlag()
+    if (interruptedRefreshJobs > 0) {
+        log.warn(
+            "Marked {} interrupted refresh job(s) as failed and reconciled latest bundle flags",
+            interruptedRefreshJobs
+        )
+    }
 
     val sourceManifestSync by inject<SourceManifestSync>()
     val sourceService by inject<SourceService>()

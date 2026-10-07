@@ -18,11 +18,13 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -96,6 +98,93 @@ class DisabledSourceRepositoryTest {
     }
 
     @Test
+    fun `patch refresh processes latest bundles before historical backlog`() {
+        val fixture = insertSource(enabled = true)
+        val (historicalId, olderHistoricalId, latestId) = transaction(database) {
+            val historicalSourceId = SourceTable.insertAndGetId {
+                it[url] = "https://github.com/example/historical-patches"
+                it[enabled] = true
+            }
+            val olderHistoricalSourceId = SourceTable.insertAndGetId {
+                it[url] = "https://github.com/example/older-historical-patches"
+                it[enabled] = true
+            }
+            val latestSourceId = SourceTable.insertAndGetId {
+                it[url] = "https://github.com/example/latest-patches"
+                it[enabled] = true
+            }
+            val historicalId = BundleTable.insertAndGetId {
+                it[version] = "v2.0.0"
+                it[createdAt] = "2026-04-30T00:00:00Z"
+                it[description] = null
+                it[downloadUrl] = "https://example.com/historical.rvp"
+                it[signatureDownloadUrl] = null
+                it[isPrerelease] = false
+                it[isLatest] = false
+                it[fileHash] = null
+                it[needPatchesUpdate] = true
+                it[bundleType] = BundleType.REVANCED_V4.value
+                it[sourceFk] = historicalSourceId
+            }
+            val olderHistoricalId = BundleTable.insertAndGetId {
+                it[version] = "v1.5.0"
+                it[createdAt] = "2026-03-01T00:00:00Z"
+                it[description] = null
+                it[downloadUrl] = "https://example.com/older-historical.rvp"
+                it[signatureDownloadUrl] = null
+                it[isPrerelease] = false
+                it[isLatest] = false
+                it[fileHash] = null
+                it[needPatchesUpdate] = true
+                it[bundleType] = BundleType.REVANCED_V4.value
+                it[sourceFk] = olderHistoricalSourceId
+            }
+            val latestId = BundleTable.insertAndGetId {
+                it[version] = "v3.0.0-dev.1"
+                it[createdAt] = "2026-04-01T00:00:00Z"
+                it[description] = null
+                it[downloadUrl] = "https://example.com/latest.rvp"
+                it[signatureDownloadUrl] = null
+                it[isPrerelease] = true
+                it[isLatest] = true
+                it[fileHash] = null
+                it[needPatchesUpdate] = true
+                it[bundleType] = BundleType.REVANCED_V4.value
+                it[sourceFk] = latestSourceId
+            }
+            Triple(historicalId.value, olderHistoricalId.value, latestId.value)
+        }
+
+        val repository = BundleRepository()
+        assertEquals(
+            listOf(latestId, fixture.bundleId, historicalId, olderHistoricalId),
+            repository.getBundlesNeedPatchesUpdate().map { it.id }
+        )
+        assertEquals(
+            listOf(latestId, fixture.bundleId),
+            repository.getLatestBundlesNeedPatchesUpdate().map { it.id }
+        )
+        assertEquals(
+            listOf(historicalId),
+            repository.getHistoricalBundlesNeedPatchesUpdate(limit = 1).map { it.id }
+        )
+
+        transaction(database) {
+            BundleTable.update({ BundleTable.id eq historicalId }) {
+                it[patchRefreshAttemptedAt] = OffsetDateTime.parse("2026-09-26T12:00:00Z")
+            }
+        }
+        assertEquals(
+            listOf(olderHistoricalId),
+            repository.getHistoricalBundlesNeedPatchesUpdate(limit = 1).map { it.id }
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            repository.getHistoricalBundlesNeedPatchesUpdate(limit = -1)
+        }
+    }
+
+    @Test
     fun `unavailable sources are excluded from runtime failure requeue`() {
         val fixture = insertSource(enabled = true)
         val repository = BundleRepository()
@@ -105,20 +194,31 @@ class DisabledSourceRepositoryTest {
                 it[needPatchesUpdate] = false
                 it[patcherFailure] = "terminal"
                 it[patcherFailureFingerprint] = "old"
+                it[patchRefreshAttemptedAt] = OffsetDateTime.parse("2026-09-26T12:00:00Z")
             }
         }
         sourceRepository.setUnavailableReason(fixture.sourceId, "404: Not Found")
 
         assertEquals(0, repository.requeuePatcherRuntimeFailures(BundleType.REVANCED_V4, "new"))
         transaction(database) {
-            assertFalse(BundleTable.selectAll().single()[BundleTable.needPatchesUpdate])
+            val bundle = BundleTable.selectAll().single()
+            assertFalse(bundle[BundleTable.needPatchesUpdate])
+            assertEquals(
+                OffsetDateTime.parse("2026-09-26T12:00:00Z"),
+                bundle[BundleTable.patchRefreshAttemptedAt]
+            )
         }
 
         sourceRepository.setUnavailableReason(fixture.sourceId, null)
 
         assertEquals(1, repository.requeuePatcherRuntimeFailures(BundleType.REVANCED_V4, "new"))
         transaction(database) {
-            assertTrue(BundleTable.selectAll().single()[BundleTable.needPatchesUpdate])
+            val bundle = BundleTable.selectAll().single()
+            assertTrue(bundle[BundleTable.needPatchesUpdate])
+            assertEquals(
+                OffsetDateTime.parse("1970-01-01T00:00:00Z"),
+                bundle[BundleTable.patchRefreshAttemptedAt]
+            )
         }
     }
 

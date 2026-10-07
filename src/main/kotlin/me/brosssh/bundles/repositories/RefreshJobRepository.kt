@@ -7,6 +7,7 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -31,6 +32,17 @@ class RefreshJobRepository {
             .limit(1)
             .map(::rowToDomain)
             .singleOrNull()
+    }
+
+    fun failStartedJobs(reason: String) = transaction {
+        val completedAt = OffsetDateTime.now(ZoneOffset.UTC)
+        RefreshJobTable.update({
+            RefreshJobTable.status eq RefreshJob.RefreshJobStatus.STARTED
+        }) {
+            it[status] = RefreshJob.RefreshJobStatus.FAILED
+            it[error] = reason
+            it[RefreshJobTable.completedAt] = completedAt
+        }
     }
 
     private fun rowToDomain(row: ResultRow) =
