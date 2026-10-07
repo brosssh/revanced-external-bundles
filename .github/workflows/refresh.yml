@@ -1,12 +1,8 @@
 name: Refresh Bundles & Patches
-# Run Production and Development on the same schedule
 # Manual triggers refresh only the environment matching the selected branch
 
 on:
   workflow_dispatch:
-  schedule:
-    # Avoid the start of the hour, when GitHub Actions scheduled runs are most likely to be delayed or dropped.
-    - cron: '17,47 * * * *'
 
 permissions:
   contents: write
@@ -31,9 +27,7 @@ jobs:
     steps:
       - name: Call refresh endpoint (${{ matrix.environment }})
         id: refresh
-        if: |
-          github.event_name == 'schedule' ||
-          (github.event_name == 'workflow_dispatch' && github.ref == matrix.branch)
+        if: github.ref == matrix.branch
         env:
           SECRET: ${{ secrets.BACKEND_AUTHENTICATION_SECRET }}
           DEPLOY_ENDPOINT: ${{ vars.DEPLOY_ENDPOINT }}
