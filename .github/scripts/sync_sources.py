@@ -1,11 +1,14 @@
 """Append database-only sources to the current branch's tracked manifest."""
 import argparse
+from email.utils import parsedate_to_datetime
 import json
 import os
 from pathlib import Path
 import re
 import sys
+import time
 import tomllib
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
@@ -32,7 +35,24 @@ def canonical_url(value):
     return f"{parsed.scheme}://{parsed.netloc.lower()}/{'/'.join(parts)}"
 
 
-def fetch_sources(endpoint, request=urlopen):
+def _retry_delay(error, attempt):
+    delay = 2 ** (attempt + 1)
+    header = error.headers.get("Retry-After") if isinstance(error, HTTPError) and error.headers else None
+    if not header:
+        return delay
+    try:
+        return max(delay, int(header))
+    except (ValueError, TypeError):
+        try:
+            retry_at = parsedate_to_datetime(header)
+            if retry_at.tzinfo is not None:
+                return max(delay, retry_at.timestamp() - time.time())
+        except (ValueError, TypeError, OverflowError):
+            pass
+    return delay
+
+
+def fetch_sources(endpoint, request=urlopen, *, total_timeout=90, request_timeout=15):
     query = """query Sources($after: Int!, $limit: Int!) {
       source(where: {id: {_gt: $after}}, order_by: {id: asc}, limit: $limit) {
         id url
@@ -40,14 +60,39 @@ def fetch_sources(endpoint, request=urlopen):
     }"""
     sources = []
     after = 0
+    deadline = time.monotonic() + total_timeout
     while True:
         body = json.dumps({"query": query, "variables": {"after": after, "limit": 100}}).encode()
         req = Request(endpoint.rstrip("/") + "/hasura/v1/graphql",
                       data=body, headers={"Content-Type": "application/json",
                                           "Accept": "application/json",
                                           "User-Agent": "revanced-external-bundles-source-sync"})
-        with request(req, timeout=60) as response:
-            payload = json.load(response)
+        for attempt in range(3):
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("Source export exceeded its total time limit")
+            try:
+                with request(req, timeout=min(request_timeout, remaining)) as response:
+                    payload = json.load(response)
+                break
+            except (URLError, TimeoutError, ConnectionError) as error:
+                # Retry transport failures and temporary HTTP errors on the same page.
+                if isinstance(error, HTTPError) and error.code != 429 and error.code < 500:
+                    raise
+                if attempt == 2:
+                    raise
+                delay = _retry_delay(error, attempt)
+                if isinstance(error, HTTPError):
+                    error.close()
+                if deadline - time.monotonic() <= delay:
+                    raise TimeoutError("Source export exceeded its total time limit") from error
+                print(f"Source export page after ID {after} failed; retrying in {delay}s",
+                      file=sys.stderr)
+                time.sleep(delay)
+        # Socket timeouts apply to blocking operations, not the complete response.
+        # A response that finishes late must not be accepted as a successful export.
+        if time.monotonic() >= deadline:
+            raise TimeoutError("Source export exceeded its total time limit")
         if payload.get("errors"):
             raise ValueError("Source export returned GraphQL errors")
         batch = payload["data"]["source"]
@@ -87,10 +132,25 @@ def append_missing(content, sources):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--endpoint", required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--endpoint")
+    source.add_argument("--sources-file", type=Path, help="Use a previously exported source snapshot")
+    parser.add_argument("--export", type=Path, help="Export a snapshot without modifying the manifest")
     parser.add_argument("--manifest", type=Path, default=Path("src/main/resources/sources.toml"))
     args = parser.parse_args()
-    sources = fetch_sources(args.endpoint)
+    if args.export and not args.endpoint:
+        parser.error("--export requires --endpoint")
+    if args.sources_file:
+        sources = json.loads(args.sources_file.read_text(encoding="utf-8"))
+        if not isinstance(sources, list):
+            raise ValueError("Source snapshot must contain a list")
+        sources = [canonical_url(url) for url in sources]
+    else:
+        sources = fetch_sources(args.endpoint)
+    if args.export:
+        args.export.write_text(json.dumps(sources) + "\n", encoding="utf-8")
+        print(f"Exported {len(sources)} source(s) to {args.export}")
+        return
     content = args.manifest.read_text(encoding="utf-8")
     updated, count = append_missing(content, sources)
     if count:
